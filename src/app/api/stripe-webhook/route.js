@@ -1,7 +1,6 @@
 // src/app/api/stripe-webhook/route.js
-
 import { NextResponse } from "next/server";
-import { db, admin } from "@/lib/firebase-admin"; // ✅ Ensure firebase-admin exports admin & db
+import { db } from "../../../lib/firebase-admin";
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(request) {
@@ -13,68 +12,47 @@ export async function POST(request) {
     let event;
     try {
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+      console.log("✅ Webhook Event Received:", event.type);
     } catch (err) {
-      console.error(`Webhook signature verification failed: ${err.message}`);
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+      console.error("❌ Webhook signature verification failed:", err.message);
+      return NextResponse.json({ error: "Webhook error" }, { status: 400 });
     }
 
-    switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object;
-        const email = session.customer_details?.email;
-        const customerId = session.customer;
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      console.log("✅ Checkout Session Data:", session);
 
-        if (!email) {
-          console.error("❌ No email in checkout session");
-          break;
-        }
+      const userEmail = session.customer_details?.email;
+      const stripeCustomerId = session.customer;
 
-        // ✅ Save pending user record for signup page to pick up later
-        await db.collection("pending_users").doc(email).set({
-          email,
-          stripeCustomerId: customerId || null,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          status: "paid",
-        });
-
-        console.log(`✅ Pending user record created for ${email}`);
-        break;
+      if (!userEmail) {
+        console.error("❌ No email found in session");
+        return NextResponse.json({ error: "No email in session" }, { status: 400 });
       }
 
-      case "customer.subscription.updated":
-      case "customer.subscription.deleted": {
-        const subscription = event.data.object;
-        const customerId = subscription.customer;
+      console.log(`🔄 Writing pending user for: ${userEmail}`);
 
-        // 🔹 Find any users in Firestore with this stripeCustomerId
-        const userQuery = await db
-          .collection("users")
-          .where("stripeCustomerId", "==", customerId)
-          .get();
+      const pendingUserRef = db.collection("pending_users").doc(userEmail);
+      await pendingUserRef.set({
+        email: userEmail,
+        stripeCustomerId,
+        createdAt: new Date(),
+        status: "paid",
+      });
 
-        if (!userQuery.empty) {
-          for (const docSnap of userQuery.docs) {
-            const status = subscription.status === "active" ? "premium" : "free";
-
-            await docSnap.ref.update({
-              tier: status,
-              subscriptionStatus: subscription.status,
-              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-            });
-
-            console.log(`✅ Updated tier for user ${docSnap.id} → ${status}`);
-          }
-        }
-        break;
-      }
-
-      default:
-        console.log(`ℹ️ Unhandled event type: ${event.type}`);
+      console.log(`✅ Pending user record created for: ${userEmail}`);
     }
 
     return NextResponse.json({ received: true });
   } catch (err) {
-    console.error("❌ Webhook error:", err.message);
-    return NextResponse.json({ error: "Webhook failed" }, { status: 500 });
+    console.error("🔥 Error in Stripe webhook:", err.message);
+    return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
 }
+
+export const config = {
+  api: {
+    bodyParser: false, // 🚨 REQUIRED for raw body in Stripe webhook
+  },
+};
+s
