@@ -1,7 +1,6 @@
 "use client";
 import { Mail, Phone, MapPin } from "lucide-react";
-import Footer from "@/components/home/Footer"; // Assuming your Footer component is here
-
+import Footer from "../../components/home/Footer";
 // --- Main Contact Page Component ---
 export default function ContactPage() {
   return (

@@ -1,8 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Plus, ArrowRight } from "lucide-react";
-import Footer from "@/components/home/Footer"; // Assuming your Footer component is here
-
+import Footer from "../../components/home/Footer";
 // --- FAQ Item Component with smooth animation ---
 const FaqItem = ({ faq, index, openIndex, setOpenIndex }) => {
     const isOpen = index === openIndex;
