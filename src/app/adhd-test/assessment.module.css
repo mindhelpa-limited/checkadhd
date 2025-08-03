@@ -13,30 +13,32 @@
   max-width: 900px;
 }
 
-:global(h2) {
-  text-align: center;
-  color: #2563eb;
-}
+/* ✅ Fixed Global Styles */
+:global {
+  h2 {
+    text-align: center;
+    color: #2563eb;
+  }
 
-:global(h3) {
-  text-align: center;
-  color: #2563eb;
-}
+  h3 {
+    text-align: center;
+    color: #2563eb;
+  }
 
+  label {
+    font-weight: bold;
+    display: block;
+    margin-top: 15px;
+  }
 
-:global(label) {
-  font-weight: bold;
-  display: block;
-  margin-top: 15px;
-}
-
-:global(input), :global(select) {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  box-sizing: border-box;
+  input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+  }
 }
 
 .infoBox {
