@@ -1,7 +1,6 @@
 "use client";
 import { ShieldCheck, Database, Fingerprint, User, Mail } from "lucide-react";
-import Footer from "@/components/home/Footer"; // Assuming your Footer component is here
-
+import Footer from "../../components/home/Footer";
 // --- Policy Section Component ---
 const PolicySection = ({ icon, title, children }) => (
     <div className="flex items-start mt-12">
