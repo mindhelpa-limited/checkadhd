@@ -13,10 +13,16 @@
   max-width: 900px;
 }
 
-:global(h2), :global(h3) {
+:global(h2) {
   text-align: center;
   color: #2563eb;
 }
+
+:global(h3) {
+  text-align: center;
+  color: #2563eb;
+}
+
 
 :global(label) {
   font-weight: bold;
