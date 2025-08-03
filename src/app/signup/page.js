@@ -1,8 +1,8 @@
 "use client";
-
+import { auth, db } from "@/lib/firebase";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { auth, db } from "../../firebase";
+
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,

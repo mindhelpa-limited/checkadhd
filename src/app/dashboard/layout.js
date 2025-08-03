@@ -1,7 +1,8 @@
 "use client";
+import { auth, db } from "@/lib/firebase";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { auth, db } from "../../firebase";
+
 
 import { useState, useEffect } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";

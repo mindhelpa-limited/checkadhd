@@ -1,8 +1,9 @@
 "use client";
+import { auth, db } from "@/lib/firebase";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "../firebase"; // ✅ Corrected import path
+
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
 export default function Header() {
