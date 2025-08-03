@@ -22,30 +22,9 @@
 /* ✅ Only one body selector */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f5f8ff;  /* Light background */
+  background: #f5f8ff;  /* You are forcing a light background */
   margin: 0;
   padding: 0;
   line-height: 1.6;
   color: #1f2937;
-}
-
-/* ✅ Moved from assessment.module.css */
-h2, h3 {
-  text-align: center;
-  color: #2563eb;
-}
-
-label {
-  font-weight: bold;
-  display: block;
-  margin-top: 15px;
-}
-
-input, select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  box-sizing: border-box;
 }
