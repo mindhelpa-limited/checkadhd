@@ -15,6 +15,25 @@ const FullScreenLoader = ({ message }) => (
   </div>
 );
 
+function PaymentRequiredModal({ onRedirect }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-md w-full text-center">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">👋 Almost there!</h2>
+        <p className="text-gray-600 mb-6">
+          To create your premium account, please complete your payment first.
+        </p>
+        <button
+          onClick={onRedirect}
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-lg shadow-md hover:shadow-lg hover:scale-[1.02] transition-transform"
+        >
+          💳 Go to Pricing
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function SignUpPageWrapper() {
   return (
     <Suspense fallback={<FullScreenLoader message="Loading..." />}>
@@ -29,9 +48,9 @@ function SignUpPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const sessionId = searchParams.get("session_id");
 
   const createOrUpdateUser = async (user) => {
@@ -60,9 +79,9 @@ function SignUpPage() {
     );
   };
 
-  // ✅ Fixed useEffect block
   useEffect(() => {
     if (!sessionId) {
+      setShowPaymentModal(true);
       setLoading(false);
       return;
     }
@@ -104,7 +123,11 @@ function SignUpPage() {
   if (loading) return <FullScreenLoader message="Finalizing account..." />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-100 px-4 relative">
+      {showPaymentModal && (
+        <PaymentRequiredModal onRedirect={() => router.push("/pricing")} />
+      )}
+
       <div className="max-w-md w-full bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/50">
         <h1 className="text-3xl font-extrabold text-center text-gray-900">
           ✨ Create Your Premium Account
