@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { auth, db } from "@/lib/firebase"; // ✅ FIXED IMPORT
+import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
@@ -59,11 +59,12 @@ export default function LoginPage() {
             displayName: user.displayName,
             photoURL: user.photoURL,
             createdAt: serverTimestamp(),
-            subscription: "inactive",
+            tier: "free",
           });
           router.push("/pricing");
         } else {
-          router.push(docSnap.data().subscription === "active" ? "/dashboard" : "/pricing");
+          const userData = docSnap.data();
+          router.push(userData?.tier === "premium" ? "/dashboard" : "/pricing");
         }
       } else {
         setAuthLoading(false);
@@ -115,7 +116,6 @@ export default function LoginPage() {
           </div>
 
           <form className="space-y-5" onSubmit={handleLogin}>
-            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
               <div className="mt-1 relative">
@@ -132,7 +132,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <div className="flex justify-between items-center">
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
