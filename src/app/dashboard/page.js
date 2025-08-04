@@ -1,3 +1,5 @@
+// /src/app/dashboard/page.jsx
+
 "use client";
 import { auth, db } from "@/lib/firebase";
 import { useState, useEffect } from "react";
@@ -18,11 +20,12 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Verifying access...");
+  const [hasTakenTest, setHasTakenTest] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
-        router.replace("/login"); // ✅ replace() prevents back-button returning to dashboard
+        router.replace("/login");
         return;
       }
 
@@ -40,6 +43,7 @@ export default function DashboardPage() {
 
       if (data.tier === "premium") {
         setUserData(data);
+        setHasTakenTest(!!data.lastTest); 
         setLoading(false);
       } else {
         router.replace("/pricing");
@@ -48,6 +52,10 @@ export default function DashboardPage() {
 
     return () => unsubscribe();
   }, [router]);
+
+  const handleTestButtonClick = () => {
+    router.push("/dashboard/adhd-test");
+  };
 
   if (loading) {
     return <FullScreenLoader message={loadingMessage} />;
@@ -68,9 +76,22 @@ export default function DashboardPage() {
                 {userData.tier}
               </span>
             </li>
-            <li><strong>Last Test:</strong> {userData.lastTest || "Not taken yet"}</li>
+            <li>
+              <strong>Last Test:</strong>{" "}
+              {userData.lastTest 
+                ? userData.lastTest.toDate().toLocaleDateString() 
+                : "Not taken yet"}
+            </li>
           </ul>
         )}
+        <div className="mt-6">
+          <button
+            onClick={handleTestButtonClick}
+            className="w-full sm:w-auto px-6 py-3 text-lg font-semibold text-white bg-blue-600 rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors"
+          >
+            {hasTakenTest ? "Retake the Test" : "Take the ADHD Test"}
+          </button>
+        </div>
       </div>
     </div>
   );

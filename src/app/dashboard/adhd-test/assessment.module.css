@@ -1,0 +1,457 @@
+/* /src/app/dashboard/adhd-test/assessment.module.css */
+
+/* --- General Container Styles --- */
+.adhdContainer {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2.5rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #374151;
+    transition: all 0.3s ease;
+}
+
+.adhdContainer.fullWidth {
+    max-width: 1000px;
+}
+
+/* Global styles for the h-tags and p-tags within the container */
+.adhdContainer :global(h1),
+.adhdContainer :global(h2),
+.adhdContainer :global(h3),
+.adhdContainer :global(p) {
+    color: #1f2937;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.adhdContainer :global(p) {
+    line-height: 1.6;
+}
+
+/* Form element styles */
+.adhdContainer :global(label) {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.adhdContainer :global(input),
+.adhdContainer :global(select) {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.adhdContainer :global(input:focus),
+.adhdContainer :global(select:focus) {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.infoBox {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #1e40af;
+}
+
+/* --- Assessment Quiz Styles --- */
+.progressBarContainer {
+    height: 10px;
+    background-color: #e5e7eb;
+    border-radius: 5px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.progressBar {
+    height: 100%;
+    background-color: #2563eb;
+    transition: width 0.3s ease-in-out;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+}
+
+.optionsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.optionBtn {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background-color: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.optionBtn:hover {
+    border-color: #93c5fd;
+    background-color: #f3f4f6;
+}
+
+.optionBtn.selected {
+    background-color: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.navControls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+.navButton {
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    background-color: #2563eb;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.navButton:hover {
+    background-color: #1e40af;
+}
+
+.navButton:disabled {
+    background-color: #e5e7eb;
+    cursor: not-allowed;
+    color: #9ca3af;
+}
+
+.milestoneNotification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 1.5rem 2.5rem;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    z-index: 10000;
+    text-align: center;
+    pointer-events: none;
+    animation: fadeIn 0.5s ease-out, fadeOut 0.5s ease-in 3s forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -60%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* --- Dialog Styles (for resume dialog) --- */
+.dialogOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.dialogBox {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+}
+
+.dialogButtons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1.5rem;
+}
+
+/* --- Report Styles --- */
+.resultActions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 10px;
+}
+
+.onScreenReportWrapper {
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.pdfHeader {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #2563eb;
+}
+
+.logoContainerPdf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+
+.logoImagePdf {
+    width: 50px;
+    height: 50px;
+    margin-right: 12px;
+    border-radius: 50%;
+}
+
+.mainReportTitlePdf {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    line-height: 1;
+}
+
+.subtitleReportPdf {
+    text-align: center;
+    color: #2563eb;
+    font-size: 16px;
+    margin: 5px 0 15px 0;
+    font-weight: 600;
+}
+
+.patientInfo {
+    background: #f9fafb;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #2563eb;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+}
+
+.infoItem {
+    display: flex;
+    flex-direction: column;
+}
+
+.infoLabel {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.infoValue {
+    font-size: 14px;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.resultsContainer {
+    background: #f9fafb;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.resultsTitle {
+    font-size: 18px;
+    color: #111827;
+    margin: 0 0 15px 0;
+    font-weight: 700;
+    text-align: left;
+}
+
+.likelihoodDisplay {
+    margin: 15px 0;
+}
+
+.likelihoodPercentage {
+    font-size: 52px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.likelihoodLabel {
+    font-size: 16px;
+    color: #4b5563;
+    margin: 4px 0;
+    font-weight: 500;
+}
+
+.riskLevel {
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    margin: 8px 0;
+}
+
+.visualScale {
+    margin: 25px 0 15px 0;
+    padding: 8px;
+}
+
+.scaleContainer {
+    height: 12px;
+    background: linear-gradient(to right, #16a34a 0%, #f59e0b 50%, #dc2626 100%);
+    border-radius: 6px;
+    position: relative;
+    margin: 8px 0;
+}
+
+.scaleLabels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.scaleIndicator {
+    position: absolute;
+    top: -7px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    transition: left 0.5s ease-in-out;
+    box-shadow: 0 0 0 3px;
+}
+
+.section {
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.interpretationSection {
+    background: #f8fafc;
+    border-left: 4px solid #2563eb;
+}
+
+.recommendationsSection {
+    background: #f0fdf4;
+    border-left: 4px solid #16a34a;
+}
+
+.importantNotes {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+}
+
+.sectionTitle {
+    font-size: 18px;
+    margin: 0 0 12px 0;
+    font-weight: 700;
+    text-align: left;
+}
+
+.interpretationSection .sectionTitle { color: #1e40af; }
+.recommendationsSection .sectionTitle { color: #166534; }
+.importantNotes .sectionTitle { color: #b45309; }
+
+.listItem {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #374151;
+    margin-bottom: 8px;
+    padding-left: 5px;
+}
+
+.list {
+    list-style-position: outside;
+    padding-left: 20px;
+    margin: 0;
+}
+
+.pdfFooter {
+    text-align: center;
+    padding: 20px 0 0 0;
+    border-top: 1px solid #d1d5db;
+    margin-top: 25px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.pdfFooterLogo {
+    font-weight: 600;
+    color: #2563eb;
+    margin-bottom: 4px;
+}
+
+.pdfToolList {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 8px 0;
+    font-size: 11px;
+    color: #4b5563;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.pdfToolList li { margin-bottom: 2px; }
+.confidential { font-style: italic; margin-top: 4px; font-size: 11px; }
+
+/* For PDF page break */
+.pageBreak {
+    page-break-before: always;
+    break-before: page;
+}
+
+/* --- Small Screen Adjustments --- */
+@media (max-width: 640px) {
+    .adhdContainer { padding: 1.5rem; }
+    .resultsTitle { font-size: 1.25rem; }
+    .infoGrid { grid-template-columns: 1fr; }
+    .navButton { padding: 0.75rem 1rem; }
+}
