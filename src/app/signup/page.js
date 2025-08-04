@@ -15,24 +15,22 @@ const FullScreenLoader = ({ message }) => (
   </div>
 );
 
-function PaymentRequiredModal({ onRedirect }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-md w-full text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">👋 Almost there!</h2>
-        <p className="text-gray-600 mb-6">
-          To create your premium account, please complete your payment first.
-        </p>
-        <button
-          onClick={onRedirect}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-lg shadow-md hover:shadow-lg hover:scale-[1.02] transition-transform"
-        >
-          💳 Go to Pricing
-        </button>
-      </div>
+const PaymentModal = ({ onClose }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-6 text-center">
+      <h2 className="text-xl font-semibold text-gray-800 mb-3">Premium Access Required</h2>
+      <p className="text-gray-600 mb-6">
+        Please complete your payment to create an account and unlock your dashboard.
+      </p>
+      <button
+        onClick={() => (window.location.href = "/pricing")}
+        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-medium shadow hover:scale-105 transition-transform"
+      >
+        💳 Go to Pricing Page
+      </button>
     </div>
-  );
-}
+  </div>
+);
 
 export default function SignUpPageWrapper() {
   return (
@@ -49,6 +47,7 @@ function SignUpPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -81,8 +80,8 @@ function SignUpPage() {
 
   useEffect(() => {
     if (!sessionId) {
-      setShowPaymentModal(true);
       setLoading(false);
+      setShowPaymentModal(true);
       return;
     }
 
@@ -124,9 +123,7 @@ function SignUpPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-100 px-4 relative">
-      {showPaymentModal && (
-        <PaymentRequiredModal onRedirect={() => router.push("/pricing")} />
-      )}
+      {showPaymentModal && <PaymentModal />}
 
       <div className="max-w-md w-full bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/50">
         <h1 className="text-3xl font-extrabold text-center text-gray-900">
@@ -183,3 +180,4 @@ function SignUpPage() {
     </div>
   );
 }
+
