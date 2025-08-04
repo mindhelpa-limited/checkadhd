@@ -25,12 +25,14 @@ export default function SignUpPageWrapper() {
 
 function SignUpPage() {
   const [email, setEmail] = useState("");
-  const [isEmailLocked, setIsEmailLocked] = useState(false);
+  const [isEmailLocked, setEmailLocked] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const sessionId = searchParams.get("session_id");
 
   const createOrUpdateUser = async (user) => {
     const userRef = doc(db, "users", user.uid);
@@ -58,24 +60,30 @@ function SignUpPage() {
     );
   };
 
-  // ✅ Fetch Stripe session email
+  // ✅ Fixed useEffect block
   useEffect(() => {
-    const sessionId = searchParams.get("session_id");
-    if (sessionId) {
-      fetch("/api/get-session-details?id=" + sessionId)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.email) {
-            setEmail(data.email);
-            setIsEmailLocked(true);
-          }
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
-    } else {
+    if (!sessionId) {
       setLoading(false);
+      return;
     }
-  }, [searchParams]);
+
+    const fetchEmail = async () => {
+      try {
+        const res = await fetch(`/api/get-session-details?session_id=${sessionId}`);
+        const data = await res.json();
+        if (data?.email) {
+          setEmail(data.email);
+          setEmailLocked(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch session email:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmail();
+  }, [sessionId]);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -83,15 +91,8 @@ function SignUpPage() {
     setLoading(true);
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await createOrUpdateUser(userCredential.user);
-
-      // ✅ Auto-login after signup
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err) {
