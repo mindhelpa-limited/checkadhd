@@ -62,7 +62,7 @@ function SignUpPage() {
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
     if (sessionId) {
-      fetch(`/api/get-session-details?id=${sessionId}`)
+      fetch("/api/get-session-details?id=" + sessionId)
         .then((res) => res.json())
         .then((data) => {
           if (data.email) {
