@@ -15,7 +15,7 @@ const FullScreenLoader = ({ message }) => (
   </div>
 );
 
-const PaymentModal = ({ onClose }) => (
+const PaymentModal = () => (
   <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
     <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-6 text-center">
       <h2 className="text-xl font-semibold text-gray-800 mb-3">Premium Access Required</h2>
@@ -42,7 +42,7 @@ export default function SignUpPageWrapper() {
 
 function SignUpPage() {
   const [email, setEmail] = useState("");
-  const [isEmailLocked, setEmailLocked] = useState(false);
+  const [isEmailLocked, setIsEmailLocked] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -78,6 +78,7 @@ function SignUpPage() {
     );
   };
 
+  // ✅ Show modal or fetch email
   useEffect(() => {
     if (!sessionId) {
       setLoading(false);
@@ -85,22 +86,16 @@ function SignUpPage() {
       return;
     }
 
-    const fetchEmail = async () => {
-      try {
-        const res = await fetch(`/api/get-session-details?session_id=${sessionId}`);
-        const data = await res.json();
-        if (data?.email) {
+    fetch(`/api/get-session-details?id=${sessionId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.email) {
           setEmail(data.email);
-          setEmailLocked(true);
+          setIsEmailLocked(true);
         }
-      } catch (err) {
-        console.error("Failed to fetch session email:", err);
-      } finally {
         setLoading(false);
-      }
-    };
-
-    fetchEmail();
+      })
+      .catch(() => setLoading(false));
   }, [sessionId]);
 
   const handleSignUp = async (e) => {
@@ -109,8 +104,15 @@ function SignUpPage() {
     setLoading(true);
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
       await createOrUpdateUser(userCredential.user);
+
+      // ✅ Auto-login after signup
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err) {
@@ -180,4 +182,3 @@ function SignUpPage() {
     </div>
   );
 }
-
