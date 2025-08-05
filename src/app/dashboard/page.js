@@ -1,105 +1,98 @@
+// /src/app/dashboard/page.jsx
+
 "use client";
+import { auth, db } from "@/lib/firebase";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { auth, db } from "@/lib/firebase";
+
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, collection, getDocs, query, setDoc } from "firebase/firestore";
-import { v4 as uuidv4 } from 'uuid';
+import { doc, getDoc } from "firebase/firestore";
 
-// --- Loader Component for a clean loading screen experience ---
 const FullScreenLoader = ({ message }) => (
-    <div className="fixed inset-0 bg-white flex flex-col items-center justify-center z-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-        <p className="mt-4 text-gray-700 font-semibold text-lg">{message}</p>
-    </div>
+  <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
+    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+    <p className="ml-4 text-gray-700">{message}</p>
+  </div>
 );
 
-// --- Task Component ---
-const Task = ({ task, onToggle }) => (
-    <div className={`p-4 rounded-xl shadow-sm flex items-center justify-between transition-colors duration-300
-        ${task.completed ? 'bg-green-100 text-green-700' : 'bg-gray-50 text-gray-800'}`}>
-        <span className="font-medium text-lg">{task.title}</span>
-        <input
-            type="checkbox"
-            checked={task.completed}
-            onChange={() => onToggle(task.id)}
-            className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
-        />
-    </div>
-);
+export default function DashboardPage() {
+  const router = useRouter();
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Verifying access...");
+  const [hasTakenTest, setHasTakenTest] = useState(false);
 
-// --- Main Recovery Page Component ---
-export default function RecoveryPage() {
-    const router = useRouter();
-    const [user, setUser] = useState(null);
-    const [tasks, setTasks] = useState([]);
-    const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        router.replace("/login");
+        return;
+      }
 
-    // Fetch the tasks for the current user
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            if (!currentUser) {
-                router.push("/login");
-                return;
-            }
-            setUser(currentUser);
-            
-            const tasksCollectionRef = collection(db, `users/${currentUser.uid}/recoveryTasks`);
-            
-            try {
-                const querySnapshot = await getDocs(query(tasksCollectionRef));
-                const fetchedTasks = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setTasks(fetchedTasks);
-            } catch (error) {
-                console.error("Error fetching recovery tasks:", error);
-            } finally {
-                setLoading(false);
-            }
-        });
-        return () => unsubscribe();
-    }, [router]);
+      setLoadingMessage("Checking your subscription...");
+      const userDocRef = doc(db, "users", currentUser.uid);
+      const docSnap = await getDoc(userDocRef);
 
-    // Function to handle toggling a task's completion status
-    const handleToggleTask = async (taskId) => {
-        if (!user) return;
-        const taskRef = doc(db, `users/${user.uid}/recoveryTasks`, taskId);
-        
-        // Find the task and update its completion status locally
-        const updatedTasks = tasks.map(task => 
-            task.id === taskId ? { ...task, completed: !task.completed } : task
-        );
-        setTasks(updatedTasks);
+      if (!docSnap.exists()) {
+        console.error("❌ No user document found.");
+        router.replace("/pricing");
+        return;
+      }
 
-        // Update the task in Firestore
-        try {
-            await setDoc(taskRef, { ...tasks.find(t => t.id === taskId), completed: !tasks.find(t => t.id === taskId).completed }, { merge: true });
-        } catch (error) {
-            console.error("Error updating task status:", error);
-        }
-    };
+      const data = docSnap.data();
 
-    if (loading) {
-        return <FullScreenLoader message="in less than 5 minutes" />;
-    }
+      if (data.tier === "premium") {
+        setUserData(data);
+        setHasTakenTest(!!data.lastTest); 
+        setLoading(false);
+      } else {
+        router.replace("/pricing");
+      }
+    });
 
-    return (
-        <div className="container mx-auto px-4 py-8 pb-24 md:pb-0">
-            <h1 className="text-3xl font-bold text-gray-800 mb-8">Daily Recovery Tasks</h1>
-            <p className="text-gray-600 mb-6">
-                Complete these tasks to track your recovery journey.
-            </p>
+    return () => unsubscribe();
+  }, [router]);
 
-            <div className="grid grid-cols-1 gap-4">
-                {tasks.length > 0 ? (
-                    tasks.map(task => (
-                        <Task key={task.id} task={task} onToggle={handleToggleTask} />
-                    ))
-                ) : (
-                    <div className="p-8 text-center text-gray-500">
-                        <p>No tasks found. Add some to get started!</p>
-                    </div>
-                )}
-            </div>
+  const handleTestButtonClick = () => {
+    router.push("/dashboard/adhd-test");
+  };
+
+  if (loading) {
+    return <FullScreenLoader message={loadingMessage} />;
+  }
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold mb-6">Welcome to Your Dashboard</h1>
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4">Your Premium Account</h2>
+        {userData && (
+          <ul>
+            <li className="mb-2"><strong>Email:</strong> {userData.email}</li>
+            <li className="mb-2"><strong>Score:</strong> {userData.score || 0}</li>
+            <li className="mb-2">
+              <strong>Tier:</strong>{" "}
+              <span className="capitalize font-medium text-green-600">
+                {userData.tier}
+              </span>
+            </li>
+            <li>
+              <strong>Last Test:</strong>{" "}
+              {userData.lastTest 
+                ? userData.lastTest.toDate().toLocaleDateString() 
+                : "Not taken yet"}
+            </li>
+          </ul>
+        )}
+        <div className="mt-6">
+          <button
+            onClick={handleTestButtonClick}
+            className="w-full sm:w-auto px-6 py-3 text-lg font-semibold text-white bg-blue-600 rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors"
+          >
+            {hasTakenTest ? "Retake the Test" : "Take the ADHD Test"}
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
