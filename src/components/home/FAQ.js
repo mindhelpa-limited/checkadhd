@@ -25,57 +25,59 @@ const faqs = [
   },
 ];
 
-// --- FAQ Item Component with smooth animation ---
 const FaqItem = ({ faq, index, openIndex, setOpenIndex }) => {
-    const isOpen = index === openIndex;
+  const isOpen = index === openIndex;
 
-    return (
-        <div className="border-b border-gray-200 py-6">
-            <button
-                onClick={() => setOpenIndex(isOpen ? null : index)}
-                className="w-full flex justify-between items-center text-left"
-            >
-                <span className="text-lg font-medium text-gray-800">{faq.question}</span>
-                <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full flex-shrink-0">
-                    <Plus className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${isOpen ? 'transform rotate-45' : ''}`} />
-                </div>
-            </button>
-            <div 
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-96 mt-4' : 'max-h-0'}`}
-            >
-                <p className="text-gray-600 pr-8">
-                    {faq.answer}
-                </p>
-            </div>
+  return (
+    <div className="border-b border-white/10 py-6">
+      <button
+        onClick={() => setOpenIndex(isOpen ? null : index)}
+        className="w-full flex justify-between items-center text-left"
+      >
+        <span className="text-lg font-semibold text-white">{faq.question}</span>
+        <div className="w-8 h-8 flex items-center justify-center bg-white/10 rounded-full flex-shrink-0">
+          <Plus
+            className={`w-5 h-5 text-white transition-transform duration-300 ${
+              isOpen ? "rotate-45" : ""
+            }`}
+          />
         </div>
-    );
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-500 ease-in-out ${
+          isOpen ? "max-h-96 mt-4" : "max-h-0"
+        }`}
+      >
+        <p className="text-white/70 pr-8 text-base">{faq.answer}</p>
+      </div>
+    </div>
+  );
 };
 
-
-// --- Main FAQ Component ---
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(null);
 
   return (
-    <section className="py-24 bg-gray-50">
+    <section className="bg-[#0a122a] py-24 sm:py-32">
       <div className="max-w-4xl mx-auto px-6 lg:px-8">
         <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">
-                Frequently Asked Questions
-            </h2>
-            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-                Find quick answers to common questions about our platform, the assessment, and the recovery program.
-            </p>
+          <h2 className="font-serif text-5xl font-bold text-white">
+            Frequently Asked Questions
+          </h2>
+          <p className="mt-4 text-lg text-white/70 max-w-2xl mx-auto">
+            Find quick answers to common questions about our platform, the
+            assessment, and the recovery program.
+          </p>
         </div>
 
         <div className="space-y-2">
           {faqs.map((faq, index) => (
-            <FaqItem 
-                key={index} 
-                faq={faq} 
-                index={index} 
-                openIndex={openIndex} 
-                setOpenIndex={setOpenIndex} 
+            <FaqItem
+              key={index}
+              faq={faq}
+              index={index}
+              openIndex={openIndex}
+              setOpenIndex={setOpenIndex}
             />
           ))}
         </div>

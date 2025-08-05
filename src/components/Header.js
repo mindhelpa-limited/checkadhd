@@ -1,9 +1,8 @@
 "use client";
-import { auth, db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
 export default function Header() {
@@ -25,35 +24,37 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+    <header className="bg-black/40 backdrop-blur-md text-white fixed top-0 left-0 right-0 z-50 shadow-lg">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <img src="/logo.png" alt="ADHD Check Logo" className="h-8" />
         </Link>
 
         {/* Desktop Menu */}
-        <nav className="hidden md:flex space-x-6 font-medium text-gray-800 items-center">
-          <Link href="/" className="hover:text-blue-600">Home</Link>
-          <Link href="/features" className="hover:text-blue-600">Features</Link>
-          <Link href="/how-it-works" className="hover:text-blue-600">How It Works</Link>
-          <Link href="/assessment" className="hover:text-blue-600">Assessment</Link>
-          <Link href="/pricing" className="hover:text-blue-600">Pricing</Link>
-          <Link href="/resources" className="hover:text-blue-600">Resources</Link>
+        <nav className="hidden md:flex space-x-8 font-medium text-white items-center">
+          <Link href="/" className="hover:text-focus-gold transition-all duration-200">Home</Link>
+          <Link href="/features" className="hover:text-focus-gold transition-all duration-200">Features</Link>
+          <Link href="/how-it-works" className="hover:text-focus-gold transition-all duration-200">How It Works</Link>
+          <Link href="/assessment" className="hover:text-focus-gold transition-all duration-200">Assessment</Link>
+          <Link href="/pricing" className="hover:text-focus-gold transition-all duration-200">Pricing</Link>
+          <Link href="/resources" className="hover:text-focus-gold transition-all duration-200">Resources</Link>
 
-          {/* Dynamic Auth Links for Desktop */}
           {user ? (
             <>
-              <Link href="/dashboard" className="hover:text-blue-600">Dashboard</Link>
+              <Link href="/dashboard" className="hover:text-focus-gold transition-all duration-200">Dashboard</Link>
               <button
                 onClick={handleLogout}
-                className="text-red-600 font-semibold hover:underline"
+                className="text-red-400 font-semibold hover:underline"
               >
                 Logout
               </button>
             </>
           ) : (
-            <Link href="/login" className="text-blue-600 font-semibold hover:underline">
+            <Link
+              href="/login"
+              className="text-focus-gold font-semibold hover:underline"
+            >
               Login / Dashboard
             </Link>
           )}
@@ -61,7 +62,7 @@ export default function Header() {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-2xl text-gray-800"
+          className="md:hidden text-3xl text-white"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           ☰
@@ -70,7 +71,7 @@ export default function Header() {
 
       {/* Mobile Dropdown */}
       {menuOpen && (
-        <div className="md:hidden bg-white shadow-lg flex flex-col items-center py-4 space-y-4 text-gray-800">
+        <div className="md:hidden bg-black/90 backdrop-blur-xl text-white flex flex-col items-center py-4 space-y-5 font-medium shadow-xl">
           <Link href="/" onClick={() => setMenuOpen(false)}>Home</Link>
           <Link href="/features" onClick={() => setMenuOpen(false)}>Features</Link>
           <Link href="/how-it-works" onClick={() => setMenuOpen(false)}>How It Works</Link>
@@ -78,26 +79,15 @@ export default function Header() {
           <Link href="/pricing" onClick={() => setMenuOpen(false)}>Pricing</Link>
           <Link href="/resources" onClick={() => setMenuOpen(false)}>Resources</Link>
 
-          {/* Dynamic Auth Links for Mobile */}
           {user ? (
             <>
-              <Link
-                href="/dashboard"
-                onClick={() => setMenuOpen(false)}
-                className="font-semibold"
-              >
-                Dashboard
-              </Link>
-              <button onClick={handleLogout} className="text-red-600 font-semibold">
+              <Link href="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+              <button onClick={handleLogout} className="text-red-400 font-semibold">
                 Logout
               </button>
             </>
           ) : (
-            <Link
-              href="/login"
-              onClick={() => setMenuOpen(false)}
-              className="text-blue-600 font-semibold"
-            >
+            <Link href="/login" onClick={() => setMenuOpen(false)} className="text-focus-gold font-semibold">
               Login / Dashboard
             </Link>
           )}
