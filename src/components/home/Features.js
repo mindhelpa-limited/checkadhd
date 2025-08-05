@@ -1,94 +1,101 @@
 "use client";
-import { Check, Target, Award } from "lucide-react";
 
-// This component presents the core features of the product with a modern, dark theme.
-// The design is responsive and uses subtle animations to match the hero section.
+import { useRouter } from "next/navigation";
+
 export default function Features() {
+  const router = useRouter();
+
   return (
-    <section className="bg-[#0a122a] py-24 sm:py-32 animate-[fade-in_1s_ease-out]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        
+    <section className="bg-[#0a122a] py-28 sm:py-36 text-white">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-32">
+
         {/* Section Header */}
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-base font-semibold leading-7 text-blue-400 uppercase tracking-wide">THE CORE EXPERIENCE</p>
-          <h2 className="font-serif mt-2 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+        <div className="text-center max-w-3xl mx-auto animate-fade-in-up">
+          <h2 className="font-serif text-5xl font-bold leading-tight tracking-tight">
             A Clear Path to Clarity
           </h2>
-          <p className="mt-6 text-lg leading-8 text-gray-300">
-            Our platform combines science-backed assessments with a personalized recovery program to help you build focus and find your calm.
+          <p className="mt-6 text-lg text-gray-300">
+            You don’t just take a test. You begin a guided journey — built on science, refined by care, and shaped to fit the way your mind works.
           </p>
         </div>
 
-        {/* Feature 1: Evidence-Based Assessment */}
-        <div className="mt-20 grid grid-cols-1 gap-16 items-center lg:grid-cols-2">
-          <div className="lg:order-first">
-            <h3 className="font-serif text-3xl font-bold tracking-tight text-white">
-              Evidence-Based Assessment
-            </h3>
+        {/* Feature Block 1 */}
+        <div className="grid lg:grid-cols-2 gap-16 items-center animate-fade-in-up">
+          <div>
+            <h3 className="font-serif text-3xl font-bold">Start with Understanding</h3>
             <p className="mt-4 text-gray-300">
-              Built by clinical experts, our comprehensive assessment provides accurate, personalized insights based on scientifically-validated frameworks. It's the essential first step to understanding your unique cognitive patterns.
+              Our clinically-validated ADHD assessment isn’t just a label — it’s a mirror. Backed by ASRS and DSM-5 frameworks, it reveals patterns and gives you words for what you’ve been feeling.
             </p>
-            <dl className="mt-6 space-y-4">
-              <div className="relative pl-9">
-                <dt className="inline font-semibold text-white">
-                  <Check className="absolute left-1 top-1 h-5 w-5 text-blue-400" />
-                  <span className="ml-2">Clinically-Informed.</span>
-                </dt>
-                <dd className="inline ml-2 text-gray-400">Grounded in ASRS & DSM-5 criteria.</dd>
-              </div>
-              <div className="relative pl-9">
-                <dt className="inline font-semibold text-white">
-                  <Check className="absolute left-1 top-1 h-5 w-5 text-blue-400" />
-                  <span className="ml-2">Actionable Insights.</span>
-                </dt>
-                <dd className="inline ml-2 text-gray-400">Forms the foundation of your recovery plan.</dd>
-              </div>
-            </dl>
+            <ul className="mt-6 space-y-4 text-gray-400">
+              <li className="flex items-start gap-3">
+                <span className="text-blue-400 mt-1">✔</span>
+                <div>
+                  <strong className="text-white">Clinically Informed:</strong><br />
+                  Developed with expert input and trusted screening tools.
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-blue-400 mt-1">✔</span>
+                <div>
+                  <strong className="text-white">Truly Personalized:</strong><br />
+                  Tailored insights you can actually use in real life.
+                </div>
+              </li>
+            </ul>
           </div>
           <img
-            src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=2874&auto=format&fit=crop"
-            alt="A person sitting calmly and reading a book, representing focus and clarity."
-            className="rounded-3xl shadow-xl transform transition-transform duration-500 hover:scale-[1.02]"
+            src="https://images.unsplash.com/photo-1573497019154-4192ae7b16ab?auto=format&fit=crop&w=2940&q=80"
+            alt="Person reflecting near a window with soft morning light"
+            className="rounded-3xl shadow-xl hover:scale-[1.02] transition-transform duration-500"
           />
         </div>
 
-        {/* Feature 2: Personalized Recovery Plan (Reversed layout) */}
-        <div className="mt-24 grid grid-cols-1 gap-16 items-center lg:grid-cols-2">
+        {/* Decorative Divider */}
+        <div className="flex justify-center animate-fade-in-up">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-28 h-auto text-blue-500/20" viewBox="0 0 200 200">
+            <path d="M100 100 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40 A60 60 0 1 1 40 100 A60 60 0 1 0 100 160" fill="none" stroke="currentColor" strokeWidth="0.5" />
+          </svg>
+        </div>
+
+        {/* Feature Block 2 */}
+        <div className="grid lg:grid-cols-2 gap-16 items-center animate-fade-in-up">
           <img
-            src="https://images.unsplash.com/photo-1517486801948-26ff38a0a911?q=80&w=2940&auto=format&fit=crop"
-            alt="A person meditating peacefully in a well-lit, serene room."
-            className="rounded-3xl shadow-xl transform transition-transform duration-500 hover:scale-[1.02]"
+            src="https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=2874&q=80"
+            alt="Serene workspace with soft lighting, symbolizing peace and order"
+            className="rounded-3xl shadow-xl hover:scale-[1.02] transition-transform duration-500"
           />
-          <div className="lg:order-last">
-            <h3 className="font-serif text-3xl font-bold tracking-tight text-white">
-              Personalized Recovery Plan
-            </h3>
+          <div>
+            <h3 className="font-serif text-3xl font-bold">Grow with Guidance</h3>
             <p className="mt-4 text-gray-300">
-              Receive a daily set of unique, AI-powered activities. From guided meditations to interactive readings, your plan is designed to build consistency and improve focus in just a few minutes each day.
+              Based on your results, you’ll receive a daily recovery plan — brief, calming, and tailored. Whether it's mindfulness, structure, or focus tasks, your journey evolves with you.
             </p>
-            <dl className="mt-6 space-y-4">
-              <div className="relative pl-9">
-                <dt className="inline font-semibold text-white">
-                  <Target className="absolute left-1 top-1 h-5 w-5 text-blue-400" />
-                  <span className="ml-2">AI-Powered.</span>
-                </dt>
-                <dd className="inline ml-2 text-gray-400">Engage with new, unique content every day.</dd>
-              </div>
-              <div className="relative pl-9">
-                <dt className="inline font-semibold text-white">
-                  <Award className="absolute left-1 top-1 h-5 w-5 text-blue-400" />
-                  <span className="ml-2">Gamified.</span>
-                </dt>
-                <dd className="inline ml-2 text-gray-400">Stay motivated by building your daily streak.</dd>
-              </div>
-            </dl>
+            <ul className="mt-6 space-y-4 text-gray-400">
+              <li className="flex items-start gap-3">
+                <span className="text-blue-400 mt-1">✔</span>
+                <div>
+                  <strong className="text-white">AI-Powered Routine:</strong><br />
+                  Dynamic tasks that adapt to your pace and goals.
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-blue-400 mt-1">✔</span>
+                <div>
+                  <strong className="text-white">Gamified Support:</strong><br />
+                  Build streaks, earn clarity, and stay motivated long-term.
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-       {/* Global styles for animations */}
+
+      {/* Fade-in animation */}
       <style jsx global>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(20px); }
+        .animate-fade-in-up {
+          animation: fadeInUp 1.3s ease-out both;
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
