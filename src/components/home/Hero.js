@@ -113,6 +113,11 @@ export default function Hero() {
           100% { transform: translateY(0); }
         }
       `}</style>
+
+      {/* Manual Divider added here */}
+      <div className="absolute bottom-0 left-0 w-full h-px">
+        <div className="h-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
+      </div>
     </section>
   );
 }

@@ -11,7 +11,7 @@ export default function Features() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-32">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
-          <h2 className="font-serif text-5xl font-bold leading-tight tracking-tight text-white">
+          <h2 className="font-serif text-4xl sm:text-5xl font-bold leading-tight tracking-tight text-white">
             A Clear Path to Clarity
           </h2>
           <p className="mt-6 text-lg text-gray-300">
@@ -57,24 +57,8 @@ export default function Features() {
           />
         </div>
 
-        {/* Decorative Divider */}
-        <div className="flex justify-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-28 h-auto text-blue-500/20"
-            viewBox="0 0 200 200"
-          >
-            <path
-              d="M100 100 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40 A60 60 0 1 1 40 100 A60 60 0 1 0 100 160"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="0.5"
-            />
-          </svg>
-        </div>
-
         {/* Feature Block 2 */}
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-16 items-center mt-32">
           <img
             src="/images/grow-guidance.jpg"
             alt="Young woman meditating in a serene flower garden"
@@ -109,6 +93,11 @@ export default function Features() {
             </ul>
           </div>
         </div>
+      </div>
+
+      {/* Manual Divider added here */}
+      <div className="absolute bottom-0 left-0 w-full h-px">
+        <div className="h-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
       </div>
     </section>
   );
