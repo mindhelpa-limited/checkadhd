@@ -10,10 +10,10 @@ const MobileMenuItem = ({ href, children, onClick }) => (
     <Link
         href={href}
         onClick={onClick}
-        className="flex justify-between items-center w-full px-4 py-3 border-b border-gray-700 last:border-b-0 hover:bg-[#1f294c] transition-colors duration-200"
+        className="flex items-center w-full px-4 py-3 border-b border-gray-700 last:border-b-0 hover:bg-[#1f294c] transition-colors duration-200 group"
     >
-        <span className="font-sans text-white text-lg font-light">{children}</span>
-        <ArrowRight size={20} className="text-gray-400" />
+        <span className="font-sans text-white text-lg font-light flex-grow">{children}</span>
+        <ArrowRight size={20} className="text-gray-400 group-hover:translate-x-1 transition-transform duration-200" />
     </Link>
 );
 
@@ -95,12 +95,12 @@ export default function Header() {
             {/* Mobile Dropdown Menu (Animated) */}
             <div className={`
                 md:hidden
-                fixed top-16 right-0 left-0 p-4
+                fixed top-16 right-4 max-w-xs w-full p-4
                 bg-[#101b3d] border border-white/10 rounded-3xl shadow-xl
                 transform transition-all duration-300 ease-in-out
                 ${menuOpen ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0 pointer-events-none'}
             `}>
-                <nav className="flex flex-col items-center py-4 font-sans font-light text-white">
+                <nav className="flex flex-col py-4 font-sans font-light text-white">
                     {navLinks}
                     {user ? (
                         <>
