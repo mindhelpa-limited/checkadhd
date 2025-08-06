@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image"; // Added Image import
 
 export default function Hero() {
   const router = useRouter();
@@ -9,16 +10,14 @@ export default function Hero() {
   return (
     <section className="relative min-h-[calc(100vh-72px)] bg-[#0a122a] text-white flex items-center justify-center px-6 sm:px-10 overflow-hidden">
 
-      {/* Blurred background */}
+      {/* Radial gradient background with subtle animated light glow */}
       <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2?auto=format&fit=crop&w=1400&q=80"
-          alt="background blur"
-          className="w-full h-full object-cover opacity-5 blur-sm"
-        />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a122a] via-[#101b3d] to-[#0a122a]" />
+        <div className="absolute top-[10%] left-[5%] w-[500px] h-[500px] bg-blue-400/20 blur-[120px] rounded-full animate-float" />
+        <div className="absolute bottom-[-10%] right-[5%] w-[400px] h-[400px] bg-blue-400/10 blur-[100px] rounded-full animate-float-slow" />
       </div>
 
-      {/* Spiral */}
+      {/* Spiral from previous design */}
       <div className="absolute inset-0 flex items-center justify-center opacity-10 z-10">
         <svg viewBox="0 0 200 200" className="w-[80vw] max-w-md h-auto text-blue-500/20 animate-spin-slow">
           <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="1" />
@@ -32,14 +31,14 @@ export default function Hero() {
 
         {/* Left Side: Text */}
         <div className="text-left px-4 sm:px-0 space-y-8 animate-fade-in-up">
-          <p className="text-blue-300 uppercase text-sm tracking-widest">ADHD support made human</p>
+          <p className="font-sans text-blue-300 uppercase text-sm tracking-widest">ADHD support made human</p>
 
-          <h1 className="font-serif text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
+          <h1 className="font-sans text-4xl sm:text-5xl font-semibold tracking-tight leading-tight">
             Focus isn’t lost. <br />
-            It’s waiting to be found — <span className="text-blue-400 animate-pop">your way.</span>
+            It’s waiting to be found — <span className="text-blue-400">your way.</span>
           </h1>
 
-          <p className="text-base sm:text-lg text-gray-300 font-normal leading-relaxed">
+          <p className="font-sans text-base sm:text-lg text-gray-300 font-normal leading-relaxed">
             We don’t fix minds. We help you understand yours — deeply, compassionately, and with tools made just for ADHD.
           </p>
 
@@ -64,9 +63,11 @@ export default function Hero() {
 
         {/* Right Side: Brain Image */}
         <div className="flex justify-center animate-float">
-          <img
+          <Image
             src="/images/brain-glow.png"
             alt="animated brain"
+            width={400}
+            height={400}
             className="w-[300px] sm:w-[350px] md:w-[400px] opacity-90"
           />
         </div>
@@ -96,14 +97,6 @@ export default function Hero() {
           to { transform: rotate(360deg); }
         }
 
-        .animate-pop {
-          animation: popIn 0.8s ease-out;
-        }
-        @keyframes popIn {
-          0% { opacity: 0; transform: scale(0.95); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-
         .animate-float {
           animation: float 5s ease-in-out infinite;
         }
@@ -113,8 +106,6 @@ export default function Hero() {
           100% { transform: translateY(0); }
         }
       `}</style>
-
-      {/* Manual Divider added here */}
       <div className="absolute bottom-0 left-0 w-full h-px">
         <div className="h-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
       </div>

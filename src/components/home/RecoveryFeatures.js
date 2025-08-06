@@ -1,50 +1,54 @@
 "use client";
-import { Calendar, Target, Award } from "lucide-react";
+import { Check } from "lucide-react";
+import Image from "next/image";
 
-export default function HowItWorks() {
-  const steps = [
-    {
-      icon: <Calendar className="w-10 h-10 text-blue-600" />,
-      title: "Join the 20-Day ADHD Recovery Plan",
-      description:
-        "Start your personalized journey to better focus and productivity with our evidence-based 20-day program.",
-    },
-    {
-      icon: <Target className="w-10 h-10 text-blue-600" />,
-      title: "Complete 5 Daily Tasks",
-      description:
-        "Engage in targeted meditation, affirmations, daily passages, exercises, and focus tasks every day.",
-    },
-    {
-      icon: <Award className="w-10 h-10 text-blue-600" />,
-      title: "Track Your Streak & Take the Test",
-      description:
-        "Build your streak, track progress, and take the ADHD test after each 20-day cycle to see measurable results.",
-    },
-  ];
-
+export default function UnderstandingSection() {
   return (
-    <section className="py-20 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6 lg:px-12 text-center">
-        <h2 className="text-4xl font-bold text-gray-900">How It Works</h2>
-        <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-          We’ve designed a simple, science-backed system to help you stay
-          consistent and achieve better focus through daily structured tasks.
-        </p>
-
-        <div className="mt-12 grid gap-8 md:grid-cols-3">
-          {steps.map((step, index) => (
-            <div
-              key={index}
-              className="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition duration-300"
-            >
-              <div className="flex justify-center mb-4">{step.icon}</div>
-              <h3 className="text-xl font-semibold text-gray-900">
-                {step.title}
-              </h3>
-              <p className="mt-2 text-gray-600">{step.description}</p>
+    <section className="bg-[#0a122a] py-24 text-white">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Left Side: Image - NOW order-1 on mobile */}
+          <div className="order-1 lg:order-1">
+            <Image
+              src="/images/meditating-girl.png" // You'll need to save the image here
+              alt="A person meditating, surrounded by flowers"
+              width={700}
+              height={500}
+              className="rounded-3xl shadow-2xl w-full max-w-lg lg:max-w-none mx-auto"
+            />
+          </div>
+          
+          {/* Right Side: Text Content - NOW order-2 on mobile */}
+          <div className="order-2 lg:order-2">
+            <div className="bg-[#101b3d] p-8 rounded-3xl border border-white/10 shadow-xl space-y-6">
+              <p className="font-sans text-blue-300 uppercase text-sm tracking-widest">
+                Gamified Support: Build streaks, earn clarity, and stay motivated long-term.
+              </p>
+              
+              <h2 className="font-sans text-4xl font-semibold leading-tight tracking-tight">
+                Start with Understanding
+              </h2>
+              
+              <p className="font-sans text-lg text-gray-300">
+                Our clinically-validated ADHD assessment isn’t just a label — it’s a mirror. Backed by ASRS and DSM-5 frameworks, it reveals patterns and gives you words for what you’ve been feeling.
+              </p>
+              
+              <ul className="space-y-4">
+                <li className="flex items-start">
+                  <Check className="flex-shrink-0 w-6 h-6 text-green-400 mt-1 mr-3" />
+                  <span className="font-sans text-lg text-gray-300">
+                    <span className="font-medium text-white">Clinically Informed:</span> Developed with expert input and trusted screening tools.
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="flex-shrink-0 w-6 h-6 text-green-400 mt-1 mr-3" />
+                  <span className="font-sans text-lg text-gray-300">
+                    <span className="font-medium text-white">Truly Personalized:</span> Tailored insights you can actually use in real life.
+                  </span>
+                </li>
+              </ul>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>
