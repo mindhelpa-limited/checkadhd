@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Features() {
   const router = useRouter();
@@ -10,7 +11,7 @@ export default function Features() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-32">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
-          <h2 className="font-serif text-5xl font-bold leading-tight tracking-tight text-white animate-spin-slow hover:[animation-play-state:paused]">
+          <h2 className="font-serif text-5xl font-bold leading-tight tracking-tight text-white">
             A Clear Path to Clarity
           </h2>
           <p className="mt-6 text-lg text-gray-300">

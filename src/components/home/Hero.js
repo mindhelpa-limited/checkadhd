@@ -36,7 +36,7 @@ export default function Hero() {
 
           <h1 className="font-serif text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
             Focus isn’t lost. <br />
-            It’s waiting to be found — <span className="text-blue-400 underline underline-offset-4 animate-pop">your way.</span>
+            It’s waiting to be found — <span className="text-blue-400 animate-pop">your way.</span>
           </h1>
 
           <p className="text-base sm:text-lg text-gray-300 font-normal leading-relaxed">

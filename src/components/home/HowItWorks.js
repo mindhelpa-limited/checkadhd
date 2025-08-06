@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 const Step = ({ number, icon, title, tagline, content, image, reverse }) => (
   <div className={`flex flex-col gap-12 group items-start relative p-8 rounded-3xl border border-transparent hover:border-blue-500/20 transition-colors duration-300 ${reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}>
     {/* Prominent Number (Absolute Positioned) */}
-    {/* FIX: Adjusted the left position on large screens from -12 to -6 */}
     <span className="absolute -top-6 left-1/2 -translate-x-1/2 lg:-left-6 lg:top-1/2 lg:-translate-x-0 lg:-translate-y-1/2 text-8xl font-extrabold text-blue-500/10 opacity-50 z-0">{number}</span>
 
     {/* Left/Right: Icon + Text */}
@@ -43,9 +42,12 @@ export default function HowItWorks() {
   }, []);
 
   return (
-    <section className="py-28 sm:py-36 text-white relative overflow-hidden" style={{ backgroundColor: '#13112d' }}>
-      {/* Subtle Shimmering Background */}
-      <div className="absolute inset-0 z-0 shimmering-background"></div>
+    <section className="relative py-28 sm:py-36 text-white overflow-hidden bg-[#0a122a]">
+      {/* Floating Glow Effects (consistent with the rest of the site) */}
+      <div className="absolute inset-0 -z-10 animate-float-container">
+        <div className="absolute top-[10%] left-[5%] w-[500px] h-[500px] bg-[#A78BFA]/20 blur-[120px] rounded-full animate-float" />
+        <div className="absolute bottom-[-10%] right-[5%] w-[400px] h-[400px] bg-blue-400/10 blur-[100px] rounded-full animate-float-slow" />
+      </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -115,40 +117,18 @@ export default function HowItWorks() {
           animation: pulse 2.5s infinite ease-in-out;
         }
 
-        @keyframes shimmer {
-          0% {
-            background-position: 0% 0%;
-          }
-          100% {
-            background-position: 100% 100%;
-          }
-        }
-        .shimmering-background {
-          background-color: #13112d;
-          background-image: linear-gradient(
-            45deg,
-            rgba(255, 255, 255, 0.03) 0%,
-            transparent 50%,
-            rgba(255, 255, 255, 0.03) 100%
-          );
-          background-size: 400% 400%;
-          animation: shimmer 40s infinite linear;
-        }
-
         @keyframes float {
-          0% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-5px);
-          }
-          100% {
-            transform: translateY(0px);
-          }
+          0% { transform: translate(0, 0); }
+          50% { transform: translate(-10px, -10px); }
+          100% { transform: translate(0, 0); }
         }
-        .animate-float {
-          animation: float 4s ease-in-out infinite;
+        @keyframes float-slow {
+          0% { transform: translate(0, 0); }
+          50% { transform: translate(10px, 10px); }
+          100% { transform: translate(0, 0); }
         }
+        .animate-float { animation: float 10s ease-in-out infinite; }
+        .animate-float-slow { animation: float-slow 12s ease-in-out infinite; }
       `}</style>
     </section>
   );
