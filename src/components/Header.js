@@ -51,7 +51,7 @@ export default function Header() {
             <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                 {/* Logo */}
                 <Link href="/" className="flex items-center">
-                    <img src="/logo.png" alt="ADHD Check Logo" className="h-8" />
+                    <img src="/logo.png" alt="ADHD Check Logo" className="h-14" />
                 </Link>
 
                 {/* Desktop Menu */}
