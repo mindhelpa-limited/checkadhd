@@ -26,6 +26,13 @@ body {
   padding: 0;
   line-height: 1.6;
   color: #1f2937;
+  font-weight: 300;
+}
+
+/* Headings styles based on the Tabulio design */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
 }
 
 /* ✅ FORM STYLES ONLY — no heading overrides */
