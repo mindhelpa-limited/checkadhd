@@ -6,11 +6,11 @@ export default function Features() {
   const router = useRouter();
 
   return (
-    <section className="bg-[#0a122a] py-28 sm:py-36 text-white">
+    <section className="bg-[#0a122a] py-28 sm:py-36 text-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-32">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto animate-fade-in-up-local">
-          <h2 className="font-serif text-5xl font-bold leading-tight tracking-tight text-white">
+        <div className="text-center max-w-3xl mx-auto">
+          <h2 className="font-serif text-5xl font-bold leading-tight tracking-tight text-white animate-spin-slow hover:[animation-play-state:paused]">
             A Clear Path to Clarity
           </h2>
           <p className="mt-6 text-lg text-gray-300">
@@ -20,7 +20,7 @@ export default function Features() {
         </div>
 
         {/* Feature Block 1 */}
-        <div className="grid lg:grid-cols-2 gap-16 items-center animate-fade-in-up-local">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <h3 className="font-serif text-3xl font-bold text-white">
               Start with Understanding
@@ -57,7 +57,7 @@ export default function Features() {
         </div>
 
         {/* Decorative Divider */}
-        <div className="flex justify-center animate-fade-in-up-local">
+        <div className="flex justify-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="w-28 h-auto text-blue-500/20"
@@ -73,7 +73,7 @@ export default function Features() {
         </div>
 
         {/* Feature Block 2 */}
-        <div className="grid lg:grid-cols-2 gap-16 items-center animate-fade-in-up-local">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           <img
             src="/images/grow-guidance.jpg"
             alt="Young woman meditating in a serene flower garden"
@@ -109,23 +109,6 @@ export default function Features() {
           </div>
         </div>
       </div>
-
-      {/* Scoped Animation Style */}
-      <style jsx>{`
-        .animate-fade-in-up-local {
-          animation: fadeInUpLocal 1.3s ease-out both;
-        }
-        @keyframes fadeInUpLocal {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </section>
   );
 }
