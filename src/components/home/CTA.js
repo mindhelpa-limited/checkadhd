@@ -30,7 +30,8 @@ export default function CTA() {
 
     return () => {
       if (sectionRef.current) {
-        observer.unobserve(entry.target);
+        // Corrected to use 'observer' to unobserve, not 'entry'
+        observer.unobserve(sectionRef.current);
       }
     };
   }, []);
@@ -75,23 +76,11 @@ export default function CTA() {
           
           {/* Animated SVG Section */}
           <div className="w-full lg:w-1/2 flex justify-center items-center h-full">
-            <div className="relative w-full max-w-sm h-auto p-4 sm:p-8">
-              <svg viewBox="0 0 400 400" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
-                <defs>
-                  <filter id="glow">
-                    <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
-                    <feFlood floodColor="white" flood-opacity="0.8" result="flood" />
-                    <feComposite in="flood" in2="blur" operator="in" result="glow_composite" />
-                    <feMerge>
-                      <feMergeNode in="glow_composite" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-                <circle cx="200" cy="200" r="180" fill="none" stroke="#A78BFA" strokeWidth="2" opacity="0.3" />
-                <path d="M 200, 200 m -120, 0 a 120,120 0 1,0 240,0 a 120,120 0 1,0 -240,0" fill="none" stroke="#3B82F6" strokeWidth="2" opacity="0.5" className="animate-spin-slow-reverse" />
-                <path d="M 200, 200 m -150, 0 a 150,150 0 1,0 300,0 a 150,150 0 1,0 -300,0" fill="none" stroke="#A78BFA" strokeWidth="1" opacity="0.4" className="animate-spin-slow" />
-                <circle cx="200" cy="50" r="10" fill="#E2E8F0" filter="url(#glow)" className="animate-path-flow" />
+            <div className="relative w-full max-w-sm h-auto">
+              <svg viewBox="0 0 200 200" className="w-full h-auto text-blue-500/20 animate-spin-slow">
+                <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="1" />
+                <circle cx="100" cy="100" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                <path d="M100 100 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40 A60 60 0 1 1 40 100 A60 60 0 1 0 100 160 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40" fill="none" stroke="currentColor" strokeWidth="0.4" />
               </svg>
             </div>
           </div>
@@ -118,21 +107,7 @@ export default function CTA() {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-        .animate-spin-slow { animation: spin-slow 80s linear infinite; }
-        @keyframes spin-slow-reverse {
-          from { transform: rotate(360deg); }
-          to { transform: rotate(0deg); }
-        }
-        .animate-spin-slow-reverse { animation: spin-slow-reverse 80s linear infinite; }
-
-        @keyframes path-flow {
-          0% { transform: translate(0, 0); }
-          25% { transform: translate(150px, 150px); }
-          50% { transform: translate(300px, 0); }
-          75% { transform: translate(150px, -150px); }
-          100% { transform: translate(0, 0); }
-        }
-        .animate-path-flow { animation: path-flow 10s linear infinite; }
+        .animate-spin-slow { animation: spin-slow 80s linear infinite; transform-origin: center; }
 
         /* Glow on hover for button */
         .glow-on-hover {

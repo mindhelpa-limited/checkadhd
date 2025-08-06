@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { UserPlus, CheckCircle, Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react"; // Only ArrowRight is needed now
 
 export default function HowItWorks() {
   const router = useRouter();
@@ -40,8 +40,8 @@ export default function HowItWorks() {
               />
             </div>
             <div className="flex items-center gap-4 mb-4">
-              <div className="bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-400/30 p-3 rounded-full shadow-lg text-blue-200">
-                <UserPlus size={28} />
+              <div className="bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-400/30 p-3 rounded-full shadow-lg text-blue-200 flex items-center justify-center w-12 h-12">
+                <span className="text-2xl font-bold">1</span> {/* Replaced icon with number */}
               </div>
               <h3 className="text-2xl font-semibold text-white">Step Into a Safe Space</h3>
             </div>
@@ -61,8 +61,8 @@ export default function HowItWorks() {
               />
             </div>
             <div className="flex items-center gap-4 mb-4">
-              <div className="bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-400/30 p-3 rounded-full shadow-lg text-blue-200">
-                <CheckCircle size={28} />
+              <div className="bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-400/30 p-3 rounded-full shadow-lg text-blue-200 flex items-center justify-center w-12 h-12">
+                <span className="text-2xl font-bold">2</span> {/* Replaced icon with number */}
               </div>
               <h3 className="text-2xl font-semibold text-white">Understand Yourself</h3>
             </div>
@@ -82,8 +82,8 @@ export default function HowItWorks() {
               />
             </div>
             <div className="flex items-center gap-4 mb-4">
-              <div className="bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-400/30 p-3 rounded-full shadow-lg text-blue-200">
-                <Sparkles size={28} />
+              <div className="bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-400/30 p-3 rounded-full shadow-lg text-blue-200 flex items-center justify-center w-12 h-12">
+                <span className="text-2xl font-bold">3</span> {/* Replaced icon with number */}
               </div>
               <h3 className="text-2xl font-semibold text-white">Start Your Daily Flow</h3>
             </div>

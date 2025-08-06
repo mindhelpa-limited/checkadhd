@@ -3,10 +3,12 @@
 import { CheckCircle2, BrainCircuit, BarChart3, ArrowRight } from "lucide-react";
 import Footer from "../../components/home/Footer";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
+// Enhanced Feature Card with Hover Effect
 const FeatureCard = ({ icon, title, description }) => (
-  <div className="bg-[#0f172a] border border-white/10 rounded-xl p-8 shadow-xl hover:shadow-2xl transition duration-300">
-    <div className="w-16 h-16 flex items-center justify-center bg-blue-500/10 text-blue-400 rounded-full mx-auto">
+  <div className="bg-[#0a122a] border border-white/10 rounded-xl p-8 shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-blue-400/20 group">
+    <div className="w-16 h-16 flex items-center justify-center bg-blue-500/10 text-blue-400 rounded-full mx-auto transition-transform duration-300 group-hover:scale-110 group-hover:text-white">
       {icon}
     </div>
     <h3 className="mt-6 text-xl font-serif font-semibold text-white text-center">{title}</h3>
@@ -24,10 +26,12 @@ export default function FeaturesPage() {
       <div className="relative min-h-[80vh] flex items-center justify-center text-center px-4 sm:px-8">
         {/* Background Layer */}
         <div className="absolute inset-0 z-0 opacity-10">
-          <img
-            src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=1400&q=80"
+          <Image
+            src="/images/feature-one.png"
             alt="Abstract thoughtful"
             className="w-full h-full object-cover object-center grayscale blur-sm"
+            fill
+            sizes="100vw"
           />
         </div>
 
@@ -37,7 +41,7 @@ export default function FeaturesPage() {
             <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="1" />
             <circle cx="100" cy="100" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" />
             <path
-              d="M100 100 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40"
+              d="M100 100 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40 A60 60 0 1 1 40 100 A60 60 0 1 0 100 160 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40"
               fill="none"
               stroke="currentColor"
               strokeWidth="0.4"
@@ -47,7 +51,7 @@ export default function FeaturesPage() {
         </div>
 
         {/* Content */}
-        <div className="relative z-20 text-center max-w-3xl mx-auto space-y-6 animate-fade-in-up">
+        <div className="relative z-20 text-center max-w-3xl mx-auto space-y-6 animate-hero-title-fade">
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
             Built for Your Mind’s Momentum
           </h1>
@@ -57,8 +61,8 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* FEATURES SECTION */}
-      <div className="bg-[#0f172a] py-24 px-4">
+      {/* FEATURES SECTION - Now with consistent dark background */}
+      <div className="bg-[#0a122a] py-24 px-4">
         <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-12">
           <FeatureCard
             icon={<CheckCircle2 size={28} />}
@@ -78,7 +82,7 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* DAILY PLAN SECTION */}
+      {/* DAILY PLAN SECTION (Image on Right) */}
       <div className="bg-gray-50 py-20 text-gray-900">
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-16 items-center">
           <div>
@@ -95,26 +99,30 @@ export default function FeaturesPage() {
             </button>
           </div>
           <div className="text-center">
-            <img
-              src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=2720&auto=format&fit=crop"
+            <Image
+              src="/images/feature-two.png"
               alt="Yoga calm"
               className="rounded-2xl shadow-xl mx-auto w-full max-w-lg"
+              width={700}
+              height={500}
             />
           </div>
         </div>
       </div>
 
-      {/* PROGRESS TRACKING SECTION */}
+      {/* PROGRESS TRACKING SECTION (Image on Left - Swapped) */}
       <div className="bg-[#0a122a] py-20 text-white">
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-16 items-center">
-          <div className="text-center md:order-2">
-            <img
-              src="https://images.unsplash.com/photo-1543286386-713bdd548da4?q=80&w=2940&auto=format&fit=crop"
+          <div className="text-center">
+            <Image
+              src="/images/feature-three.png"
               alt="Progress chart"
               className="rounded-2xl shadow-xl mx-auto w-full max-w-lg"
+              width={700}
+              height={500}
             />
           </div>
-          <div className="md:order-1">
+          <div className="">
             <p className="text-green-500 font-bold uppercase tracking-widest">Stay Motivated</p>
             <h2 className="mt-4 text-4xl font-serif font-bold">Visualize Your Progress</h2>
             <p className="mt-6 text-lg text-gray-300">
@@ -131,7 +139,7 @@ export default function FeaturesPage() {
       </div>
 
       {/* CTA SECTION */}
-      <div className="bg-[#0f172a] py-24 text-center px-4">
+      <div className="bg-[#0a122a] py-24 text-center px-4">
         <h2 className="text-3xl md:text-4xl font-extrabold font-serif">
           Ready to Build the Life You Deserve?
         </h2>
@@ -158,10 +166,10 @@ export default function FeaturesPage() {
 
       {/* Animations */}
       <style jsx global>{`
-        .animate-fade-in-up {
-          animation: fadeInUp 1s ease-out forwards;
+        .animate-hero-title-fade {
+          animation: hero-title-fade 1.5s ease-out forwards;
         }
-        @keyframes fadeInUp {
+        @keyframes hero-title-fade {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }

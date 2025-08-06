@@ -8,7 +8,7 @@ export default function Features() {
 
   return (
     <section className="bg-[#0a122a] py-28 sm:py-36 text-white relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-32">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-16"> {/* Reduced spacing here for a tighter flow */}
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="font-serif text-4xl sm:text-5xl font-bold leading-tight tracking-tight text-white">
@@ -20,7 +20,44 @@ export default function Features() {
           </p>
         </div>
 
-        {/* Feature Block 1 */}
+        {/* Feature Block 2 (now displayed first on mobile) */}
+        <div className="grid lg:grid-cols-2 gap-16 items-center mt-0"> {/* Removed mt-32, spacing is now managed by parent */}
+          <img
+            src="/images/grow-guidance.jpg"
+            alt="Young woman meditating in a serene flower garden"
+            className="rounded-3xl shadow-xl hover:scale-[1.02] transition-transform duration-500"
+          />
+          <div>
+            <h3 className="font-serif text-3xl font-bold text-white">
+              Grow with Guidance
+            </h3>
+            <p className="mt-4 text-gray-300">
+              Based on your results, you’ll receive a daily recovery plan —
+              brief, calming, and tailored. Whether it's mindfulness, structure,
+              or focus tasks, your journey evolves with you.
+            </p>
+            <ul className="mt-6 space-y-4 text-gray-400">
+              <li className="flex items-start gap-3">
+                <span className="text-blue-400 mt-1">✔</span>
+                <div>
+                  <strong className="text-white">AI-Powered Routine:</strong>
+                  <br />
+                  Dynamic tasks that adapt to your pace and goals.
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-blue-400 mt-1">✔</span>
+                <div>
+                  <strong className="text-white">Gamified Support:</strong>
+                  <br />
+                  Build streaks, earn clarity, and stay motivated long-term.
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Feature Block 1 (now displayed second on mobile) */}
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <h3 className="font-serif text-3xl font-bold text-white">
@@ -57,42 +94,6 @@ export default function Features() {
           />
         </div>
 
-        {/* Feature Block 2 */}
-        <div className="grid lg:grid-cols-2 gap-16 items-center mt-32">
-          <img
-            src="/images/grow-guidance.jpg"
-            alt="Young woman meditating in a serene flower garden"
-            className="rounded-3xl shadow-xl hover:scale-[1.02] transition-transform duration-500"
-          />
-          <div>
-            <h3 className="font-serif text-3xl font-bold text-white">
-              Grow with Guidance
-            </h3>
-            <p className="mt-4 text-gray-300">
-              Based on your results, you’ll receive a daily recovery plan —
-              brief, calming, and tailored. Whether it's mindfulness, structure,
-              or focus tasks, your journey evolves with you.
-            </p>
-            <ul className="mt-6 space-y-4 text-gray-400">
-              <li className="flex items-start gap-3">
-                <span className="text-blue-400 mt-1">✔</span>
-                <div>
-                  <strong className="text-white">AI-Powered Routine:</strong>
-                  <br />
-                  Dynamic tasks that adapt to your pace and goals.
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-blue-400 mt-1">✔</span>
-                <div>
-                  <strong className="text-white">Gamified Support:</strong>
-                  <br />
-                  Build streaks, earn clarity, and stay motivated long-term.
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
       </div>
 
       {/* Manual Divider added here */}

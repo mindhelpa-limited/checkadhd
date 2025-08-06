@@ -72,9 +72,9 @@ export default function Assessment() {
       ref={sectionRef}
       className="relative bg-[#0a122a] text-white py-28 sm:py-36 overflow-hidden"
     >
-      {/* Dynamic Glow Effects */}
+      {/* Dynamic Glow Effects (Updated to Blue) */}
       <div className="absolute inset-0 -z-10 animate-float-container">
-        <div className="absolute top-[10%] left-[5%] w-[500px] h-[500px] bg-[#A78BFA]/20 blur-[120px] rounded-full animate-float" />
+        <div className="absolute top-[10%] left-[5%] w-[500px] h-[500px] bg-blue-400/20 blur-[120px] rounded-full animate-float" />
         <div className="absolute bottom-[-10%] right-[5%] w-[400px] h-[400px] bg-blue-400/10 blur-[100px] rounded-full animate-float-slow" />
       </div>
 
@@ -96,7 +96,7 @@ export default function Assessment() {
 
           {/* Right: Content */}
           <div className={`transform transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <p className="text-[#A78BFA] font-semibold tracking-widest uppercase mb-2">
+            <p className="text-blue-400 font-semibold tracking-widest uppercase mb-2">
               The First Step
             </p>
 
@@ -131,7 +131,12 @@ export default function Assessment() {
         </div>
       </div>
 
-      {/* Animation Styles */}
+      {/* Manual Divider added here */}
+      <div className="absolute bottom-0 left-0 w-full h-px">
+        <div className="h-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
+      </div>
+
+      {/* Animation Styles (Updated Button Gradient) */}
       <style jsx>{`
         @keyframes bounce-in {
           0% { transform: scale(0); opacity: 0; }
@@ -148,12 +153,12 @@ export default function Assessment() {
           50% { transform: scale(1.05); }
         }
         .button-gradient {
-          background-image: linear-gradient(135deg, #A78BFA, #6D28D9);
+          background-image: linear-gradient(135deg, #3B82F6, #1D4ED8);
           border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .button-gradient:hover {
           animation: pulse-gradient 1.5s infinite ease-in-out;
-          box-shadow: 0 0 20px rgba(167, 139, 250, 0.4);
+          box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
         }
 
         @keyframes float {

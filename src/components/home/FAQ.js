@@ -95,7 +95,7 @@ export default function FAQ() {
 
       <div className={`max-w-4xl mx-auto px-6 lg:px-8 relative z-10 transform transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <div className="text-center mb-16">
-          <h2 className="font-serif text-5xl font-bold text-white pulsing-heading">
+          <h2 className="font-serif text-4xl sm:text-5xl font-bold text-white">
             Frequently Asked Questions
           </h2>
           <p className="mt-4 text-lg text-white/70 max-w-2xl mx-auto">
@@ -117,13 +117,6 @@ export default function FAQ() {
         </div>
       </div>
       <style jsx>{`
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.05); opacity: 0.9; text-shadow: 0 0 15px rgba(255, 255, 255, 0.6); }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        .pulsing-heading { animation: pulse 2.5s infinite ease-in-out; }
-
         @keyframes float {
           0% { transform: translate(0, 0); }
           50% { transform: translate(-10px, -10px); }
