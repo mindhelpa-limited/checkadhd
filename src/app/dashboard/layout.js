@@ -2,8 +2,6 @@
 import { auth, db } from "@/lib/firebase";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-
-
 import { useState, useEffect } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -36,14 +34,11 @@ const useAuth = () => {
   return { user, userData, loading };
 };
 
-
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, userData, loading } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // ADDED RULE: This checks if the current path is a recovery path
   const isRecoveryPath = pathname.startsWith("/dashboard/recovery/");
 
   const handleLogout = async () => {
@@ -51,7 +46,6 @@ export default function DashboardLayout({ children }) {
     router.push("/login");
   };
 
-  // Extract the first name from the displayName or email
   const getFirstName = () => {
     if (userData?.displayName) {
       return userData.displayName.split(" ")[0];
@@ -71,72 +65,73 @@ export default function DashboardLayout({ children }) {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-gray-950 flex items-center justify-center z-50">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
-  
-  // ADDED RULE: If it's a recovery path, just return the children (the page content itself)
+
   if (isRecoveryPath) {
     return <>{children}</>;
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-950 text-gray-100 font-sans">
       {/* Sidebar for Desktop */}
-      <aside className={`hidden md:flex w-64 bg-gray-900 text-white flex-col p-6`}>
-        <h2 className="text-xl font-bold mb-8 text-center">ADHD Check</h2>
-        <nav className="space-y-3">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                pathname === tab.href ? "bg-blue-600 text-white" : "hover:bg-gray-700"
-              }`}
-            >
-              <tab.icon size={20} />
-              {tab.name}
-            </Link>
-          ))}
-        </nav>
+      <aside className={`hidden md:flex w-72 bg-gray-900 shadow-xl border-r border-gray-800 flex-col p-8`}>
+        <div className="flex-grow flex flex-col">
+          <h2 className="text-2xl font-bold mb-10 text-center text-blue-500 tracking-wider">ADHD Check</h2>
+          <nav className="space-y-4 flex-grow">
+            {tabs.map((tab) => (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-200 ease-in-out ${
+                  pathname === tab.href ? "bg-blue-600 text-white shadow-lg" : "hover:bg-gray-800 hover:text-white text-gray-400"
+                }`}
+              >
+                <tab.icon size={22} className="flex-shrink-0" />
+                <span className="text-lg font-medium">{tab.name}</span>
+              </Link>
+            ))}
+          </nav>
+        </div>
         <button
           onClick={handleLogout}
-          className="mt-auto flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors"
+          className="mt-8 flex items-center gap-4 p-4 rounded-xl transition-colors duration-200 ease-in-out hover:bg-gray-800 text-red-400"
         >
-          <LogOut size={20} />
-          Logout
+          <LogOut size={22} />
+          <span className="text-lg font-medium">Logout</span>
         </button>
       </aside>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header for Mobile */}
-        <header className="md:hidden flex items-center justify-between bg-white p-4 border-b">
-           <h1 className="text-lg font-semibold">
-           Welcome, {getFirstName()}
-         </h1>
-          <button onClick={handleLogout} className="p-2 text-gray-600 hover:text-red-500">
+        <header className="md:hidden flex items-center justify-between bg-gray-900 p-4 border-b border-gray-800 shadow-md">
+          <h1 className="text-lg font-semibold text-gray-200">Welcome, {getFirstName()}</h1>
+          <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-red-500">
             <LogOut size={22} />
           </button>
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 md:p-10">{children}</main>
+        <main className="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
+          {children}
+        </main>
       </div>
 
       {/* Bottom Navigation for Mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 shadow-lg flex justify-around py-3 z-20">
         {tabs.map((tab) => (
           <Link
             key={tab.href}
             href={tab.href}
-            className={`flex flex-col items-center text-xs w-full pt-1 pb-0.5 transition-colors ${
-              pathname === tab.href ? "text-blue-600" : "text-gray-600 hover:text-blue-500"
+            className={`flex flex-col items-center text-xs w-full pt-1 pb-0.5 transition-colors duration-200 ${
+              pathname === tab.href ? "text-blue-500" : "text-gray-500 hover:text-blue-400"
             }`}
           >
-            <tab.icon size={22} />
-            {tab.name}
+            <tab.icon size={22} className="mb-1" />
+            <span className="text-sm">{tab.name}</span>
           </Link>
         ))}
       </nav>

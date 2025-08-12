@@ -9,19 +9,19 @@ const games = [
   {
     name: 'MoneyStack',
     description: 'Stack the blocks with focus and precision. Great for improving attention.',
-    link: '/dashboard/recovery/moneystack', // Corrected path
+    link: '/dashboard/recovery/moneystack',
     imageUrl: '/images/blockstack.png',
   },
   {
     name: 'Snakegame',
     description: 'Eat all the dots while navigating obstacles. Helps with timing and control.',
-    link: 'http://localhost:3000/dashboard/recovery/snakegame',
+    link: '/dashboard/recovery/snakegame',
     imageUrl: '/images/trailmuncher.png',
   },
   {
     name: 'Pingmoney game',
     description: 'Bounce within the bounds. Supports quick decision making.',
-    link: 'http://localhost:3000/dashboard/recovery/pingmoneygame',
+    link: '/dashboard/recovery/pingmoneygame',
     imageUrl: '/images/neuralbounds.png',
   },
 ];
@@ -64,12 +64,20 @@ export default function RecoveryGameSelectionPage() {
     }
   }, [activeTab]);
 
-  const handleTabClick = (tabName) => {
-    setActiveTab(tabName);
+  const playClickSound = () => {
     if (clickAudioRef.current) {
       clickAudioRef.current.currentTime = 0; // Rewind to the start
       clickAudioRef.current.play().catch(e => console.error("Click sound playback failed:", e));
     }
+  };
+
+  const handleTabClick = (tabName) => {
+    setActiveTab(tabName);
+    playClickSound();
+  };
+
+  const handleGameClick = () => {
+    playClickSound();
   };
 
   const MusicTabContent = ({ title, link }) => (
@@ -127,6 +135,7 @@ export default function RecoveryGameSelectionPage() {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
+            onClick={playClickSound} // Added onClick handler
             className="bg-white text-blue-800 font-bold py-3 px-8 rounded-full shadow-lg transition-all"
           >
             Explore Library
@@ -148,6 +157,7 @@ export default function RecoveryGameSelectionPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5, delay: index * 0.2 }}
                   whileHover={{ scale: 1.05, boxShadow: '0 0 25px rgba(129, 140, 248, 0.5)' }}
+                  onClick={handleGameClick} // Added onClick handler
                   className="group cursor-pointer rounded-2xl transition-all relative overflow-hidden"
                 >
                   <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-75 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
@@ -170,9 +180,9 @@ export default function RecoveryGameSelectionPage() {
           </div>
         );
       case 'therapy-music':
-        return <MusicTabContent title="Therapy Music" link="http://localhost:3000/dashboard/recovery/therapymusic" />;
+        return <MusicTabContent title="Therapy Music" link="/dashboard/recovery/therapymusic" />;
       case 'healing-sounds':
-        return <MusicTabContent title="Healing Sounds" link="http://localhost:3000/dashboard/recovery/healingsounds" />;
+        return <MusicTabContent title="Healing Sounds" link="/dashboard/recovery/healingsounds" />;
       default:
         return null;
     }
