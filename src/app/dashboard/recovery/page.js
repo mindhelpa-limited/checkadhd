@@ -9,7 +9,7 @@ const games = [
   {
     name: 'MoneyStack',
     description: 'Stack the blocks with focus and precision. Great for improving attention.',
-    link: 'http://localhost:3000/dashboard/recovery/moneystack',
+    link: '/dashboard/recovery/moneystack', // Corrected path
     imageUrl: '/images/blockstack.png',
   },
   {
@@ -38,7 +38,7 @@ export default function RecoveryGameSelectionPage() {
     backgroundAudioRef.current.volume = 0.5;
 
     // Initialize click sound
-    clickAudioRef.current = new Audio('/click.mp3'); 
+    clickAudioRef.current = new Audio('/click.mp3');
     clickAudioRef.current.volume = 0.7;
 
     return () => {
