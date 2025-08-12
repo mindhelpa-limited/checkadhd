@@ -76,7 +76,7 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-950 text-gray-100 font-sans">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 text-gray-800 font-sans">
       {/* Sidebar for Desktop */}
       <aside className={`hidden md:flex w-72 bg-gray-900 shadow-xl border-r border-gray-800 flex-col p-8`}>
         <div className="flex-grow flex flex-col">
@@ -105,11 +105,11 @@ export default function DashboardLayout({ children }) {
         </button>
       </aside>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-100 text-gray-800">
         {/* Top Header for Mobile */}
-        <header className="md:hidden flex items-center justify-between bg-gray-900 p-4 border-b border-gray-800 shadow-md">
-          <h1 className="text-lg font-semibold text-gray-200">Welcome, {getFirstName()}</h1>
-          <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-red-500">
+        <header className="md:hidden flex items-center justify-between bg-white p-4 border-b border-gray-200 shadow-sm text-gray-800">
+          <h1 className="text-lg font-semibold">Welcome, {getFirstName()}</h1>
+          <button onClick={handleLogout} className="p-2 text-gray-600 hover:text-red-500">
             <LogOut size={22} />
           </button>
         </header>
@@ -121,7 +121,7 @@ export default function DashboardLayout({ children }) {
       </div>
 
       {/* Bottom Navigation for Mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 shadow-lg flex justify-around py-3 z-20">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg flex justify-around py-3 z-20">
         {tabs.map((tab) => (
           <Link
             key={tab.href}
