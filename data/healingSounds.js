@@ -1,0 +1,55 @@
+// data/healingSounds.js
+
+export const healingSoundsSections = [
+  {
+    title: 'Wind Down',
+    items: [
+      { name: 'Gentle Rain', imageUrl: '/images/sounds/gentle_rain.jpg', link: '' },
+      { name: 'Whispering Wind', imageUrl: '/images/sounds/whispering_wind.jpg', link: '' },
+      { name: 'Ocean Waves', imageUrl: '/images/sounds/ocean_waves.jpg', link: '' },
+      { name: 'Calm Thunder', imageUrl: '/images/sounds/calm_thunder.jpg', link: '' },
+      { name: 'Soft Creek', imageUrl: '/images/sounds/soft_creek.jpg', link: '' },
+      { name: 'Winter Breeze', imageUrl: '/images/sounds/winter_breeze.jpg', link: '' },
+      { name: 'Rain on Tent', imageUrl: '/images/sounds/rain_on_tent.jpg', link: '' },
+      { name: 'Distant Storm', imageUrl: '/images/sounds/distant_storm.jpg', link: '' },
+      { name: 'Gentle Waterfall', imageUrl: '/images/sounds/gentle_waterfall.jpg', link: '' },
+      { name: 'Rustling Leaves', imageUrl: '/images/sounds/rustling_leaves.jpg', link: '' },
+      { name: 'Crickets Chirping', imageUrl: '/images/sounds/crickets_chirping.jpg', link: '' },
+      { name: 'Campfire Crackle', imageUrl: '/images/sounds/campfire_crackle.jpg', link: '' },
+    ],
+  },
+  {
+    title: 'Nature Sounds',
+    items: [
+      { name: 'Forest Ambience', imageUrl: '/images/sounds/forest_ambience.jpg', link: '' },
+      { name: 'Chirping Birds', imageUrl: '/images/sounds/chirping_birds.jpg', link: '' },
+      { name: 'Calm River', imageUrl: '/images/sounds/calm_river.jpg', link: '' },
+      { name: 'Jungle At Night', imageUrl: '/images/sounds/jungle_night.jpg', link: '' },
+      { name: 'Dolphin Calls', imageUrl: '/images/sounds/dolphin_calls.jpg', link: '' },
+      { name: 'Beach At Sunset', imageUrl: '/images/sounds/beach_sunset.jpg', link: '' },
+      { name: 'Birds of Paradise', imageUrl: '/images/sounds/birds_paradise.jpg', link: '' },
+      { name: 'Desert Wind', imageUrl: '/images/sounds/desert_wind.jpg', link: '' },
+      { name: 'Deep Sea', imageUrl: '/images/sounds/deep_sea.jpg', link: '' },
+      { name: 'Mountain Peak', imageUrl: '/images/sounds/mountain_peak.jpg', link: '' },
+      { name: 'Arctic Ice', imageUrl: '/images/sounds/arctic_ice.jpg', link: '' },
+      { name: 'Volcano Calm', imageUrl: '/images/sounds/volcano_calm.jpg', link: '' },
+    ],
+  },
+  {
+    title: 'Sleep Lofi',
+    items: [
+      { name: 'Dreamy Lofi', imageUrl: '/images/sounds/dreamy_lofi.jpg', link: '' },
+      { name: 'Night City Lo-fi', imageUrl: '/images/sounds/night_city_lofi.jpg', link: '' },
+      { name: 'Chillhop Sleep', imageUrl: '/images/sounds/chillhop_sleep.jpg', link: '' },
+      { name: 'Rainy Day Lofi', imageUrl: '/images/sounds/rainy_day_lofi.jpg', link: '' },
+      { name: 'Coffee Shop Lofi', imageUrl: '/images/sounds/coffee_shop_lofi.jpg', link: '' },
+      { name: 'Starlight Lofi', imageUrl: '/images/sounds/starlight_lofi.jpg', link: '' },
+      { name: 'Dream State', imageUrl: '/images/sounds/dream_state.jpg', link: '' },
+      { name: 'Midnight Train', imageUrl: '/images/sounds/midnight_train.jpg', link: '' },
+      { name: 'Winter Lofi', imageUrl: '/images/sounds/winter_lofi.jpg', link: '' },
+      { name: 'Space Lofi', imageUrl: '/images/sounds/space_lofi.jpg', link: '' },
+      { name: 'Silent Street', imageUrl: '/images/sounds/silent_street.jpg', link: '' },
+      { name: 'Sunrise Lofi', imageUrl: '/images/sounds/sunrise_lofi.jpg', link: '' },
+    ],
+  },
+];

@@ -43,6 +43,9 @@ export default function DashboardLayout({ children }) {
   const { user, userData, loading } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // ADDED RULE: This checks if the current path is a recovery path
+  const isRecoveryPath = pathname.startsWith("/dashboard/recovery/");
+
   const handleLogout = async () => {
     await signOut(auth);
     router.push("/login");
@@ -72,6 +75,11 @@ export default function DashboardLayout({ children }) {
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
+  }
+  
+  // ADDED RULE: If it's a recovery path, just return the children (the page content itself)
+  if (isRecoveryPath) {
+    return <>{children}</>;
   }
 
   return (
@@ -106,8 +114,8 @@ export default function DashboardLayout({ children }) {
         {/* Top Header for Mobile */}
         <header className="md:hidden flex items-center justify-between bg-white p-4 border-b">
            <h1 className="text-lg font-semibold">
-            Welcome, {getFirstName()}
-          </h1>
+           Welcome, {getFirstName()}
+         </h1>
           <button onClick={handleLogout} className="p-2 text-gray-600 hover:text-red-500">
             <LogOut size={22} />
           </button>
