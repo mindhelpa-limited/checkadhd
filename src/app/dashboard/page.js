@@ -33,7 +33,7 @@ const ScoreRing = ({ score }) => {
           cy="64"
         />
         <circle
-          className="text-teal-400 transition-all duration-1000 ease-in-out"
+          className="text-blue-400 transition-all duration-1000 ease-in-out"
           strokeWidth="8"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
@@ -61,7 +61,7 @@ const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) =
         <XMarkIcon className="h-6 w-6" />
       </button>
       <div className="text-center">
-        <ClockIcon className="h-16 w-16 text-teal-400 mx-auto mb-4" />
+        <ClockIcon className="h-16 w-16 text-blue-400 mx-auto mb-4" />
         <h3 className="text-2xl font-bold text-white mb-2">
           Retake Not Yet Available
         </h3>
@@ -76,7 +76,7 @@ const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) =
         </div>
         <button
           onClick={() => { playClickSound(); onViewResults(); }}
-          className="w-full px-8 py-3 text-sm font-semibold text-white rounded-2xl bg-teal-500 hover:bg-teal-600 transition-colors"
+          className="w-full px-8 py-3 text-sm font-semibold text-white rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors"
         >
           View Current Result
         </button>
@@ -87,7 +87,7 @@ const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) =
 
 const FullScreenLoader = ({ message }) => (
   <div className="fixed inset-0 bg-[#0A0A0A] flex items-center justify-center z-50">
-    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-teal-500"></div>
+    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
     <p className="ml-4 text-gray-200">{message}</p>
   </div>
 );
@@ -212,8 +212,8 @@ export default function DashboardPage() {
 
       {/* Subtle background glow effect for a premium feel */}
       <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
-        <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
-        <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob-delay" />
+        <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
+        <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob-delay" />
       </div>
 
       <div className="relative max-w-6xl mx-auto z-10">
@@ -228,7 +228,7 @@ export default function DashboardPage() {
           {/* Card for Premium Account Info with Glassmorphism */}
           <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] md:col-span-2 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl">
             <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center text-gray-200">
-              <SparklesIcon className="h-6 w-6 md:h-8 md:w-8 mr-3 flex-shrink-0 text-teal-400" />
+              <SparklesIcon className="h-6 w-6 md:h-8 md:w-8 mr-3 flex-shrink-0 text-blue-400" />
               Your Premium Account
             </h2>
             {userData && (
@@ -253,7 +253,7 @@ export default function DashboardPage() {
                   <ChatBubbleBottomCenterTextIcon className="h-6 w-6 text-gray-400 mr-4 flex-shrink-0" />
                   <div>
                     <strong className="text-white">ADHD Status:</strong>
-                    <p className="font-semibold text-teal-400">
+                    <p className="font-semibold text-blue-400">
                       {userData.score !== undefined && userData.score !== null ? (
                         getAdhdStatus(scoreOutOf100)
                       ) : (
@@ -296,7 +296,7 @@ export default function DashboardPage() {
                 onClick={handleTestButtonClick}
                 className={`w-full px-8 py-4 text-lg font-semibold text-white rounded-2xl shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-opacity-50
                   ${retakeAvailable
-                    ? "bg-teal-500 hover:shadow-xl hover:-translate-y-1 active:scale-95 focus:ring-teal-500"
+                    ? "bg-blue-500 hover:shadow-xl hover:-translate-y-1 active:scale-95 focus:ring-blue-500"
                     : "bg-[#2c2c2c] text-gray-400 cursor-pointer"
                   }`}
               >
