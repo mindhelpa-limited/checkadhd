@@ -10,7 +10,40 @@ import {
   UserCircleIcon,
   ChatBubbleBottomCenterTextIcon,
   CalendarDaysIcon,
+  ClockIcon, // The static ClockIcon is back
+  XMarkIcon,
 } from "@heroicons/react/24/solid";
+
+// Modal component for the retake reminder
+const RetakeTestModal = ({ timeLeft, onClose }) => (
+  <div className="fixed inset-0 z-50 bg-gray-950 bg-opacity-80 flex items-center justify-center p-4">
+    <div className="relative bg-gray-800 p-8 rounded-3xl shadow-2xl border border-gray-700 max-w-sm w-full animate-fade-in">
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+      >
+        <XMarkIcon className="h-6 w-6" />
+      </button>
+      <div className="text-center">
+        {/* Restored the static Heroicon clock */}
+        <ClockIcon className="h-16 w-16 text-blue-400 mx-auto mb-4" />
+
+        <h3 className="text-2xl font-bold text-white mb-2">
+          Retake Not Yet Available
+        </h3>
+        <p className="text-gray-400 mb-6">
+          You must wait 14 days between tests to ensure accurate results.
+        </p>
+        <div className="bg-gray-700 p-4 rounded-xl">
+          <p className="text-gray-400">Time remaining until retake:</p>
+          <strong className="text-2xl text-white font-bold block mt-1">
+            {timeLeft}
+          </strong>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const FullScreenLoader = ({ message }) => (
   <div className="fixed inset-0 bg-gray-950 flex items-center justify-center z-50">
@@ -43,6 +76,7 @@ export default function DashboardPage() {
   const [scoreOutOf100, setScoreOutOf100] = useState(null);
   const [retakeAvailable, setRetakeAvailable] = useState(true);
   const [timeLeft, setTimeLeft] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -107,6 +141,8 @@ export default function DashboardPage() {
   const handleTestButtonClick = () => {
     if (retakeAvailable) {
       router.push("/dashboard/adhd-test");
+    } else {
+      setShowModal(true);
     }
   };
 
@@ -119,7 +155,6 @@ export default function DashboardPage() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-indigo-500 leading-tight">
           Welcome to Your Dashboard
-          <span className="ml-3 inline-block animate-pulse">👋</span>
         </h1>
         <p className="text-gray-400 text-base md:text-lg mt-2 mb-8 md:mb-12">
           Access your results and account details below.
@@ -183,19 +218,12 @@ export default function DashboardPage() {
               Take the ADHD test to get an up-to-date assessment.
             </p>
             <div>
-              {hasTakenTest && !retakeAvailable && (
-                <div className="mb-4 text-center text-gray-400">
-                  <p>You can retake the test in:</p>
-                  <strong className="text-lg text-white font-bold">{timeLeft}</strong>
-                </div>
-              )}
               <button
                 onClick={handleTestButtonClick}
-                disabled={!retakeAvailable}
                 className={`w-full px-8 py-4 text-lg font-semibold text-white rounded-full shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-opacity-50
                   ${retakeAvailable
                     ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-2xl hover:-translate-y-1 active:scale-95 focus:ring-purple-500"
-                    : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-700 text-gray-400 cursor-pointer hover:shadow-xl active:scale-95"
                   }`}
               >
                 {hasTakenTest ? "Retake the Test" : "Take the ADHD Test"}
@@ -204,6 +232,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      {showModal && <RetakeTestModal timeLeft={timeLeft} onClose={() => setShowModal(false)} />}
     </main>
   );
 }
