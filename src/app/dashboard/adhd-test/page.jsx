@@ -1,11 +1,6 @@
-// /src/app/dashboard/adhd-test/AdhdTestPage.jsx
-
-"use client";
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import html2pdf from 'html2pdf.js';
-import styles from './assessment.module.css';
 import Report from './Report';
 import { auth, db } from "@/lib/firebase";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
@@ -91,7 +86,7 @@ const milestoneMessages = ["Keep Going!", "Great Focus!", "You're Doing Great!",
 
 
 export default function AdhdTestPage() {
-    const [step, setStep] = useState('form');
+    const [step, setStep] = useState('disclaimer');
     const [current, setCurrent] = useState(0);
     const [answers, setAnswers] = useState(() => new Array(questions.length).fill(null));
     const [userInfo, setUserInfo] = useState({ name: '', sex: '', dob: '' });
@@ -99,6 +94,16 @@ export default function AdhdTestPage() {
     const [milestoneNotification, setMilestoneNotification] = useState('');
     const [isDownloading, setIsDownloading] = useState(false);
     const [calculatedScore, setCalculatedScore] = useState(0);
+
+    const audioRef = useRef(null);
+
+    // Function to play the click sound
+    const playClickSound = () => {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0; // Rewind to the start
+        audioRef.current.play();
+      }
+    };
 
     useEffect(() => {
         const savedStateJSON = localStorage.getItem('adhdAssessmentState');
@@ -146,6 +151,8 @@ export default function AdhdTestPage() {
     };
     
     const handleAnswer = (answerIndex) => {
+        playClickSound(); // Play the sound on option click
+        
         const newAnswers = [...answers];
         newAnswers[current] = answerIndex;
         setAnswers(newAnswers);
@@ -173,6 +180,7 @@ export default function AdhdTestPage() {
 
     const handleGoBack = () => {
         if (current > 0) {
+            playClickSound(); // Play the sound on back button click
             setCurrent(current - 1);
         }
     };
@@ -212,76 +220,190 @@ export default function AdhdTestPage() {
     };
 
     return (
-        <div className={`${styles.adhdContainer} ${step === 'results' ? styles.fullWidth : ''}`}>
-            {milestoneNotification && <div className={styles.milestoneNotification}>{milestoneNotification}</div>}
-            
-            {showResumeDialog && (
-                <div className={styles.dialogOverlay} style={{display: 'flex'}}>
-                    <div className={styles.dialogBox}>
-                        <h3>Welcome Back!</h3>
-                        <p>You have an unfinished assessment. Resume or start over?</p>
-                        <div className={styles.dialogButtons}>
-                            <button onClick={handleResume} className={styles.navButton}>Resume</button>
-                            <button onClick={handleStartNew} className={styles.navButton} style={{backgroundColor: '#6b7280'}}>Start New</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+      <div className="relative min-h-screen flex items-center justify-center p-6 bg-[#0A0A0A] text-gray-200">
+        
+        {/* Audio element for the click sound */}
+        <audio ref={audioRef} src="/sounds/click.mp3" preload="auto" />
 
-            {step === 'form' && (
-                <div>
-                    <div style={{textAlign:'center', fontSize:'50px'}}>🧠</div>
-                    <h2>Personal Information</h2>
-                    <p style={{textAlign:'center'}}>Please provide your details to personalize your report.</p>
-                    <label htmlFor="name">Full Name</label>
-                    <input type="text" id="name" value={userInfo.name} onChange={(e) => setUserInfo({...userInfo, name: e.target.value})} />
-                    <label htmlFor="sex">Sex</label>
-                    <select id="sex" value={userInfo.sex} onChange={(e) => setUserInfo({...userInfo, sex: e.target.value})}>
-                        <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option>
-                    </select>
-                    <label htmlFor="dob">Date of Birth</label>
-                    <input type="date" id="dob" value={userInfo.dob} onChange={(e) => setUserInfo({...userInfo, dob: e.target.value})} />
-                    <div className={styles.infoBox}>🔐 Your personal information is used only to personalize your assessment report and is not stored on our servers.</div>
-                    <button onClick={handleStart} className={styles.navButton}>Begin ADHD Assessment</button>
-                </div>
-            )}
-
-            {step === 'quiz' && (
-                <div>
-                    <div className={styles.progressBarContainer}>
-                        <div className={styles.progressBar} style={{ width: `${((current + 1) / questions.length) * 100}%` }}>
-                            {Math.round(((current + 1) / questions.length) * 100)}%
-                        </div>
-                    </div>
-                    <h3>Question {current + 1} of {questions.length}</h3>
-                    <p style={{fontSize:'18px', fontWeight:600, textAlign:'center'}}>{questions[current]}</p>
-                    <div className={styles.optionsContainer}>
-                        {options.map((opt, idx) => (
-                            <button key={idx} className={`${styles.optionBtn} ${answers[current] === idx ? styles.selected : ''}`} onClick={() => handleAnswer(idx)}>
-                                {opt}
-                            </button>
-                        ))}
-                    </div>
-                    <div className={styles.navControls}>
-                        <button onClick={handleGoBack} className={styles.navButton} disabled={current === 0}>Back</button>
-                        <div></div>
-                    </div>
-                </div>
-            )}
-            
-            {step === 'results' && (
-                <div>
-                    <Report userInfo={userInfo} answers={answers} />
-                    <div className={styles.resultActions}>
-                        <button onClick={handleDownloadPDF} className={styles.navButton} disabled={isDownloading}>
-                            {isDownloading ? '📄 Generating PDF...' : '📄 Download Detailed Report as PDF'}
-                        </button>
-                        <button onClick={handleStartNew} className={styles.navButton} style={{backgroundColor: '#6b7280', maxWidth: '320px', marginTop:'10px'}}>
-                            🔄 Restart Assessment
-                        </button>
-                    </div>
-                </div>
-            )}
+        {/* Animated background glow effect for a premium feel */}
+        <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
+          <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
+          <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob-delay" />
         </div>
+
+        {milestoneNotification && (
+          <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[10001] bg-teal-500/80 backdrop-blur-sm text-white px-4 py-2 text-sm md:px-6 md:py-3 md:text-lg font-bold shadow-lg rounded-full animate-fade-in">
+            {milestoneNotification}
+          </div>
+        )}
+        
+        {showResumeDialog && (
+          <div className="fixed inset-0 z-50 bg-[#0A0A0A] bg-opacity-80 flex items-center justify-center p-4">
+            <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] max-w-sm w-full animate-fade-in text-center">
+              <h3 className="text-3xl font-bold text-white mb-2">Welcome Back!</h3>
+              <p className="text-gray-400 mb-6">You have an unfinished assessment. Resume or start over?</p>
+              <div className="flex flex-col space-y-4">
+                <button onClick={handleResume} className="px-8 py-3 font-semibold text-white rounded-2xl bg-teal-500 hover:bg-teal-600 transition-colors">Resume</button>
+                <button onClick={handleStartNew} className="px-8 py-3 font-semibold text-white rounded-2xl bg-gray-600 hover:bg-gray-700 transition-colors">Start New</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="relative z-10 w-full max-w-3xl">
+          {step === 'disclaimer' && (
+            <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-2xl border border-[#2c2c2c] text-center animate-fade-in">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">A Quick Note on Accuracy</h2>
+              <div className="p-6 md:p-8 bg-gray-900/50 rounded-2xl border border-gray-700 mb-8">
+                <p className="text-gray-400 text-lg leading-relaxed">
+                  You can only take this **ADHD test once every two weeks**.
+                  This helps ensure that your results are **accurate and meaningful**,
+                  reflecting a consistent period of time rather than a single moment.
+                </p>
+              </div>
+              <button onClick={() => setStep('form')} className="w-full px-8 py-4 text-lg font-semibold text-white rounded-2xl bg-teal-500 hover:bg-teal-600 transition-colors">
+                Let's Begin
+              </button>
+            </div>
+          )}
+
+          {step === 'form' && (
+            <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-2xl border border-[#2c2c2c] animate-fade-in">
+              <div className="text-center text-5xl mb-4">🧠</div>
+              <h2 className="text-3xl font-bold text-white text-center mb-2">Personal Information</h2>
+              <p className="text-gray-400 text-center mb-8">Please provide your details to personalize your report.</p>
+              
+              <div className="space-y-6">
+                <div>
+                  <label htmlFor="name" className="block text-gray-400 font-semibold mb-2">Full Name</label>
+                  <input type="text" id="name" value={userInfo.name} onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
+                    className="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
+                    placeholder="Enter your full name" />
+                </div>
+                <div>
+                  <label htmlFor="sex" className="block text-gray-400 font-semibold mb-2">Sex</label>
+                  <select id="sex" value={userInfo.sex} onChange={(e) => setUserInfo({...userInfo, sex: e.target.value})}
+                    className="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors">
+                    <option value="" className="bg-gray-900">Select</option>
+                    <option value="Male" className="bg-gray-900">Male</option>
+                    <option value="Female" className="bg-gray-900">Female</option>
+                    <option value="Other" className="bg-gray-900">Other</option>
+                    <option value="Prefer not to say" className="bg-gray-900">Prefer not to say</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="dob" className="block text-gray-400 font-semibold mb-2">Date of Birth</label>
+                  <input type="date" id="dob" value={userInfo.dob} onChange={(e) => setUserInfo({...userInfo, dob: e.target.value})}
+                    className="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors" />
+                </div>
+              </div>
+              
+              <div className="bg-gray-900/50 backdrop-blur-md p-4 rounded-xl mt-8 text-sm text-center text-gray-500">
+                🔐 Your personal information is used only to personalize your assessment report and is not stored on our servers.
+              </div>
+              <button onClick={handleStart} className="mt-8 w-full px-8 py-4 text-lg font-semibold text-white rounded-2xl bg-teal-500 hover:bg-teal-600 transition-colors">
+                Begin ADHD Assessment
+              </button>
+            </div>
+          )}
+
+          {step === 'quiz' && (
+            <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-2xl border border-[#2c2c2c] animate-fade-in">
+              <div className="h-4 bg-gray-700 rounded-full overflow-hidden mb-6">
+                <div 
+                  className="h-full bg-teal-500 rounded-full flex items-center justify-end pr-4 transition-all duration-500 ease-out" 
+                  style={{ width: `${((current + 1) / questions.length) * 100}%` }}
+                >
+                  <span className="text-white text-sm font-semibold">
+                    {Math.round(((current + 1) / questions.length) * 100)}%
+                  </span>
+                </div>
+              </div>
+              <p className="text-gray-400 text-center mb-6">
+                Question {current + 1} of {questions.length}
+              </p>
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-8 text-center">{questions[current]}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {options.map((opt, idx) => (
+                  <button key={idx} 
+                    className={`py-4 px-6 text-lg font-semibold rounded-2xl transition-all duration-200
+                      ${answers[current] === idx ? 'bg-teal-500 text-white shadow-lg' : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white'}`} 
+                    onClick={() => handleAnswer(idx)}>
+                    {opt}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-8 flex justify-start">
+                <button onClick={handleGoBack} disabled={current === 0} 
+                  className={`px-6 py-3 font-semibold rounded-2xl transition-colors
+                  ${current === 0 ? 'bg-gray-800/50 text-gray-500 cursor-not-allowed' : 'bg-gray-600 hover:bg-gray-700 text-white'}`}>
+                  Back
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {step === 'results' && (
+            <div>
+              <Report userInfo={userInfo} answers={answers} />
+              <div className="mt-8 flex flex-col items-center">
+                <button onClick={handleDownloadPDF} disabled={isDownloading} 
+                  className="w-full max-w-xs px-8 py-4 font-semibold text-white rounded-2xl bg-teal-500 hover:bg-teal-600 transition-colors">
+                  {isDownloading ? '📄 Generating PDF...' : '📄 Download Detailed Report as PDF'}
+                </button>
+                <button onClick={handleStartNew} 
+                  className="mt-4 w-full max-w-xs px-8 py-4 font-semibold text-white rounded-2xl bg-gray-600 hover:bg-gray-700 transition-colors">
+                  🔄 Restart Assessment
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <style jsx global>{`
+          @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-in { animation: fade-in 0.5s ease-out; }
+
+          @keyframes blob {
+            0% {
+              transform: translate(0px, 0px) scale(1);
+            }
+            33% {
+              transform: translate(30px, -50px) scale(1.1);
+            }
+            66% {
+              transform: translate(-20px, 20px) scale(0.9);
+            }
+            100% {
+              transform: translate(0px, 0px) scale(1);
+            }
+          }
+  
+          @keyframes blob-delay {
+            0% {
+              transform: translate(0px, 0px) scale(1);
+            }
+            33% {
+              transform: translate(-30px, 50px) scale(1.1);
+            }
+            66% {
+              transform: translate(20px, -20px) scale(0.9);
+            }
+            100% {
+              transform: translate(0px, 0px) scale(1);
+            }
+          }
+          
+          .animate-blob {
+            animation: blob 10s infinite ease-in-out;
+          }
+          .animate-blob-delay {
+            animation: blob-delay 10s infinite ease-in-out;
+          }
+        `}</style>
+      </div>
     );
 }
