@@ -10,12 +10,12 @@ import {
   UserCircleIcon,
   ChatBubbleBottomCenterTextIcon,
   CalendarDaysIcon,
-  ClockIcon, // The static ClockIcon is back
+  ClockIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 
 // Modal component for the retake reminder
-const RetakeTestModal = ({ timeLeft, onClose }) => (
+const RetakeTestModal = ({ timeLeft, onClose, onViewResults }) => (
   <div className="fixed inset-0 z-50 bg-gray-950 bg-opacity-80 flex items-center justify-center p-4">
     <div className="relative bg-gray-800 p-8 rounded-3xl shadow-2xl border border-gray-700 max-w-sm w-full animate-fade-in">
       <button
@@ -25,7 +25,6 @@ const RetakeTestModal = ({ timeLeft, onClose }) => (
         <XMarkIcon className="h-6 w-6" />
       </button>
       <div className="text-center">
-        {/* Restored the static Heroicon clock */}
         <ClockIcon className="h-16 w-16 text-blue-400 mx-auto mb-4" />
 
         <h3 className="text-2xl font-bold text-white mb-2">
@@ -34,12 +33,18 @@ const RetakeTestModal = ({ timeLeft, onClose }) => (
         <p className="text-gray-400 mb-6">
           You must wait 14 days between tests to ensure accurate results.
         </p>
-        <div className="bg-gray-700 p-4 rounded-xl">
+        <div className="bg-gray-700 p-4 rounded-xl mb-4">
           <p className="text-gray-400">Time remaining until retake:</p>
           <strong className="text-2xl text-white font-bold block mt-1">
             {timeLeft}
           </strong>
         </div>
+        <button
+          onClick={onViewResults}
+          className="w-full px-8 py-3 text-sm font-semibold text-white rounded-full bg-blue-500 hover:bg-blue-600 transition-colors"
+        >
+          View Current Result
+        </button>
       </div>
     </div>
   </div>
@@ -146,6 +151,12 @@ export default function DashboardPage() {
     }
   };
 
+  const handleViewResultsClick = () => {
+    // Navigates to the Report page with the corrected lowercase path
+    router.push("/dashboard/adhd-test/report");
+    setShowModal(false);
+  };
+
   if (loading) {
     return <FullScreenLoader message={loadingMessage} />;
   }
@@ -232,7 +243,13 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      {showModal && <RetakeTestModal timeLeft={timeLeft} onClose={() => setShowModal(false)} />}
+      {showModal && (
+        <RetakeTestModal
+          timeLeft={timeLeft}
+          onClose={() => setShowModal(false)}
+          onViewResults={handleViewResultsClick}
+        />
+      )}
     </main>
   );
 }
