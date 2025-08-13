@@ -182,6 +182,7 @@ export default function AdhdTestPage() {
 
     const handleGoBack = () => {
         if (current > 0) {
+            playClickSound();
             setCurrent(current - 1);
         }
     };
@@ -228,30 +229,30 @@ export default function AdhdTestPage() {
 
         {/* Animated background glow effect for a premium feel */}
         <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
-          <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
-          <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob-delay" />
+          <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
+          <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob-delay" />
         </div>
 
         {milestoneNotification && (
-          <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[10001] bg-teal-500/80 backdrop-blur-sm text-white px-4 py-2 text-sm md:px-6 md:py-3 md:text-lg font-bold shadow-lg rounded-full animate-fade-in">
+          <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[10001] bg-blue-500/80 backdrop-blur-sm text-white px-4 py-2 text-sm md:px-6 md:py-3 md:text-lg font-bold shadow-lg rounded-full animate-fade-in">
             {milestoneNotification}
           </div>
         )}
         
         {showResumeDialog && (
           <div className="fixed inset-0 z-50 bg-[#0A0A0A] bg-opacity-80 flex items-center justify-center p-4">
-            <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] max-w-sm w-full animate-fade-in text-center">
+            <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] max-w-md w-full animate-fade-in text-center">
               <h3 className="text-3xl font-bold text-white mb-2">Welcome Back!</h3>
               <p className="text-gray-400 mb-6">You have an unfinished assessment. Resume or start over?</p>
               <div className="flex flex-col space-y-4">
-                <button onClick={handleResume} className="px-8 py-3 font-semibold text-white rounded-2xl bg-teal-500 hover:bg-teal-600 transition-colors">Resume</button>
+                <button onClick={handleResume} className="px-8 py-3 font-semibold text-white rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors">Resume</button>
                 <button onClick={handleStartNew} className="px-8 py-3 font-semibold text-white rounded-2xl bg-gray-600 hover:bg-gray-700 transition-colors">Start New</button>
               </div>
             </div>
           </div>
         )}
 
-        <div className="relative z-10 w-full max-w-3xl">
+        <div className="relative z-10 w-full max-w-2xl">
           {step === 'disclaimer' && (
             <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-2xl border border-[#2c2c2c] text-center animate-fade-in">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">A Quick Note on Accuracy</h2>
@@ -262,7 +263,7 @@ export default function AdhdTestPage() {
                   reflecting a consistent period of time rather than a single moment.
                 </p>
               </div>
-              <button onClick={() => setStep('form')} className="w-full px-8 py-4 text-lg font-semibold text-white rounded-2xl bg-teal-500 hover:bg-teal-600 transition-colors">
+              <button onClick={() => setStep('form')} className="w-full px-8 py-4 text-lg font-semibold text-white rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors">
                 Let's Begin
               </button>
             </div>
@@ -278,13 +279,13 @@ export default function AdhdTestPage() {
                 <div>
                   <label htmlFor="name" className="block text-gray-400 font-semibold mb-2">Full Name</label>
                   <input type="text" id="name" value={userInfo.name} onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
-                    className="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
+                    className="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                     placeholder="Enter your full name" />
                 </div>
                 <div>
                   <label htmlFor="sex" className="block text-gray-400 font-semibold mb-2">Sex</label>
                   <select id="sex" value={userInfo.sex} onChange={(e) => setUserInfo({...userInfo, sex: e.target.value})}
-                    className="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors">
+                    className="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
                     <option value="" className="bg-gray-900">Select</option>
                     <option value="Male" className="bg-gray-900">Male</option>
                     <option value="Female" className="bg-gray-900">Female</option>
@@ -295,14 +296,14 @@ export default function AdhdTestPage() {
                 <div>
                   <label htmlFor="dob" className="block text-gray-400 font-semibold mb-2">Date of Birth</label>
                   <input type="date" id="dob" value={userInfo.dob} onChange={(e) => setUserInfo({...userInfo, dob: e.target.value})}
-                    className="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors" />
+                    className="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" />
                 </div>
               </div>
               
               <div className="bg-gray-900/50 backdrop-blur-md p-4 rounded-xl mt-8 text-sm text-center text-gray-500">
                 🔐 Your personal information is used only to personalize your assessment report and is not stored on our servers.
               </div>
-              <button onClick={handleStart} className="mt-8 w-full px-8 py-4 text-lg font-semibold text-white rounded-2xl bg-teal-500 hover:bg-teal-600 transition-colors">
+              <button onClick={handleStart} className="mt-8 w-full px-8 py-4 text-lg font-semibold text-white rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors">
                 Begin ADHD Assessment
               </button>
             </div>
@@ -312,7 +313,7 @@ export default function AdhdTestPage() {
             <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-2xl border border-[#2c2c2c] animate-fade-in">
               <div className="h-4 bg-gray-700 rounded-full overflow-hidden mb-6">
                 <div 
-                  className="h-full bg-teal-500 rounded-full flex items-center justify-end pr-4 transition-all duration-500 ease-out" 
+                  className="h-full bg-blue-500 rounded-full flex items-center justify-end pr-4 transition-all duration-500 ease-out" 
                   style={{ width: `${((current + 1) / questions.length) * 100}%` }}
                 >
                   <span className="text-white text-sm font-semibold">
@@ -328,7 +329,7 @@ export default function AdhdTestPage() {
                 {options.map((opt, idx) => (
                   <button key={idx} 
                     className={`py-4 px-6 text-lg font-semibold rounded-2xl transition-all duration-200
-                      ${answers[current] === idx ? 'bg-teal-500 text-white shadow-lg' : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white'}`} 
+                      ${answers[current] === idx ? 'bg-blue-500 text-white shadow-lg' : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white'}`} 
                     onClick={() => handleAnswer(idx)}>
                     {opt}
                   </button>
@@ -349,7 +350,7 @@ export default function AdhdTestPage() {
               <Report userInfo={userInfo} answers={answers} />
               <div className="mt-8 flex flex-col items-center">
                 <button onClick={handleDownloadPDF} disabled={isDownloading} 
-                  className="w-full max-w-xs px-8 py-4 font-semibold text-white rounded-2xl bg-teal-500 hover:bg-teal-600 transition-colors">
+                  className="w-full max-w-xs px-8 py-4 font-semibold text-white rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors">
                   {isDownloading ? '📄 Generating PDF...' : '📄 Download Detailed Report as PDF'}
                 </button>
                 <button onClick={handleStartNew} 
