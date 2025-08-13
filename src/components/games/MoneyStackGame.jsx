@@ -4,11 +4,11 @@ import { ChevronLeft, ChevronRight, RotateCcw, ChevronDown, Music, XCircle } fro
 import * as Tone from 'tone';
 
 // Game constants
-const COLS = 10;
+const COLS = 15;
 const ROWS = 20;
 const INITIAL_SPEED = 600; // milliseconds
 
-// Define the shapes of the money stacks (Tetris-style)
+// Define the shapes of the pieces (Tetris-style)
 // I, L, J, T, S, Z, O
 const SHAPES = [
   // I-Stack
@@ -27,7 +27,7 @@ const SHAPES = [
   [[1, 1, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
 ];
 
-const MoneyStackGame = ({ onNext, duration }) => {
+const Game = ({ onNext, duration }) => {
   const [board, setBoard] = useState(
     Array.from({ length: ROWS }, () => Array(COLS).fill(0))
   );
@@ -48,35 +48,28 @@ const MoneyStackGame = ({ onNext, duration }) => {
   // Initialize Tone.js players and start background music automatically
   useEffect(() => {
     const initializeAudio = async () => {
-      // Await Tone.start() to ensure audio context is active
       await Tone.start();
       
-      // Create and load player for the placement sound (moneysound.mp3)
       placementSoundPlayer.current = new Tone.Player("/moneysound.mp3", () => {
-        // This callback runs when the buffer is loaded.
         console.log("Placement sound loaded.");
       }).toDestination();
       
-      // Create and load player for the background music (meditation.mp3)
       backgroundMusicPlayer.current = new Tone.Player("/meditation.mp3", () => {
-        // This callback runs when the music buffer is loaded.
         backgroundMusicPlayer.current.loop = true;
-        backgroundMusicPlayer.current.volume.value = -10; // Set a lower volume for background music
+        backgroundMusicPlayer.current.volume.value = -10;
         console.log("Background music loaded.");
-        setIsAudioLoaded(true); // Now we know the audio is ready
+        setIsAudioLoaded(true);
       }).toDestination();
     };
 
     initializeAudio();
 
-    // Cleanup function to dispose of the players
     return () => {
       if (placementSoundPlayer.current) placementSoundPlayer.current.dispose();
       if (backgroundMusicPlayer.current) backgroundMusicPlayer.current.dispose();
     };
   }, []);
 
-  // New useEffect to start the music once the audio is loaded
   useEffect(() => {
     if (isAudioLoaded) {
       backgroundMusicPlayer.current.start();
@@ -84,20 +77,15 @@ const MoneyStackGame = ({ onNext, duration }) => {
     }
   }, [isAudioLoaded]);
 
-  // Function to play the piece placement sound (moneysound.mp3)
   const playPlacementSound = async () => {
     await Tone.start();
-    // Check if the player is ready before attempting to play
     if (placementSoundPlayer.current && placementSoundPlayer.current.loaded) {
-      // Start the sound from the beginning each time, playing it once
       placementSoundPlayer.current.start();
     }
   };
 
-  // Function to toggle background music
   const toggleBackgroundMusic = async () => {
     await Tone.start();
-    // Check if the player is ready before attempting to toggle
     if (backgroundMusicPlayer.current && backgroundMusicPlayer.current.loaded) {
       if (isMusicPlaying) {
         backgroundMusicPlayer.current.stop();
@@ -109,11 +97,9 @@ const MoneyStackGame = ({ onNext, duration }) => {
     }
   };
 
-
   // Timer Effect to handle the countdown
   useEffect(() => {
     if (timeLeft <= 0) {
-      // Stop music only if the player is loaded and playing
       if (isMusicPlaying && backgroundMusicPlayer.current && backgroundMusicPlayer.current.loaded) {
         backgroundMusicPlayer.current.stop();
       }
@@ -162,7 +148,6 @@ const MoneyStackGame = ({ onNext, duration }) => {
   const placePiece = useCallback(() => {
     if (!currentPiece) return;
 
-    // Play placement sound (moneysound.mp3)
     playPlacementSound();
 
     setBoard(prevBoard => {
@@ -173,7 +158,7 @@ const MoneyStackGame = ({ onNext, duration }) => {
             const boardRow = currentPiece.y + row;
             const boardCol = currentPiece.x + col;
             if (boardRow >= 0 && boardRow < ROWS && boardCol >= 0 && boardCol < COLS) {
-              newBoard[boardRow][boardCol] = 1; // Mark as occupied
+              newBoard[boardRow][boardCol] = 1;
             }
           }
         }
@@ -181,20 +166,17 @@ const MoneyStackGame = ({ onNext, duration }) => {
       return newBoard;
     });
 
-    // Check for full rows and clear them
     setBoard(prevBoard => {
       const newBoard = prevBoard.filter(row => !row.every(cell => cell !== 0));
       const clearedRowsCount = ROWS - newBoard.length;
       if (clearedRowsCount > 0) {
-        // We will not add line clear sound here, as per your request to only add money sound
         setScore(prevScore => prevScore + clearedRowsCount * 100);
         const emptyRows = Array.from({ length: clearedRowsCount }, () => Array(COLS).fill(0));
         return [...emptyRows, ...newBoard];
       }
-      return prevBoard; // Return original board if no rows cleared
+      return prevBoard;
     });
 
-    // Move to the next piece. If the next piece cannot be placed, clear the board and continue.
     const next = nextPiece;
     if (!isValidMove(next, board)) {
       setBoard(Array.from({ length: ROWS }, () => Array(COLS).fill(0)));
@@ -203,7 +185,6 @@ const MoneyStackGame = ({ onNext, duration }) => {
     setNextPiece(generateNewPiece());
   }, [currentPiece, board, isValidMove, nextPiece, generateNewPiece, playPlacementSound]);
 
-  // Handle piece movement (downward gravity)
   const moveDown = useCallback(() => {
     if (!currentPiece) return;
 
@@ -215,10 +196,9 @@ const MoneyStackGame = ({ onNext, duration }) => {
     }
   }, [currentPiece, board, isValidMove, placePiece]);
 
-  // Handle a user's action via keyboard or touch controls
   const handlePlayerAction = useCallback((action) => {
     if (!currentPiece) return;
-  
+    
     let newPieceState = { ...currentPiece };
     switch (action) {
       case 'ArrowLeft':
@@ -232,16 +212,15 @@ const MoneyStackGame = ({ onNext, duration }) => {
       case 'ArrowDown':
       case 'down':
         moveDown();
-        return; // The moveDown function already handles updating the state.
+        return;
       case 'ArrowUp':
       case 'rotate':
-        // Rotate the piece
         const rotatedShape = newPieceState.shape[0].map((_, colIndex) =>
           newPieceState.shape.map(row => row[colIndex]).reverse()
         );
         newPieceState.shape = rotatedShape;
         break;
-      case ' ': // Hard drop
+      case ' ':
       case 'hardDrop':
         let dropPiece = { ...currentPiece };
         while (isValidMove({ ...dropPiece, y: dropPiece.y + 1 }, board)) {
@@ -249,18 +228,16 @@ const MoneyStackGame = ({ onNext, duration }) => {
         }
         setCurrentPiece(dropPiece);
         placePiece();
-        return; // The placePiece function already handles updating the state.
+        return;
       default:
-        return; // Do nothing for other keys/actions
+        return;
     }
-  
+    
     if (isValidMove(newPieceState, board)) {
       setCurrentPiece(newPieceState);
     }
   }, [currentPiece, board, isValidMove, placePiece, moveDown]);
   
-
-  // Game loop for falling pieces
   useEffect(() => {
     if (timeLeft > 0) {
       const interval = setInterval(moveDown, gameSpeed);
@@ -268,13 +245,11 @@ const MoneyStackGame = ({ onNext, duration }) => {
     }
   }, [moveDown, gameSpeed, timeLeft]);
 
-  // Initial setup of the game
   useEffect(() => {
     if (!currentPiece) {
       setCurrentPiece(generateNewPiece());
       setNextPiece(generateNewPiece());
     }
-    // Handle keyboard input
     const handleKeyDown = (e) => {
       handlePlayerAction(e.key);
     };
@@ -290,7 +265,6 @@ const MoneyStackGame = ({ onNext, duration }) => {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Render the game board and current piece
   const renderBoard = () => {
     const combinedBoard = [...board.map(row => [...row])];
     if (currentPiece) {
@@ -324,20 +298,21 @@ const MoneyStackGame = ({ onNext, duration }) => {
     ));
   };
   
-  // Render the next piece preview
   const renderNextPiece = () => {
     if (!nextPiece) return null;
+    // Get the first two rows of the next piece's shape
+    const shapeToRender = nextPiece.shape.slice(0, 2);
     return (
-      <div className="p-2 border-2 border-green-500 bg-gray-950 shadow-inner rounded-md">
-        {nextPiece.shape.map((row, rowIndex) => (
+      <div className="p-0 border-0 border-green-500 bg-gray-950 shadow-inner rounded-md">
+        {shapeToRender.map((row, rowIndex) => (
           <div key={rowIndex} className="flex">
             {row.map((cell, colIndex) => (
               <div
                 key={colIndex}
-                className={`w-4 h-4 p-0.5 border border-gray-800 ${cell === 0 ? 'bg-transparent' : 'bg-gradient-to-br from-green-300 via-green-400 to-green-500 shadow-md rotate-3'}`}
+                className={`w-1.5 h-1.5 border border-gray-800 ${cell === 0 ? 'bg-transparent' : 'bg-gradient-to-br from-green-300 via-green-400 to-green-500 shadow-md rotate-3'}`}
               >
                 {cell !== 0 && (
-                  <div className="w-full h-full bg-green-400 rounded-sm shadow-inner flex items-center justify-center text-xs font-bold text-gray-800">
+                  <div className="w-full h-full bg-green-400 rounded-sm shadow-inner flex items-center justify-center text-[6px] font-bold text-gray-800">
                     $
                   </div>
                 )}
@@ -350,96 +325,88 @@ const MoneyStackGame = ({ onNext, duration }) => {
   };
   
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-950 text-gray-200 p-4 font-sans antialiased bg-cover bg-center"
+    <div className="flex flex-col min-h-screen bg-gray-950 text-gray-200 font-sans antialiased bg-cover bg-center"
       style={{ backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url(https://images.unsplash.com/photo-1590283603417-106b0d9129d2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80)' }}
     >
-      <div className="max-w-4xl w-full bg-gray-900 bg-opacity-80 backdrop-filter backdrop-blur-sm rounded-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] border-2 border-gray-700 p-8 space-y-8 animate-fade-in-up flex flex-col lg:flex-row items-center lg:items-start lg:justify-between">
-
-        <button
-          onClick={toggleBackgroundMusic}
-          className="absolute top-4 right-4 p-3 bg-gray-800 text-green-400 rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
-          aria-label={isMusicPlaying ? "Pause music" : "Play music"}
-        >
-          {isMusicPlaying ? <Music className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
-        </button>
-        
-        {/* Mobile Stats and Next Piece - visible on small screens */}
-        <div className="flex lg:hidden w-full justify-between items-center px-4 py-2 bg-gray-800 rounded-xl shadow-[0_10px_20px_rgba(0,0,0,0.2)] border border-gray-700 mb-4">
-          <div className="flex-1 text-center">
-            <h2 className="text-xl font-semibold text-green-300 drop-shadow">Money Stacked</h2>
-            <span className="text-2xl font-bold text-white">${score}</span>
-          </div>
-          <div className="flex-1 text-center">
-            <h2 className="text-xl font-semibold text-green-300 drop-shadow">Time</h2>
-            <span className="text-2xl font-bold text-white">{formatTime(timeLeft)}</span>
-          </div>
-          <div className="flex-1 text-center">
-            <h2 className="text-xl font-semibold text-green-300 drop-shadow">Next</h2>
-            <div className="flex justify-center">
-              {renderNextPiece()}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center w-full lg:w-auto">
-          <h1 className="text-4xl font-bold text-green-400 text-center tracking-wider drop-shadow-md mb-4 lg:hidden">Stacking Money</h1>
-          
-          <div className="relative border-4 border-green-500 p-1 bg-gray-950 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)] rounded-md overflow-hidden">
-            {renderBoard()}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="text-gray-800 opacity-20 text-9xl font-extrabold tracking-tighter">$$$</span>
-            </div>
-          </div>
-          
-          {/* Mobile Controls */}
-          <div className="lg:hidden w-full flex justify-between items-center mt-6 p-4">
+      <div className="flex-grow flex flex-col items-center justify-start pt-0 pb-0 w-full">
+        <div className="w-full p-2">
+          {/* HORIZONTAL HEADER */}
+          <div className="flex items-center justify-between py-1 px-2 bg-gray-900 bg-opacity-80 backdrop-filter backdrop-blur-sm rounded-md shadow-lg border-2 border-gray-700 w-full">
             <button
-              onClick={() => handlePlayerAction('left')}
-              className="p-4 bg-gradient-to-r from-gray-700 to-gray-800 text-green-400 rounded-full shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
+              onClick={toggleBackgroundMusic}
+              className="p-1 bg-gray-800 text-green-400 rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
+              aria-label={isMusicPlaying ? "Pause music" : "Play music"}
             >
-              <ChevronLeft className="w-8 h-8" />
+              {isMusicPlaying ? <Music className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
             </button>
-            <div className="flex flex-col items-center gap-2">
-              <button
-                onClick={() => handlePlayerAction('rotate')}
-                className="p-4 bg-gradient-to-r from-gray-700 to-gray-800 text-green-400 rounded-full shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
-              >
-                <RotateCcw className="w-8 h-8" />
-              </button>
-              <button
-                onClick={() => handlePlayerAction('down')}
-                className="p-4 bg-gradient-to-r from-gray-700 to-gray-800 text-green-400 rounded-full shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
-              >
-                <ChevronDown className="w-8 h-8" />
-              </button>
+            
+            <div className="flex-grow flex items-center justify-center space-x-2">
+              <span className="text-xs font-semibold text-green-300 drop-shadow">Cash:</span>
+              <span className="text-sm font-bold text-white">${score}</span>
+              <span className="text-xs font-semibold text-green-300 drop-shadow ml-4">Time:</span>
+              <span className="text-sm font-bold text-white">{formatTime(timeLeft)}</span>
             </div>
+            
+            <div className="flex items-center space-x-2">
+              {/* NEXT piece and label are now side-by-side */}
+              <h2 className="text-[8px] font-semibold text-green-300 drop-shadow">NEXT</h2>
+              <div className="flex justify-center p-0.5">
+                {renderNextPiece()}
+              </div>
+              <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white font-bold border-2 border-white">
+                N
+              </div>
+            </div>
+          </div>
+          {/* END OF HORIZONTAL HEADER */}
+        </div>
+        
+        <div className="relative border-4 border-green-500 p-1 bg-gray-950 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)] rounded-md overflow-hidden mt-1 w-full flex-grow items-center justify-center">
+          {renderBoard()}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span className="text-gray-800 opacity-20 text-9xl font-extrabold tracking-tighter">$$$</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="fixed bottom-0 left-0 w-full flex justify-center z-20">
+        <div className="flex items-center justify-center gap-3 py-2 px-6 bg-gray-900 bg-opacity-80 backdrop-filter backdrop-blur-sm rounded-t-[30px] shadow-2xl border-t border-gray-700 w-full">
+          <button
+            onClick={() => handlePlayerAction('left')}
+            className="p-1.5 bg-gradient-to-r from-gray-700 to-gray-800 text-green-400 rounded-full shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
+            aria-label="Move left"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+  
+          <div className="flex items-center gap-1">
             <button
-              onClick={() => handlePlayerAction('right')}
-              className="p-4 bg-gradient-to-r from-gray-700 to-gray-800 text-green-400 rounded-full shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
+              onClick={() => handlePlayerAction('rotate')}
+              className="p-1.5 bg-gradient-to-r from-gray-700 to-gray-800 text-green-400 rounded-full shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
+              aria-label="Rotate piece"
             >
-              <ChevronRight className="w-8 h-8" />
+              <RotateCcw className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handlePlayerAction('down')}
+              className="p-1.5 bg-gradient-to-r from-gray-700 to-gray-800 text-green-400 rounded-full shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
+              aria-label="Soft drop"
+            >
+              <ChevronDown className="w-4 h-4" />
             </button>
           </div>
+  
+          <button
+            onClick={() => handlePlayerAction('right')}
+            className="p-1.5 bg-gradient-to-r from-gray-700 to-gray-800 text-green-400 rounded-full shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
+            aria-label="Move right"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
-        
-        {/* Desktop Stats and Next Piece - visible on large screens */}
-        <div className="hidden lg:flex w-full lg:w-1/3 flex-col items-center lg:items-start space-y-8 mt-8 lg:mt-0">
-          <div className="w-full bg-gray-800 rounded-xl p-4 shadow-[0_10px_20px_rgba(0,0,0,0.2)] border border-gray-700">
-            <h2 className="text-2xl font-semibold text-green-300 mb-2 drop-shadow">Game Stats</h2>
-            <div className="text-xl font-medium text-gray-300">
-              <span className="block mb-1">Money Stacked: <span className="font-bold text-white">${score}</span></span>
-              <span className="block">Time: <span className="font-bold text-white">{formatTime(timeLeft)}</span></span>
-            </div>
-          </div>
-          <div className="w-full bg-gray-800 rounded-xl p-4 shadow-[0_10px_20px_rgba(0,0,0,0.2)] border border-gray-700">
-            <h2 className="text-2xl font-semibold text-green-300 mb-2 drop-shadow">Next Stack</h2>
-            {renderNextPiece()}
-          </div>
-        </div>
-        
       </div>
     </div>
   );
 };
 
-export default MoneyStackGame;
+export default Game;
