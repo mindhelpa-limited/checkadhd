@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import html2pdf from 'html2pdf.js';
@@ -180,7 +182,6 @@ export default function AdhdTestPage() {
 
     const handleGoBack = () => {
         if (current > 0) {
-            playClickSound(); // Play the sound on back button click
             setCurrent(current - 1);
         }
     };
