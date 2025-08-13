@@ -37,7 +37,7 @@ const Game = ({ onNext, duration }) => {
   const [gameSpeed] = useState(INITIAL_SPEED);
   const [timeLeft, setTimeLeft] = useState(duration / 1000); // Time in seconds
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  
+ 
   // New state to track if audio is loaded
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
 
@@ -49,11 +49,11 @@ const Game = ({ onNext, duration }) => {
   useEffect(() => {
     const initializeAudio = async () => {
       await Tone.start();
-      
+     
       placementSoundPlayer.current = new Tone.Player("/moneysound.mp3", () => {
         console.log("Placement sound loaded.");
       }).toDestination();
-      
+     
       backgroundMusicPlayer.current = new Tone.Player("/meditation.mp3", () => {
         backgroundMusicPlayer.current.loop = true;
         backgroundMusicPlayer.current.volume.value = -10;
@@ -198,7 +198,7 @@ const Game = ({ onNext, duration }) => {
 
   const handlePlayerAction = useCallback((action) => {
     if (!currentPiece) return;
-    
+   
     let newPieceState = { ...currentPiece };
     switch (action) {
       case 'ArrowLeft':
@@ -232,12 +232,12 @@ const Game = ({ onNext, duration }) => {
       default:
         return;
     }
-    
+   
     if (isValidMove(newPieceState, board)) {
       setCurrentPiece(newPieceState);
     }
   }, [currentPiece, board, isValidMove, placePiece, moveDown]);
-  
+ 
   useEffect(() => {
     if (timeLeft > 0) {
       const interval = setInterval(moveDown, gameSpeed);
@@ -297,7 +297,7 @@ const Game = ({ onNext, duration }) => {
       </div>
     ));
   };
-  
+ 
   const renderNextPiece = () => {
     if (!nextPiece) return null;
     // Get the first two rows of the next piece's shape
@@ -323,7 +323,7 @@ const Game = ({ onNext, duration }) => {
       </div>
     );
   };
-  
+ 
   return (
     <div className="flex flex-col min-h-screen bg-gray-950 text-gray-200 font-sans antialiased bg-cover bg-center"
       style={{ backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url(https://images.unsplash.com/photo-1590283603417-106b0d9129d2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80)' }}
@@ -339,14 +339,14 @@ const Game = ({ onNext, duration }) => {
             >
               {isMusicPlaying ? <Music className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
             </button>
-            
+           
             <div className="flex-grow flex items-center justify-center space-x-2">
               <span className="text-xs font-semibold text-green-300 drop-shadow">Cash:</span>
               <span className="text-sm font-bold text-white">${score}</span>
               <span className="text-xs font-semibold text-green-300 drop-shadow ml-4">Time:</span>
               <span className="text-sm font-bold text-white">{formatTime(timeLeft)}</span>
             </div>
-            
+           
             <div className="flex items-center space-x-2">
               {/* NEXT piece and label are now side-by-side */}
               <h2 className="text-[8px] font-semibold text-green-300 drop-shadow">NEXT</h2>
@@ -360,7 +360,7 @@ const Game = ({ onNext, duration }) => {
           </div>
           {/* END OF HORIZONTAL HEADER */}
         </div>
-        
+       
         <div className="relative border-4 border-green-500 p-1 bg-gray-950 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)] rounded-md overflow-hidden mt-1 w-full flex-grow items-center justify-center">
           {renderBoard()}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -368,7 +368,7 @@ const Game = ({ onNext, duration }) => {
           </div>
         </div>
       </div>
-      
+     
       <div className="fixed bottom-0 left-0 w-full flex justify-center z-20">
         <div className="flex items-center justify-center gap-3 py-2 px-6 bg-gray-900 bg-opacity-80 backdrop-filter backdrop-blur-sm rounded-t-[30px] shadow-2xl border-t border-gray-700 w-full">
           <button
@@ -378,7 +378,7 @@ const Game = ({ onNext, duration }) => {
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-  
+ 
           <div className="flex items-center gap-1">
             <button
               onClick={() => handlePlayerAction('rotate')}
@@ -395,7 +395,7 @@ const Game = ({ onNext, duration }) => {
               <ChevronDown className="w-4 h-4" />
             </button>
           </div>
-  
+ 
           <button
             onClick={() => handlePlayerAction('right')}
             className="p-1.5 bg-gradient-to-r from-gray-700 to-gray-800 text-green-400 rounded-full shadow-xl transform hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
