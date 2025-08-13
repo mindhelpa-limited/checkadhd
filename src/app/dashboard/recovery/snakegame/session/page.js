@@ -1,98 +1,76 @@
 'use client';
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 
-// Import the components for each session level with corrected paths
-import SnakeGame from "../../../../../components/games/SnakeGame";
+// Session enforcement wrapper (from your hook file)
+import { GameSessionLayout } from "@/hook/useGameSessionManager";
+
+// Your session flow components
 import MeditationScreen from "../../../../../components/session/MeditationScreen";
+import SnakeGame from "../../../../../components/games/SnakeGame";
 import RehydrationBreakScreen from "../../../../../components/session/RehydrationBreakScreen";
+import ExerciseBreak from "../../../../../components/session/ExerciseBreak";
 import ScoreScreen from "../../../../../components/session/ScoreScreen";
 
-// Define the structure of the session, similar to the Blockstack session
-const LEVELS = [
-  {
-    id: 1,
-    title: "Meditate",
-    subtitle: "Focus and get ready.",
-    type: "meditation",
-    duration: "5 mins",
-  },
-  {
-    id: 2,
-    title: "Stack Big",
-    subtitle: "Deep focus session.",
-    type: "game",
-    duration: "7 mins",
-  },
-  {
-    id: 3,
-    title: "Rehydrate Fast",
-    "subtitle": "Rehydration break.",
-    type: "break",
-    duration: "2 mins",
-  },
-  {
-    id: 4,
-    title: "Stack Higher",
-    subtitle: "Stay sharp.",
-    type: "game",
-    duration: "7 mins",
-  },
-  {
-    id: 5,
-    title: "Meditate",
-    subtitle: "Relax. Get centered.",
-    type: "meditation",
-    duration: "5 mins",
-  },
-  {
-    id: 6,
-    title: "Stack Max",
-    subtitle: "Let’s finish strong.",
-    type: "game",
-    duration: "7 mins",
-  },
+// Define stages (kept from your original)
+const STAGES = [
+  { id: 'meditation', component: MeditationScreen, duration: 5 * 60 * 1000 },
+  { id: 'game1', component: SnakeGame, duration: 7 * 60 * 1000 },
+  { id: 'rehydration', component: RehydrationBreakScreen, duration: 2 * 60 * 1000 },
+  { id: 'game2', component: SnakeGame, duration: 7 * 60 * 1000 },
+  { id: 'exercise', component: ExerciseBreak, duration: 2 * 60 * 1000 },
+  { id: 'game3', component: SnakeGame, duration: 7 * 60 * 1000 },
+  { id: 'score', component: ScoreScreen, duration: null },
 ];
 
 export default function SnakeSessionPage() {
-  const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
-  const [sessionScores, setSessionScores] = useState([]);
-  
-  // This function is passed to each component to handle the transition to the next level.
-  const handleNext = (gameData) => {
-    // If gameData is provided (from a game component), save the score
-    if (gameData && gameData.totalScore !== undefined) {
-      setSessionScores(prevScores => [...prevScores, gameData.totalScore]);
+  const [currentStageIndex, setCurrentStageIndex] = useState(0);
+  const [sessionData, setSessionData] = useState({
+    score: 0,
+    segmentScores: { game1: 0, game2: 0, game3: 0 },
+  });
+  const [totalScore, setTotalScore] = useState(0);
+  const [totalTime, setTotalTime] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [highestStreak, setHighestStreak] = useState(0);
+
+  const handleNextStage = (updatedState = {}) => {
+    const prevStage = STAGES[currentStageIndex];
+    const prevStageId = prevStage.id;
+    const prevStageDuration = prevStage.duration;
+
+    if (prevStageId.includes('game')) {
+      const newScoreForSegment = (updatedState.score ?? 0) - sessionData.score;
+      setSessionData(prev => ({
+        ...prev,
+        ...updatedState,
+        segmentScores: { ...prev.segmentScores, [prevStageId]: newScoreForSegment },
+      }));
+      setTotalScore(prev => prev + newScoreForSegment);
+      setTotalTime(prev => prev + (prevStageDuration || 0));
+      setCurrentStreak(s => (newScoreForSegment > 500 ? s + 1 : 0));
+      setHighestStreak(h => Math.max(h, currentStreak));
     }
-    setCurrentLevelIndex(prevIndex => prevIndex + 1);
+
+    if (currentStageIndex < STAGES.length - 1) {
+      setCurrentStageIndex(i => i + 1);
+    }
   };
 
-  const renderComponent = () => {
-    // Check if the session is complete
-    if (currentLevelIndex >= LEVELS.length) {
-      return <ScoreScreen sessionScores={sessionScores} onNext={() => setCurrentLevelIndex(0)} />;
-    }
+  const CurrentComponent = STAGES[currentStageIndex].component;
+  const isGameStage = STAGES[currentStageIndex].id.includes('game');
+  const isScoreStage = STAGES[currentStageIndex].id === 'score';
 
-    const currentLevel = LEVELS[currentLevelIndex];
-
-    switch (currentLevel.type) {
-      case "game":
-        return <SnakeGame onFinish={handleNext} />;
-      case "meditation":
-        return <MeditationScreen onNext={handleNext} />;
-      case "break":
-        return <RehydrationBreakScreen onNext={handleNext} />;
-      default:
-        return <div>Loading...</div>;
-    }
-  };
+  const scoreScreenProps = useMemo(() => (
+    isScoreStage ? { totalScore, highestStreak, totalTime } : {}
+  ), [isScoreStage, totalScore, highestStreak, totalTime]);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white flex flex-col relative font-mono">
-      {/* Back button link */}
+    <GameSessionLayout gameName="snakegame">
+      {/* Back button */}
       <Link href="/dashboard/recovery/snakegame">
         <motion.button
           initial={{ scale: 0 }}
@@ -105,8 +83,32 @@ export default function SnakeSessionPage() {
       </Link>
 
       <AnimatePresence mode="wait">
-        {renderComponent()}
+        <motion.div
+          key={currentStageIndex}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.5 }}
+          className="h-full w-full"
+        >
+          {isGameStage ? (
+            <CurrentComponent
+              onFinish={handleNextStage}
+              initialState={{ score: sessionData.score }}
+              duration={STAGES[currentStageIndex].duration}
+              title={`Snake Session ${currentStageIndex / 2 + 1}`}
+            />
+          ) : isScoreStage ? (
+            <ScoreScreen {...scoreScreenProps} />
+          ) : (
+            <CurrentComponent
+              onNext={handleNextStage}
+              sessionScores={sessionData.segmentScores}
+              title={STAGES[currentStageIndex].id}
+            />
+          )}
+        </motion.div>
       </AnimatePresence>
-    </div>
+    </GameSessionLayout>
   );
 }

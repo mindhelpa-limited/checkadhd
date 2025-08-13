@@ -108,7 +108,7 @@ export default function App() {
     const [showPopup, setShowPopup] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [isMusicPlaying, setIsMusicPlaying] = useState(true);
-    const [isPremiumUser, setIsPremiumUser] = useState(true);
+    const [isPremiumUser, setIsPremiumUser] = useState(true); 
     const [lotteryCounter, setLotteryCounter] = useState(1000000);
     const [countdown, setCountdown] = useState(null);
 
@@ -206,16 +206,15 @@ export default function App() {
             <audio ref={countdownSoundRef} src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-bleep-967.mp3" />
 
             <div className="absolute top-0 left-0 right-0 p-8 z-20 flex justify-between items-center bg-transparent">
-                <motion.a
-                    href="#"
+                <motion.button
+                    onClick={() => router.back()}
                     initial={{ x: -100 }}
                     animate={{ x: 0 }}
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
                     className="p-3 rounded-full bg-gray-800 border-2 border-cyan-500 hover:bg-gray-700 transition-all shadow-lg"
-                    onClick={() => console.log("Simulating back navigation...")}
                 >
                     <ChevronLeft className="w-5 h-5 text-white" />
-                </motion.a>
+                </motion.button>
 
                 <motion.button
                     onClick={toggleMusic}
@@ -242,7 +241,7 @@ export default function App() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="text-4xl md:text-6xl font-extrabold mb-1 uppercase tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600 font-bebas"
+                    className="text-4xl md:text-6xl font-extrabold mb-1 uppercase tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600 font-bebas drop-shadow-[0_0_10px_rgba(59,130,246,0.7)]"
                 >
                     MoneyStack
                 </motion.h1>
@@ -271,7 +270,7 @@ export default function App() {
                 </motion.div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-8 pb-8 relative z-10 flex-grow">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-8 pb-20 relative z-10 flex-grow">
                 <AnimatePresence>
                     {LEVELS.map((level, index) => {
                         const levelColor = LEVEL_COLORS[index % LEVEL_COLORS.length];
@@ -287,6 +286,8 @@ export default function App() {
                                 whileHover={{
                                     scale: isUnlockedOrPremium ? 1.05 : 1,
                                     boxShadow: isUnlockedOrPremium ? "0 0 20px rgba(59, 130, 246, 0.4)" : "none",
+                                    rotate: isUnlockedOrPremium ? 1 : 0,
+                                    y: isUnlockedOrPremium ? -5 : 0
                                 }}
                                 className={`rounded-2xl p-4 shadow-xl transition-all duration-300 relative overflow-hidden group
                                     ${isUnlockedOrPremium
@@ -335,7 +336,7 @@ export default function App() {
                 </AnimatePresence>
             </div>
 
-            <div className="sticky bottom-0 left-0 right-0 px-8 py-4 bg-transparent backdrop-blur-sm border-t border-white/10 shadow-xl relative z-10">
+            <div className="fixed bottom-0 left-0 right-0 px-8 py-4 bg-transparent backdrop-blur-sm border-t border-white/10 shadow-xl z-20">
                 <motion.button
                     onClick={() => handleStartSessionClick(LEVELS[0])}
                     whileHover={{ scale: 1.02, boxShadow: "0 0 25px rgba(59, 130, 246, 0.7)" }}
@@ -345,7 +346,7 @@ export default function App() {
                     Start Session
                 </motion.button>
             </div>
-
+            
             <AnimatePresence>
                 {showPopup && (
                     <motion.div

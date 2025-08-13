@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react"; // Only ArrowRight is needed now
+import { ArrowRight } from "lucide-react";
 
 export default function HowItWorks() {
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function HowItWorks() {
             </div>
             <div className="flex items-center gap-4 mb-4">
               <div className="bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-400/30 p-3 rounded-full shadow-lg text-blue-200 flex items-center justify-center w-12 h-12">
-                <span className="text-2xl font-bold">1</span> {/* Replaced icon with number */}
+                <span className="text-2xl font-bold">1</span>
               </div>
               <h3 className="text-2xl font-semibold text-white">Step Into a Safe Space</h3>
             </div>
@@ -50,11 +50,11 @@ export default function HowItWorks() {
             </p>
           </div>
 
-          {/* Step 2 */}
+          {/* Step 2 - Updated Image & Button */}
           <div className="flex-1 bg-white/5 p-8 rounded-2xl shadow-xl border border-transparent hover:border-blue-500/20 transition-colors duration-300 flex flex-col">
             <div className="relative w-full h-48 mb-6">
               <Image
-                src="/images/adhd-assessment.png"
+                src="/images/mind.png"
                 alt="An ADHD assessment"
                 fill
                 className="rounded-xl object-cover"
@@ -62,16 +62,22 @@ export default function HowItWorks() {
             </div>
             <div className="flex items-center gap-4 mb-4">
               <div className="bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-400/30 p-3 rounded-full shadow-lg text-blue-200 flex items-center justify-center w-12 h-12">
-                <span className="text-2xl font-bold">2</span> {/* Replaced icon with number */}
+                <span className="text-2xl font-bold">2</span>
               </div>
               <h3 className="text-2xl font-semibold text-white">Understand Yourself</h3>
             </div>
             <p className="text-gray-300 leading-relaxed max-w-prose mt-auto">
-              Take a clinically-informed ADHD assessment rooted in DSM-5 and ASRS frameworks. You'll gain insights, clarity, and a powerful baseline.
+              Take our clinically-informed ADHD assessment to get your personalized insights and a powerful baseline.
             </p>
+            <button
+              onClick={() => router.push("/assessment")}
+              className="mt-6 text-blue-300 hover:text-blue-200 border border-blue-400/30 hover:bg-blue-400/10 text-lg font-medium py-3 px-8 rounded-full transition-all duration-300"
+            >
+              Learn More
+            </button>
           </div>
 
-          {/* Step 3 */}
+          {/* Step 3 - Updated Content */}
           <div className="flex-1 bg-white/5 p-8 rounded-2xl shadow-xl border border-transparent hover:border-blue-500/20 transition-colors duration-300 flex flex-col">
             <div className="relative w-full h-48 mb-6">
               <Image
@@ -83,12 +89,12 @@ export default function HowItWorks() {
             </div>
             <div className="flex items-center gap-4 mb-4">
               <div className="bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-400/30 p-3 rounded-full shadow-lg text-blue-200 flex items-center justify-center w-12 h-12">
-                <span className="text-2xl font-bold">3</span> {/* Replaced icon with number */}
+                <span className="text-2xl font-bold">3</span>
               </div>
-              <h3 className="text-2xl font-semibold text-white">Start Your Daily Flow</h3>
+              <h3 className="text-2xl font-semibold text-white">Start Your Gamified Flow</h3>
             </div>
             <p className="text-gray-300 leading-relaxed max-w-prose mt-auto">
-              Access your dashboard and start your personalized daily routine — 5 short, intentional, AI-guided activities to build focus, calm, and consistency.
+              Access your dashboard to begin your daily 30-minute recovery session. This structured experience combines guided meditation, brain-training games, and quick breaks to help you build focus and consistency. You can also explore our library of healing sounds and music therapy anytime.
             </p>
           </div>
         </div>

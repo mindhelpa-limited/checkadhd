@@ -4,14 +4,20 @@ import { Plus } from "lucide-react";
 
 const faqs = [
   {
-    question: "What does the £15/month plan include?",
+    question: "What does the £50/month plan include?",
     answer:
-      "Your subscription includes the full ADHD assessment, a personalized recovery dashboard, daily AI-powered meditations, affirmations, exercises, cognitive care tracking, and progress monitoring with our gamified streak system.",
+      "Your subscription includes the full ADHD assessment, a personalized recovery dashboard, daily AI-powered meditations and affirmations, access to our library of healing sounds and music therapy, gamified brain-training games, and exclusive access to our daily 30-minute recovery sessions.",
   },
   {
     question: "Is the ADHD assessment a clinical diagnosis?",
     answer:
-      "No. Our assessment is an evidence-based tool designed to provide helpful insights and a strong baseline, but it does not replace a clinical diagnosis from a qualified healthcare provider. You can, however, share your results with your doctor.",
+    "No. Our assessment is an evidence-based tool designed to provide helpful insights and a strong baseline, but it does not replace a clinical diagnosis from a qualified healthcare provider. You can, however, share your results with your doctor.",
+  },
+  // --- UPDATED FAQ FOR GAMIFIED RECOVERY SESSIONS ---
+  {
+    question: "How do the 30-minute gamified recovery sessions work?",
+    answer:
+      "Our sessions combine guided meditations, brain-training games designed to improve memory, attention, and focus, and timed focus exercises into a single, structured routine. It's designed to help you build consistency in a gentle, engaging, and progressive way.",
   },
   {
     question: "Can I cancel my subscription anytime?",

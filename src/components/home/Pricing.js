@@ -43,15 +43,16 @@ const FeatureListItem = ({ title, isVisible }) => {
 
 export default function Pricing() {
   const router = useRouter();
+  // --- UPDATED AND COMPLETE FEATURES LIST ---
   const features = [
     "Comprehensive 75-Question ADHD Assessment",
     "Personalized ADHD Recovery Calendar for structured progress.",
     "Daily Targeted Meditations with affirmations.",
-    "Daily ADHD Passages with audio option and quizzes.",
+    "Access to a library of healing sounds and music therapy.",
+    "Gamified brain-training games & daily streak tracking.",
     "Recommended Daily Exercise for physical well-being.",
     "Cognitive Care Plan including daily water, fruit, and dietary tracking.",
-    "Timed Focus Exercises to build concentration and mental clarity.",
-    "Gamified Progress & Daily Streak Tracking to keep you motivated.",
+    "Exclusive access to daily 30-minute recovery sessions.",
   ];
 
   const sectionRef = useRef(null);
@@ -127,14 +128,14 @@ export default function Pricing() {
           <div className={`w-full lg:w-1/2 shrink-0 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm p-10 rounded-3xl shadow-2xl border border-white/10 transform transition-all duration-1000 delay-500 hover:scale-[1.02] hover:shadow-2xl hover:border-blue-500/30 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <h3 className="text-3xl font-serif font-bold text-white">Premium Recovery Plan</h3>
             <p className="mt-4 text-5xl font-extrabold text-white">
-              £15<span className="text-xl font-medium text-gray-400"> / month</span>
+              £50<span className="text-xl font-medium text-gray-400"> / month</span>
             </p>
             <p className="mt-4 text-gray-300">
               Everything you need to build focus, consistency, and a calmer mind.
             </p>
 
             <button
-              onClick={() => router.push("/pricing")}
+              onClick={() => router.push("/checkout")}
               className="mt-8 w-full text-white font-bold py-4 rounded-full text-lg shadow-lg transition-all transform hover:scale-105 pulsing-button"
             >
               Get Started Today

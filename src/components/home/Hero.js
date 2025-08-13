@@ -9,7 +9,6 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-[calc(100vh-72px)] bg-[#0a122a] text-white flex items-center justify-center px-6 sm:px-10 overflow-hidden">
-
       {/* Background Image Container */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -49,10 +48,10 @@ export default function Hero() {
           </button>
 
           <button
-            onClick={() => router.push("/pricing")}
+            onClick={() => router.push("/features")} 
             className="text-blue-300 hover:text-blue-200 border border-blue-400/30 hover:bg-blue-400/10 text-lg font-medium py-4 px-10 rounded-full transition-all duration-300"
           >
-            Explore Options
+            Explore Games & Therapy
           </button>
         </div>
       </div>

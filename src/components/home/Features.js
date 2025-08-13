@@ -8,7 +8,7 @@ export default function Features() {
 
   return (
     <section className="bg-[#0a122a] py-28 sm:py-36 text-white relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-16"> {/* Reduced spacing here for a tighter flow */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 space-y-16">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="font-serif text-4xl sm:text-5xl font-bold leading-tight tracking-tight text-white">
@@ -20,8 +20,8 @@ export default function Features() {
           </p>
         </div>
 
-        {/* Feature Block 2 (now displayed first on mobile) */}
-        <div className="grid lg:grid-cols-2 gap-16 items-center mt-0"> {/* Removed mt-32, spacing is now managed by parent */}
+        {/* Feature Block 2 (now updated for the new games and therapy) */}
+        <div className="grid lg:grid-cols-2 gap-16 items-center mt-0">
           <img
             src="/images/grow-guidance.jpg"
             alt="Young woman meditating in a serene flower garden"
@@ -29,35 +29,41 @@ export default function Features() {
           />
           <div>
             <h3 className="font-serif text-3xl font-bold text-white">
-              Grow with Guidance
+              Gamified Recovery: Find Your Flow
             </h3>
             <p className="mt-4 text-gray-300">
-              Based on your results, you’ll receive a daily recovery plan —
-              brief, calming, and tailored. Whether it's mindfulness, structure,
-              or focus tasks, your journey evolves with you.
+              Transform your daily recovery with our structured 30-minute session. Each day, you'll engage in a series of focus-building activities designed to boost your concentration and provide a rewarding experience.
             </p>
             <ul className="mt-6 space-y-4 text-gray-400">
               <li className="flex items-start gap-3">
                 <span className="text-blue-400 mt-1">✔</span>
                 <div>
-                  <strong className="text-white">AI-Powered Routine:</strong>
+                  <strong className="text-white">Structured Daily Session:</strong>
                   <br />
-                  Dynamic tasks that adapt to your pace and goals.
+                  A 30-minute routine with meditation, gaming, and breaks for rehydration and exercise.
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-blue-400 mt-1">✔</span>
                 <div>
-                  <strong className="text-white">Gamified Support:</strong>
+                  <strong className="text-white">Engaging Games:</strong>
                   <br />
-                  Build streaks, earn clarity, and stay motivated long-term.
+                  Dive into **MoneyStack**, a captivating stacking game reminiscent of Tetris; slither your way to rewards in **Snake**, collecting credits as you grow; or enjoy the fast-paced action of **PingPong**.
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-blue-400 mt-1">✔</span>
+                <div>
+                  <strong className="text-white">Healing Sounds:</strong>
+                  <br />
+                  Access a library of **Afrotherapy music and healing sounds** for calm and focus anytime.
                 </div>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Feature Block 1 (now displayed second on mobile) */}
+        {/* Feature Block 1 (remains the same) */}
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <h3 className="font-serif text-3xl font-bold text-white">
