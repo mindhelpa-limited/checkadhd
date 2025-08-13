@@ -79,7 +79,7 @@ export default function RecoveryGameSelectionPage() {
   };
 
   const MusicTabContent = ({ title, link }) => (
-    <div className="relative overflow-hidden rounded-3xl h-[450px] flex flex-col items-center justify-center text-white p-8 mt-10 shadow-2xl">
+    <div className="relative overflow-hidden rounded-3xl h-[450px] flex flex-col items-center justify-center text-white p-8 mt-10 shadow-2xl bg-gray-800 border border-gray-700">
       <motion.div
         className="absolute inset-0 z-0"
         initial={{ opacity: 0 }}
@@ -147,7 +147,7 @@ export default function RecoveryGameSelectionPage() {
     switch (activeTab) {
       case 'games':
         return (
-          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mt-10 p-4">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mt-10">
             {games.map((game, index) => (
               <Link href={game.link} key={index}>
                 <motion.div
@@ -159,7 +159,7 @@ export default function RecoveryGameSelectionPage() {
                   className="group cursor-pointer relative overflow-hidden rounded-3xl transition-all duration-300 transform hover:z-10"
                 >
                   <div className="absolute inset-0.5 rounded-3xl bg-gradient-to-r from-cyan-400 to-purple-500 opacity-0 group-hover:opacity-100 transition duration-500 blur-md"></div>
-                  <div className="relative p-6 rounded-[calc(1.5rem+0.5px)] shadow-2xl transition-all overflow-hidden bg-gray-900 border border-white/10">
+                  <div className="relative p-6 rounded-[calc(1.5rem+0.5px)] shadow-2xl transition-all overflow-hidden bg-gray-900 border border-gray-700">
                     <div className="relative overflow-hidden rounded-2xl mb-4 aspect-w-16 aspect-h-9">
                       <Image
                         src={game.imageUrl}
@@ -198,8 +198,8 @@ export default function RecoveryGameSelectionPage() {
   `;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0c0d1b] to-[#12132a] py-20 px-6 text-white font-sans">
-      <div className="max-w-4xl mx-auto text-center mb-16">
+    <div className="py-8 px-0 text-white font-sans">
+      <div className="max-w-4xl mx-auto text-center mb-10">
         <motion.h1
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
