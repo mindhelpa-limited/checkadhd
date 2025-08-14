@@ -2,80 +2,77 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Music, XCircle, ChevronLeft, ChevronRight, ChevronDown, RotateCcw } from 'lucide-react';
 import * as Tone from 'tone';
 
-// Game constants
+// ===== Playfield constants =====
 const COLS = 15;
 const ROWS = 20;
-const INITIAL_SPEED = 600; // milliseconds
+const INITIAL_SPEED = 600;
 
-// Define the shapes of the pieces (Tetris-style)
+// Circular control sizing (px)
+const CONTROL_SIZE = 180;
+const CONTROL_GAP = 8;
+
+// Tetris-like shapes
 const SHAPES = [
-  [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], // I
-  [[0,0,1,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]], // L
-  [[0,1,0,0],[0,1,1,1],[0,0,0,0],[0,0,0,0]], // J
-  [[0,1,0,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]], // T
-  [[0,1,1,0],[1,1,0,0],[0,0,0,0],[0,0,0,0]], // S
-  [[1,1,0,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]], // Z
-  [[1,1,0,0],[1,1,0,0],[0,0,0,0],[0,0,0,0]], // O
+  [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+  [[0,0,1,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]],
+  [[0,1,0,0],[0,1,1,1],[0,0,0,0],[0,0,0,0]],
+  [[0,1,0,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]],
+  [[0,1,1,0],[1,1,0,0],[0,0,0,0],[0,0,0,0]],
+  [[1,1,0,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]],
+  [[1,1,0,0],[1,1,0,0],[0,0,0,0],[0,0,0,0]],
 ];
 
 const Game = ({ onNext, duration }) => {
-  // ===== Disable scrolling globally while this component is mounted =====
+  // ===== Disable page scrolling while mounted =====
   useEffect(() => {
-    const { documentElement, body } = document;
-    const prevHtmlOverflow = documentElement.style.overflow;
+    const { documentElement: html, body } = document;
+    const prevHtmlOverflow = html.style.overflow;
     const prevBodyOverflow = body.style.overflow;
-    const prevHtmlHeight = documentElement.style.height;
+    const prevHtmlHeight = html.style.height;
     const prevBodyHeight = body.style.height;
 
-    documentElement.style.overflow = 'hidden';
+    html.style.overflow = 'hidden';
     body.style.overflow = 'hidden';
-    documentElement.style.height = '100%';
+    html.style.height = '100%';
     body.style.height = '100%';
 
-    // Prevent touch scroll / rubber-band
-    const preventTouchScroll = (e) => {
-      e.preventDefault();
-    };
-    window.addEventListener('touchmove', preventTouchScroll, { passive: false });
+    const prevent = (e) => e.preventDefault();
+    window.addEventListener('touchmove', prevent, { passive: false });
 
     return () => {
-      documentElement.style.overflow = prevHtmlOverflow;
+      html.style.overflow = prevHtmlOverflow;
       body.style.overflow = prevBodyOverflow;
-      documentElement.style.height = prevHtmlHeight;
+      html.style.height = prevHtmlHeight;
       body.style.height = prevBodyHeight;
-      window.removeEventListener('touchmove', preventTouchScroll);
+      window.removeEventListener('touchmove', prevent);
     };
   }, []);
-  // =====================================================================
+  // ================================================
 
   const [board, setBoard] = useState(Array.from({ length: ROWS }, () => Array(COLS).fill(0)));
   const [currentPiece, setCurrentPiece] = useState(null);
   const [nextPiece, setNextPiece] = useState(null);
   const [score, setScore] = useState(0);
   const [gameSpeed] = useState(INITIAL_SPEED);
-  const [timeLeft, setTimeLeft] = useState(duration / 1000); // seconds
+  const [timeLeft, setTimeLeft] = useState(duration / 1000);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
 
-  // Tone.js
+  // Tone.js players
   const placementSoundPlayer = useRef(null);
   const backgroundMusicPlayer = useRef(null);
 
   useEffect(() => {
-    const initializeAudio = async () => {
+    const init = async () => {
       await Tone.start();
-      placementSoundPlayer.current = new Tone.Player('/moneysound.mp3', () => {
-        // loaded
-      }).toDestination();
-
+      placementSoundPlayer.current = new Tone.Player('/moneysound.mp3').toDestination();
       backgroundMusicPlayer.current = new Tone.Player('/meditation.mp3', () => {
         backgroundMusicPlayer.current.loop = true;
         backgroundMusicPlayer.current.volume.value = -10;
         setIsAudioLoaded(true);
       }).toDestination();
     };
-    initializeAudio();
-
+    init();
     return () => {
       placementSoundPlayer.current?.dispose();
       backgroundMusicPlayer.current?.dispose();
@@ -109,9 +106,7 @@ const Game = ({ onNext, duration }) => {
   // Timer
   useEffect(() => {
     if (timeLeft <= 0) {
-      if (isMusicPlaying && backgroundMusicPlayer.current?.loaded) {
-        backgroundMusicPlayer.current.stop();
-      }
+      if (isMusicPlaying && backgroundMusicPlayer.current?.loaded) backgroundMusicPlayer.current.stop();
       onNext({ score, board });
       return;
     }
@@ -121,22 +116,20 @@ const Game = ({ onNext, duration }) => {
 
   // Piece helpers
   const generateNewPiece = useCallback(() => {
-    const shapeIndex = Math.floor(Math.random() * SHAPES.length);
-    const shape = SHAPES[shapeIndex];
+    const idx = Math.floor(Math.random() * SHAPES.length);
+    const shape = SHAPES[idx];
     const x = Math.floor(COLS / 2) - Math.floor(shape[0].length / 2);
     const y = 0;
     return { shape, x, y };
   }, []);
 
-  const isValidMove = useCallback((newPiece, newBoard) => {
-    for (let r = 0; r < newPiece.shape.length; r++) {
-      for (let c = 0; c < newPiece.shape[r].length; c++) {
-        if (newPiece.shape[r][c] !== 0) {
-          const br = newPiece.y + r;
-          const bc = newPiece.x + c;
-          if (bc < 0 || bc >= COLS || br >= ROWS || (br >= 0 && newBoard[br][bc] !== 0)) {
-            return false;
-          }
+  const isValidMove = useCallback((p, b) => {
+    for (let r = 0; r < p.shape.length; r++) {
+      for (let c = 0; c < p.shape[r].length; c++) {
+        if (p.shape[r][c] !== 0) {
+          const br = p.y + r;
+          const bc = p.x + c;
+          if (bc < 0 || bc >= COLS || br >= ROWS || (br >= 0 && b[br][bc] !== 0)) return false;
         }
       }
     }
@@ -162,12 +155,12 @@ const Game = ({ onNext, duration }) => {
     });
 
     setBoard((prev) => {
-      const filtered = prev.filter((row) => !row.every((cell) => cell !== 0));
-      const cleared = ROWS - filtered.length;
+      const kept = prev.filter((row) => !row.every((cell) => cell !== 0));
+      const cleared = ROWS - kept.length;
       if (cleared > 0) {
         setScore((s) => s + cleared * 100);
         const empty = Array.from({ length: cleared }, () => Array(COLS).fill(0));
-        return [...empty, ...filtered];
+        return [...empty, ...kept];
       }
       return prev;
     });
@@ -191,24 +184,14 @@ const Game = ({ onNext, duration }) => {
     (action) => {
       if (!currentPiece) return;
       let np = { ...currentPiece };
-
       switch (action) {
-        case 'left':
-          np.x--;
+        case 'left': np.x--; break;
+        case 'right': np.x++; break;
+        case 'down': moveDown(); return;
+        case 'rotate':
+          np.shape = np.shape[0].map((_, col) => np.shape.map((row) => row[col]).reverse());
           break;
-        case 'right':
-          np.x++;
-          break;
-        case 'down':
-          moveDown();
-          return;
-        case 'rotate': {
-          const rotated = np.shape[0].map((_, col) => np.shape.map((row) => row[col]).reverse());
-          np.shape = rotated;
-          break;
-        }
-        default:
-          return;
+        default: return;
       }
       if (isValidMove(np, board)) setCurrentPiece(np);
     },
@@ -223,7 +206,7 @@ const Game = ({ onNext, duration }) => {
     }
   }, [moveDown, gameSpeed, timeLeft]);
 
-  // Spawn piece + keyboard controls
+  // Spawn + keyboard
   useEffect(() => {
     if (!currentPiece) {
       setCurrentPiece(generateNewPiece());
@@ -263,11 +246,10 @@ const Game = ({ onNext, duration }) => {
         {row.map((cell, ci) => (
           <div
             key={ci}
-            className={`w-6 h-6 p-0.5 border border-gray-700 ${
-              cell === 0
-                ? 'bg-gray-900'
-                : 'bg-gradient-to-br from-green-300 via-green-400 to-green-500 shadow-md rotate-3'
-            }`}
+            // empty cells are TRANSPARENT so your image shows through
+            className={`w-6 h-6 p-0.5 ${cell === 0
+              ? 'bg-transparent'
+              : 'bg-gradient-to-br from-green-300 via-green-400 to-green-500 shadow-md rotate-3'}`}
           >
             {cell !== 0 && (
               <div className="w-full h-full bg-green-400 rounded-sm shadow-inner flex items-center justify-center text-sm font-bold text-gray-800">
@@ -282,26 +264,17 @@ const Game = ({ onNext, duration }) => {
 
   const renderNextPiece = () => {
     if (!nextPiece) return null;
-    const shapeToRender = nextPiece.shape.slice(0, 2);
+    const shape = nextPiece.shape.slice(0, 2);
     return (
-      <div className="p-0 border-0 bg-gray-950 shadow-inner rounded-md">
-        {shapeToRender.map((row, ri) => (
+      <div className="p-0 bg-transparent rounded-md">
+        {shape.map((row, ri) => (
           <div key={ri} className="flex">
             {row.map((cell, ci) => (
-              <div
-                key={ci}
-                className={`w-1.5 h-1.5 border border-gray-800 ${
-                  cell === 0
-                    ? 'bg-transparent'
-                    : 'bg-gradient-to-br from-green-300 via-green-400 to-green-500 shadow-md rotate-3'
-                }`}
-              >
-                {cell !== 0 && (
-                  <div className="w-full h-full bg-green-400 rounded-sm shadow-inner flex items-center justify-center text-[6px] font-bold text-gray-800">
-                    $
-                  </div>
-                )}
-              </div>
+              <div key={ci}
+                className={`w-1.5 h-1.5 ${cell === 0
+                  ? 'bg-transparent'
+                  : 'bg-gradient-to-br from-green-300 via-green-400 to-green-500 shadow-md rotate-3'}`}
+              />
             ))}
           </div>
         ))}
@@ -311,19 +284,22 @@ const Game = ({ onNext, duration }) => {
 
   return (
     <div
-      className="flex flex-col h-dvh bg-gray-950 text-gray-200 font-sans antialiased bg-cover bg-center select-none"
+      className="flex flex-col h-dvh bg-gray-950 text-gray-200 font-sans antialiased select-none"
       style={{
+        // Page background (behind the framed board)
         backgroundImage:
-          'linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url(https://images.unsplash.com/photo-1590283603417-106b0d9129d2?auto=format&fit=crop&w=1950&q=80)',
-        touchAction: 'none', // extra guard for mobile gestures
+          'linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url(/images/money.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        touchAction: 'none',
       }}
     >
       {/* HEADER */}
       <div className="w-full p-2">
-        <div className="flex items-center justify-between py-1 px-2 bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-md shadow-lg border-2 border-gray-700 w-full">
+        <div className="flex items-center justify-between py-1 px-2 bg-gray-900/80 backdrop-blur-sm rounded-md shadow-lg border-2 border-gray-700 w-full">
           <button
             onClick={toggleBackgroundMusic}
-            className="p-1 bg-gray-800 text-green-400 rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
+            className="p-1 bg-gray-800 text-green-400 rounded-full shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 border border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500/50"
             aria-label={isMusicPlaying ? 'Pause music' : 'Play music'}
           >
             {isMusicPlaying ? <Music className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
@@ -348,25 +324,49 @@ const Game = ({ onNext, duration }) => {
 
       {/* GAME AREA */}
       <div className="relative flex-1 w-full px-2 pb-2">
-        <div className="relative border-4 border-green-500 p-1 bg-gray-950 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)] rounded-md overflow-hidden w-full h-full flex items-center justify-center">
-          {/* grid */}
-          <div>{renderBoard()}</div>
-
-          {/* $$$ watermark */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-gray-800 opacity-20 text-9xl font-extrabold tracking-tighter">$$$</span>
+        <div
+          className="relative border-4 border-green-500 rounded-md overflow-hidden w-full h-full flex items-start justify-center"
+          style={{
+            // Board background – your image visible inside the frame
+            backgroundImage: 'url(/images/money.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          {/* Grid content starts at top, with reserved padding at bottom for control */}
+          <div className="w-full flex flex-col items-center"
+               style={{ paddingBottom: CONTROL_SIZE / 2 + CONTROL_GAP + 16 }}>
+            {renderBoard()}
           </div>
 
-          {/* ===== Circular D-Pad controls (inside board, bottom center) ===== */}
-          <div className="pointer-events-auto absolute bottom-3 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full bg-gray-900/70 border border-green-500 shadow-2xl flex items-center justify-center">
-            {/* 3x3 grid for arrows + center */}
+          {/* Soft watermark (optional). Remove if not needed */}
+          {/* <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span className="text-gray-900/40 opacity-20 text-9xl font-extrabold tracking-tighter">$</span>
+          </div> */}
+
+          {/* OPAQUE mask under the circular control so background doesn't show in that zone */}
+          <div
+            className="absolute left-0 right-0 bg-gray-950/85 pointer-events-none"
+            style={{ height: CONTROL_SIZE / 2 + CONTROL_GAP + 8, bottom: 0 }}
+          />
+
+          {/* Circular D-pad inside board */}
+          <div
+            className="pointer-events-auto absolute rounded-full bg-gray-900/70 border border-green-500 shadow-2xl flex items-center justify-center"
+            style={{
+              width: CONTROL_SIZE,
+              height: CONTROL_SIZE,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              bottom: CONTROL_GAP,
+            }}
+          >
             <div className="grid grid-cols-3 grid-rows-3 gap-2">
               <div />
               <button
                 onClick={() => handlePlayerAction('rotate')}
                 className="w-10 h-10 rounded-full bg-gray-800 text-green-400 border border-green-500 shadow-lg active:scale-95 flex items-center justify-center"
                 aria-label="Rotate"
-                title="Rotate"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -376,17 +376,14 @@ const Game = ({ onNext, duration }) => {
                 onClick={() => handlePlayerAction('left')}
                 className="w-10 h-10 rounded-full bg-gray-800 text-green-400 border border-green-500 shadow-lg active:scale-95 flex items-center justify-center"
                 aria-label="Left"
-                title="Left"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
 
-              {/* Center (bigger) */}
               <button
                 onClick={() => handlePlayerAction('rotate')}
                 className="w-12 h-12 rounded-full bg-green-400/90 text-gray-900 font-bold border border-white shadow-xl active:scale-95 flex items-center justify-center"
                 aria-label="Rotate (Center)"
-                title="Rotate"
               >
                 ●
               </button>
@@ -395,7 +392,6 @@ const Game = ({ onNext, duration }) => {
                 onClick={() => handlePlayerAction('right')}
                 className="w-10 h-10 rounded-full bg-gray-800 text-green-400 border border-green-500 shadow-lg active:scale-95 flex items-center justify-center"
                 aria-label="Right"
-                title="Right"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -405,17 +401,14 @@ const Game = ({ onNext, duration }) => {
                 onClick={() => handlePlayerAction('down')}
                 className="w-10 h-10 rounded-full bg-gray-800 text-green-400 border border-green-500 shadow-lg active:scale-95 flex items-center justify-center"
                 aria-label="Down"
-                title="Down"
               >
                 <ChevronDown className="w-4 h-4" />
               </button>
               <div />
             </div>
           </div>
-          {/* ===== End circular controls ===== */}
         </div>
       </div>
-      {/* Footer controls REMOVED entirely */}
     </div>
   );
 };
