@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import styles from "./assessment.module.css";
 import Report from "./Report";
+import { auth, db } from "@/lib/firebase"; // ✅ make sure this path is correct
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 const confetti = dynamic(() => import("canvas-confetti"), { ssr: false });
 const html2pdf = dynamic(() => import("html2pdf.js"), { ssr: false });
@@ -32,7 +34,7 @@ export default function AdhdTestPage() {
   const [milestoneNotification, setMilestoneNotification] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // ✅ Run only in browser
+  // ✅ load resume state if exists
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedStateJSON = localStorage.getItem("adhdAssessmentState");
@@ -50,12 +52,48 @@ export default function AdhdTestPage() {
     }
   }, []);
 
+  // ✅ save quiz progress
   useEffect(() => {
     if (typeof window !== "undefined" && step === "quiz") {
       const state = { current, answers, userInfo };
       localStorage.setItem("adhdAssessmentState", JSON.stringify(state));
     }
   }, [current, answers, userInfo, step]);
+
+  // ✅ Save results to Firestore
+  async function saveResultsToFirestore(answers, userInfo) {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    // Calculate score percentage
+    const totalScore = answers.reduce((sum, val) => sum + (val || 0), 0);
+    const maxScore = answers.length * 4;
+    const scorePercentage = Math.round((totalScore / maxScore) * 100);
+
+    let level, riskLevelText;
+    if (scorePercentage >= 75) {
+      level = "High likelihood of ADHD traits";
+      riskLevelText = "High Risk";
+    } else if (scorePercentage >= 40) {
+      level = "Moderate likelihood of ADHD traits";
+      riskLevelText = "Moderate Risk";
+    } else {
+      level = "Low likelihood of ADHD traits";
+      riskLevelText = "Low Risk";
+    }
+
+    const colRef = collection(db, "users", currentUser.uid, "results");
+    await addDoc(colRef, {
+      answers,
+      assessmentTimestamp: serverTimestamp(),
+      userName: userInfo.name,
+      sex: userInfo.sex,
+      dob: userInfo.dob,
+      scorePercentage,
+      level,
+      riskLevelText,
+    });
+  }
 
   const handleStart = () => {
     if (!userInfo.name || !userInfo.sex || !userInfo.dob) {
@@ -86,13 +124,17 @@ export default function AdhdTestPage() {
       setTimeout(() => setMilestoneNotification(""), 3500);
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (current < questions.length - 1) {
         setCurrent(current + 1);
       } else {
+        // ✅ Save results before showing them
+        await saveResultsToFirestore(newAnswers, userInfo);
+
         setStep("results");
         if (typeof window !== "undefined")
           localStorage.removeItem("adhdAssessmentState");
+
         import("canvas-confetti").then((module) =>
           module.default({ particleCount: 250, spread: 160, origin: { y: 0.3 } })
         );
@@ -127,7 +169,15 @@ export default function AdhdTestPage() {
         step === "results" ? styles.fullWidth : ""
       }`}
     >
-      {/* ... Keep the rest of your JSX unchanged ... */}
+      {/* keep your full JSX UI from before */}
+      {step === "results" && (
+        <div>
+          <Report userInfo={userInfo} answers={answers} />
+          <button onClick={handleDownloadPDF} disabled={isDownloading}>
+            {isDownloading ? "Generating PDF…" : "Download PDF"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

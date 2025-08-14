@@ -1,9 +1,17 @@
 "use client";
-import { auth, db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase"; // If alias isn't set, use "../../../lib/firebase"
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  limit,
+} from "firebase/firestore";
 import {
   SparklesIcon,
   TrophyIcon,
@@ -12,13 +20,14 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   XMarkIcon,
-} from "@heroicons/react/24/outline"; // Changed to outline icons for a cleaner look
+} from "@heroicons/react/24/outline";
 
-// Component for the animated score ring
+/* ------------------------ Small UI components (unchanged) ------------------------ */
+
 const ScoreRing = ({ score }) => {
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
+  const offset = circumference - (Number(score) / 100) * circumference;
 
   return (
     <div className="relative w-32 h-32 flex items-center justify-center">
@@ -50,7 +59,6 @@ const ScoreRing = ({ score }) => {
   );
 };
 
-// Modal component for the retake reminder
 const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) => (
   <div className="fixed inset-0 z-50 bg-[#0A0A0A] bg-opacity-80 flex items-center justify-center p-4">
     <div className="relative bg-[#1A1A1A]/70 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] max-w-sm w-full animate-fade-in">
@@ -62,9 +70,7 @@ const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) =
       </button>
       <div className="text-center">
         <ClockIcon className="h-16 w-16 text-blue-400 mx-auto mb-4" />
-        <h3 className="text-2xl font-bold text-white mb-2">
-          Retake Not Yet Available
-        </h3>
+        <h3 className="text-2xl font-bold text-white mb-2">Retake Not Yet Available</h3>
         <p className="text-gray-400 mb-6">
           You must wait 14 days between tests to ensure accurate results.
         </p>
@@ -92,34 +98,37 @@ const FullScreenLoader = ({ message }) => (
   </div>
 );
 
-const getAdhdStatus = (score) => {
-  if (score >= 70) {
-    return "High Likelihood";
-  } else if (score >= 40) {
-    return "Moderate Likelihood";
-  } else {
-    return "Low Likelihood";
-  }
+const getAdhdStatus = (score /* 0-100 string or number */) => {
+  const s = Number(score) || 0;
+  if (s >= 70) return "High Likelihood";
+  if (s >= 40) return "Moderate Likelihood";
+  return "Low Likelihood";
 };
 
-const calculateScoreOutOf100 = (score) => {
-  const maxScore = 60;
-  return ((score / maxScore) * 100).toFixed(0);
-};
+/* -------------------------------- Dashboard -------------------------------- */
 
 export default function DashboardPage() {
   const router = useRouter();
+
+  // user doc summary (email, tier)
   const [userData, setUserData] = useState(null);
+
+  // latest result
+  const [latestId, setLatestId] = useState(null);
+  const [scoreOutOf100, setScoreOutOf100] = useState(null);
+  const [riskLevelText, setRiskLevelText] = useState("");
+  const [levelLabel, setLevelLabel] = useState("");
+  const [lastTestDate, setLastTestDate] = useState(null);
+
+  // ui state
   const [loading, setLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Verifying access...");
   const [hasTakenTest, setHasTakenTest] = useState(false);
-  const [scoreOutOf100, setScoreOutOf100] = useState(null);
   const [retakeAvailable, setRetakeAvailable] = useState(true);
   const [timeLeft, setTimeLeft] = useState("");
   const [showModal, setShowModal] = useState(false);
-  
-  const audioRef = useRef(null);
 
+  const audioRef = useRef(null);
   const playClickSound = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -127,64 +136,109 @@ export default function DashboardPage() {
     }
   };
 
+  // 1) wait for auth, fetch user doc (for tier/email)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsub = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
         router.replace("/login");
         return;
       }
+
       setLoadingMessage("Checking your subscription...");
       const userDocRef = doc(db, "users", currentUser.uid);
       const docSnap = await getDoc(userDocRef);
       if (!docSnap.exists()) {
-        console.error("❌ No user document found.");
         router.replace("/pricing");
         return;
       }
+
       const data = docSnap.data();
-      if (data.tier === "premium") {
-        setUserData(data);
-        const testTaken = !!data.lastTest;
-        setHasTakenTest(testTaken);
-
-        if (data.score !== undefined && data.score !== null) {
-          const score = calculateScoreOutOf100(data.score);
-          setScoreOutOf100(score);
-        }
-
-        if (testTaken) {
-          const lastTestDate = data.lastTest.toDate();
-          const twoWeeksInMs = 14 * 24 * 60 * 60 * 1000;
-          const retakeDate = new Date(lastTestDate.getTime() + twoWeeksInMs);
-
-          const updateTimer = () => {
-            const now = new Date();
-            const difference = retakeDate.getTime() - now.getTime();
-
-            if (difference > 0) {
-              const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-              const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-              const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-              setTimeLeft(`${days}d ${hours}h ${minutes}m`);
-              setRetakeAvailable(false);
-            } else {
-              setTimeLeft("Now!");
-              setRetakeAvailable(true);
-            }
-          };
-
-          const timerId = setInterval(updateTimer, 60000);
-          updateTimer();
-          
-          setLoading(false);
-          return () => clearInterval(timerId);
-        }
-        setLoading(false);
-      } else {
+      if (data?.tier !== "premium") {
         router.replace("/pricing");
+        return;
       }
+
+      setUserData({ email: data.email, tier: data.tier });
+      setLoadingMessage("Loading your latest result...");
+
+      // 2) subscribe to the latest result in subcollection
+      const colRef = collection(db, "users", currentUser.uid, "results");
+      const q = query(colRef, orderBy("takenAt", "desc"), limit(1));
+      const unsubLatest = onSnapshot(
+        q,
+        (snap) => {
+          const doc0 = snap.docs[0];
+          if (!doc0) {
+            setHasTakenTest(false);
+            setLatestId(null);
+            setScoreOutOf100(null);
+            setRiskLevelText("");
+            setLevelLabel("");
+            setLastTestDate(null);
+            setRetakeAvailable(true);
+            setLoading(false);
+            return;
+          }
+
+          const d = doc0.data();
+          const takenAt =
+            d?.takenAt?.toDate?.() ??
+            (d?.takenAt ? new Date(d.takenAt) : null);
+
+          setHasTakenTest(true);
+          setLatestId(doc0.id);
+          setScoreOutOf100(d?.scorePercentage ?? null); // already 0..100 from save
+          setRiskLevelText(d?.riskLevelText ?? "");
+          setLevelLabel(d?.level ?? "");
+          setLastTestDate(takenAt || null);
+          setLoading(false);
+
+          // 3) 14-day retake timer
+          if (takenAt) {
+            const retakeDate = new Date(takenAt.getTime() + 14 * 24 * 60 * 60 * 1000);
+
+            const updateTimer = () => {
+              const now = new Date().getTime();
+              const diff = retakeDate.getTime() - now;
+              if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                setTimeLeft(`${days}d ${hours}h ${minutes}m`);
+                setRetakeAvailable(false);
+              } else {
+                setTimeLeft("Now!");
+                setRetakeAvailable(true);
+              }
+            };
+
+            updateTimer();
+            const timerId = setInterval(updateTimer, 60_000);
+            // cleanup when snapshot changes
+            return () => clearInterval(timerId);
+          } else {
+            setRetakeAvailable(true);
+            setTimeLeft("");
+          }
+        },
+        (err) => {
+          console.error("Latest result subscription error:", err);
+          setHasTakenTest(false);
+          setLatestId(null);
+          setScoreOutOf100(null);
+          setRiskLevelText("");
+          setLevelLabel("");
+          setLastTestDate(null);
+          setRetakeAvailable(true);
+          setLoading(false);
+        }
+      );
+
+      // cleanup both listeners when auth changes
+      return () => unsubLatest();
     });
-    return () => unsubscribe();
+
+    return () => unsub();
   }, [router]);
 
   const handleTestButtonClick = () => {
@@ -196,9 +250,10 @@ export default function DashboardPage() {
     }
   };
 
+  // 🔁 UPDATED: View Current Result now goes to ADHD History
   const handleViewResultsClick = () => {
     playClickSound();
-    router.push("/dashboard/adhd-test/report");
+    router.push("/dashboard/adhd-history");
     setShowModal(false);
   };
 
@@ -210,7 +265,7 @@ export default function DashboardPage() {
     <main className="relative min-h-screen p-6 md:p-10 text-gray-200 bg-[#0A0A0A] overflow-hidden">
       <audio ref={audioRef} src="/sounds/click.mp3" preload="auto" />
 
-      {/* Subtle background glow effect for a premium feel */}
+      {/* background glow */}
       <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
         <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
         <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob-delay" />
@@ -225,12 +280,13 @@ export default function DashboardPage() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          {/* Card for Premium Account Info with Glassmorphism */}
+          {/* Premium Account card */}
           <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] md:col-span-2 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl">
             <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center text-gray-200">
               <SparklesIcon className="h-6 w-6 md:h-8 md:w-8 mr-3 flex-shrink-0 text-blue-400" />
               Your Premium Account
             </h2>
+
             {userData && (
               <ul className="space-y-4 md:space-y-6">
                 <li className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:bg-[#2c2c2c] hover:shadow-lg">
@@ -240,35 +296,37 @@ export default function DashboardPage() {
                     <p className="text-gray-400">{userData.email}</p>
                   </div>
                 </li>
+
                 <li className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:bg-[#2c2c2c] hover:shadow-lg">
                   <TrophyIcon className="h-6 w-6 text-gray-400 mr-4 flex-shrink-0" />
                   <div>
                     <strong className="text-white">Score:</strong>
                     <p className="text-gray-400">
-                      {scoreOutOf100 !== null ? `${scoreOutOf100} / 100` : "N/A"}
+                      {hasTakenTest && scoreOutOf100 != null ? `${scoreOutOf100} / 100` : "N/A"}
                     </p>
                   </div>
                 </li>
+
                 <li className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:bg-[#2c2c2c] hover:shadow-lg">
                   <ChatBubbleBottomCenterTextIcon className="h-6 w-6 text-gray-400 mr-4 flex-shrink-0" />
                   <div>
                     <strong className="text-white">ADHD Status:</strong>
                     <p className="font-semibold text-blue-400">
-                      {userData.score !== undefined && userData.score !== null ? (
-                        getAdhdStatus(scoreOutOf100)
-                      ) : (
-                        "Not available yet"
-                      )}
+                      {hasTakenTest && scoreOutOf100 != null ? getAdhdStatus(scoreOutOf100) : "Not available yet"}
                     </p>
+                    {hasTakenTest && riskLevelText && (
+                      <p className="text-xs text-gray-400 mt-1">{levelLabel} • {riskLevelText}</p>
+                    )}
                   </div>
                 </li>
+
                 <li className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:bg-[#2c2c2c] hover:shadow-lg">
                   <CalendarDaysIcon className="h-6 w-6 text-gray-400 mr-4 flex-shrink-0" />
                   <div>
                     <strong className="text-white">Last Test:</strong>
                     <p className="text-gray-400">
-                      {userData.lastTest
-                        ? userData.lastTest.toDate().toLocaleDateString()
+                      {hasTakenTest && lastTestDate
+                        ? lastTestDate.toLocaleDateString()
                         : "Not taken yet"}
                     </p>
                   </div>
@@ -276,21 +334,24 @@ export default function DashboardPage() {
               </ul>
             )}
           </div>
-          
-          {/* Card for Test Actions with Glassmorphism */}
+
+          {/* Actions card */}
           <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] flex flex-col justify-between transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl">
             <div className="flex flex-col items-center">
-              <h3 className="text-xl font-bold mb-4 text-white text-center">Ready for your test?</h3>
+              <h3 className="text-xl font-bold mb-4 text-white text-center">
+                Ready for your test?
+              </h3>
               <p className="text-gray-400 mb-6 text-sm md:text-base text-center">
                 Take the ADHD test to get an up-to-date assessment.
               </p>
-              {/* Animated Score Visualization */}
-              {hasTakenTest && scoreOutOf100 !== null && (
+
+              {hasTakenTest && scoreOutOf100 != null && (
                 <div className="mb-6">
                   <ScoreRing score={scoreOutOf100} />
                 </div>
               )}
             </div>
+
             <div>
               <button
                 onClick={handleTestButtonClick}
@@ -306,6 +367,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
       {showModal && (
         <RetakeTestModal
           timeLeft={timeLeft}
@@ -317,41 +379,19 @@ export default function DashboardPage() {
 
       <style jsx global>{`
         @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
         }
-
         @keyframes blob-delay {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(-30px, 50px) scale(1.1);
-          }
-          66% {
-            transform: translate(20px, -20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(-30px, 50px) scale(1.1); }
+          66% { transform: translate(20px, -20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
         }
-        
-        .animate-blob {
-          animation: blob 10s infinite ease-in-out;
-        }
-        .animate-blob-delay {
-          animation: blob-delay 10s infinite ease-in-out;
-        }
+        .animate-blob { animation: blob 10s infinite ease-in-out; }
+        .animate-blob-delay { animation: blob-delay 10s infinite ease-in-out; }
       `}</style>
     </main>
   );
