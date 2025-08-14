@@ -73,12 +73,20 @@ export default function Header() {
                             </button>
                         </>
                     ) : (
-                        <Link
-                            href="/login"
-                            className="bg-blue-600 hover:bg-blue-700 transition-colors text-white font-semibold py-2 px-4 rounded-lg shadow"
-                        >
-                            Login / Dashboard
-                        </Link>
+                        <>
+                            <Link
+                                href="/login"
+                                className="bg-blue-600 hover:bg-blue-700 transition-colors text-white font-semibold py-2 px-4 rounded-lg shadow"
+                            >
+                                Login
+                            </Link>
+                            <Link
+                                href="/signup"
+                                className="bg-green-600 hover:bg-green-700 transition-colors text-white font-semibold py-2 px-4 rounded-lg shadow"
+                            >
+                                Sign Up
+                            </Link>
+                        </>
                     )}
                 </nav>
 
@@ -110,13 +118,15 @@ export default function Header() {
                             </button>
                         </>
                     ) : (
-                        <MobileMenuItem href="/login" onClick={() => setMenuOpen(false)}>Login / Dashboard</MobileMenuItem>
+                        <>
+                            <MobileMenuItem href="/login" onClick={() => setMenuOpen(false)}>Login</MobileMenuItem>
+                            <div className="mt-4 px-4 w-full">
+                                <Link href="/signup" onClick={() => setMenuOpen(false)} className="w-full text-center block py-3 rounded-xl bg-blue-600 text-white text-lg font-semibold shadow hover:bg-blue-700 transition-colors">
+                                    Sign Up
+                                </Link>
+                            </div>
+                        </>
                     )}
-                     <div className="mt-4 px-4 w-full">
-                        <Link href="/signup" onClick={() => setMenuOpen(false)} className="w-full text-center block py-3 rounded-xl bg-blue-600 text-white text-lg font-semibold shadow hover:bg-blue-700 transition-colors">
-                            Sign Up
-                        </Link>
-                    </div>
                 </nav>
             </div>
         </header>
