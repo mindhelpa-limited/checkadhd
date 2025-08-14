@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
 
 export async function GET(req) {
   try {
@@ -12,10 +12,18 @@ export async function GET(req) {
       return NextResponse.json({ error: "Session ID missing" }, { status: 400 });
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    return NextResponse.json({ email: session.customer_details?.email || "" });
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["customer_details"],
+    });
+
+    const email =
+      session.customer_details?.email ||
+      session.customer_email ||
+      "";
+
+    return NextResponse.json({ email });
   } catch (error) {
-    console.error("Error fetching session details:", error.message);
+    console.error("Error fetching session details:", error);
     return NextResponse.json(
       { error: "Failed to fetch session details" },
       { status: 500 }

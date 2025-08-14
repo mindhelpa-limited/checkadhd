@@ -8,16 +8,19 @@ import Report from './Report';
 // ✅ import your single firebase instance (adjust path if different)
 import { auth, db } from "../../../lib/firebase";
 
-
-// ✅ only the firestore funcs we need (no arrayUnion)
 import {
   collection,
   addDoc,
   doc,
   updateDoc,
   serverTimestamp,
+  query,
+  orderBy,
+  limit,
+  getDocs,
 } from "firebase/firestore";
-
+import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
 
 // --- Data Constants: Full set of 73 questions for your assessment ---
@@ -111,7 +114,66 @@ function riskFromPercent(scorePercentage) {
   return { level: "Low likelihood of ADHD traits", riskLevelText: "Low Risk" };
 }
 
+const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
+
+/* ---------- Lock modal (standalone view, no underlying form) ---------- */
+function LockScreen({ timeLeft }) {
+  return (
+    <main className="relative min-h-screen flex items-center justify-center p-6 bg-[#0A0A0A] text-gray-200">
+      <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
+        <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
+        <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob-delay" />
+      </div>
+      <div className="relative z-10 bg-[#1A1A1A]/70 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] max-w-sm w-full text-center animate-fade-in">
+        <h3 className="text-2xl font-bold text-white mb-2">Retake Not Yet Available</h3>
+        <p className="text-gray-400 mb-6">
+          You can take the ADHD test once every 14 days. Please check back later.
+        </p>
+        <div className="bg-[#1A1A1A] p-4 rounded-xl mb-6">
+          <p className="text-gray-400">Time remaining until retake:</p>
+          <strong className="text-2xl text-white font-bold block mt-1">{timeLeft || "—"}</strong>
+        </div>
+        <a
+          href="/dashboard/adhd-history"
+          className="w-full inline-block px-8 py-3 text-sm font-semibold text-white rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors"
+        >
+          View Your Results
+        </a>
+      </div>
+      <style jsx global>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.5s ease-out; }
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes blob-delay {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(-30px, 50px) scale(1.1); }
+          66% { transform: translate(20px, -20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob { animation: blob 10s infinite ease-in-out; }
+        .animate-blob-delay { animation: blob-delay 10s infinite ease-in-out; }
+      `}</style>
+    </main>
+  );
+}
+
 export default function AdhdTestPage() {
+  const router = useRouter();
+
+  // gating
+  const [authReady, setAuthReady] = useState(false);
+  const [locked, setLocked] = useState(true);
+  const [timeLeft, setTimeLeft] = useState("");
+
+  // your original UI state
   const [step, setStep] = useState('disclaimer');
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState(() => new Array(questions.length).fill(null));
@@ -122,7 +184,6 @@ export default function AdhdTestPage() {
   const [calculatedScore, setCalculatedScore] = useState(0);
 
   const audioRef = useRef(null);
-
   const playClickSound = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -130,8 +191,56 @@ export default function AdhdTestPage() {
     }
   };
 
-  // resume logic
+  // 🔐 Require login + check 14-day cooldown (based ONLY on last completed result)
   useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      if (!u) {
+        router.replace("/login");
+        return;
+      }
+      setAuthReady(true);
+
+      // query latest completed result
+      const colRef = collection(db, "users", u.uid, "results");
+      const qLatest = query(colRef, orderBy("takenAt", "desc"), limit(1));
+      const snap = await getDocs(qLatest);
+      const d0 = snap.docs[0];
+
+      if (!d0) {
+        // never completed → allowed
+        setLocked(false);
+        return;
+      }
+      const lastTaken = d0.data()?.takenAt?.toDate?.() ?? (d0.data()?.takenAt ? new Date(d0.data().takenAt) : null);
+      if (!lastTaken) {
+        setLocked(false);
+        return;
+      }
+
+      const nextAllowed = new Date(lastTaken.getTime() + FOURTEEN_DAYS_MS);
+      const update = () => {
+        const diff = nextAllowed.getTime() - Date.now();
+        if (diff <= 0) {
+          setLocked(false);
+          setTimeLeft("Now!");
+        } else {
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          setTimeLeft(`${days}d ${hours}h ${minutes}m`);
+          setLocked(true);
+        }
+      };
+      update();
+      const tid = setInterval(update, 60_000);
+      return () => clearInterval(tid);
+    });
+    return () => unsub();
+  }, [router, db]);
+
+  // Resume logic (unchanged)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
     const savedStateJSON = localStorage.getItem('adhdAssessmentState');
     if (savedStateJSON) {
       const savedState = JSON.parse(savedStateJSON);
@@ -143,29 +252,42 @@ export default function AdhdTestPage() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     if (step === 'quiz') {
       const state = { current, answers, userInfo };
       localStorage.setItem('adhdAssessmentState', JSON.stringify(state));
     }
   }, [current, answers, userInfo, step]);
 
-  // ✅ new: save each result as its own doc (no arrayUnion)
+  // ✅ save each result as its own doc; lock is anchored at takenAt
   const saveResultsToFirestore = async (totalScore, answerArray, userInfo) => {
     const currentUser = auth.currentUser;
-    if (!currentUser) {
-      console.warn("User not signed in — skip Firestore write (or add local fallback).");
-      return;
+    if (!currentUser) return;
+
+    // Defense-in-depth: re-check lock before save
+    const colRef = collection(db, "users", currentUser.uid, "results");
+    const qLatest = query(colRef, orderBy("takenAt", "desc"), limit(1));
+    const latestSnap = await getDocs(qLatest);
+    const lastDoc = latestSnap.docs[0];
+    if (lastDoc) {
+      const lastTaken = lastDoc.data()?.takenAt?.toDate?.() ?? (lastDoc.data()?.takenAt ? new Date(lastDoc.data().takenAt) : null);
+      if (lastTaken) {
+        const nextAllowed = new Date(lastTaken.getTime() + FOURTEEN_DAYS_MS);
+        if (Date.now() < nextAllowed.getTime()) {
+          // still locked → just bail (and the page will show lock screen on next load)
+          setLocked(true);
+          return;
+        }
+      }
     }
 
-    try {
-      const maxScore = answerArray.length * 4;
-      const scorePercentage = Math.round((totalScore / maxScore) * 100);
-      const { level, riskLevelText } = riskFromPercent(scorePercentage);
+    const maxScore = answerArray.length * 4;
+    const scorePercentage = Math.round((totalScore / maxScore) * 100);
+    const { level, riskLevelText } = riskFromPercent(scorePercentage);
 
-      // 1) write a result doc under users/{uid}/results/{autoId}
-      const resultsCol = collection(db, "users", currentUser.uid, "results");
-      const docRef = await addDoc(resultsCol, {
-        takenAt: serverTimestamp(),      // ✅ allowed (field, not arrayUnion)
+    try {
+      await addDoc(colRef, {
+        takenAt: serverTimestamp(),      // ⏱️ cooldown anchor
         scorePercentage,
         level,
         riskLevelText,
@@ -173,24 +295,20 @@ export default function AdhdTestPage() {
         userName: userInfo?.name || null,
         sex: userInfo?.sex || null,
         dob: userInfo?.dob || null,
-        // answers: answerArray, // optional: store if you really need them
+        // answers: answerArray, // optional
       });
 
-      // 2) (optional) bump a summary field on the user doc
-      const userDocRef = doc(db, "users", currentUser.uid);
-      await updateDoc(userDocRef, {
-        lastTest: serverTimestamp(),
-      });
-
-      console.log("✅ Test result saved:", docRef.id);
-      // You can redirect to the permalink if you want:
-      // router.push(`/results/${docRef.id}`);
+      // Optional: bump summary field
+      await updateDoc(doc(db, "users", currentUser.uid), { lastTest: serverTimestamp() });
+      console.log("✅ Test result saved");
     } catch (error) {
       console.error("❌ Error saving test results:", error);
     }
   };
 
   const handleStart = () => {
+    if (!authReady) return;
+    if (locked) return; // if locked, don't show form/quiz
     if (!userInfo.name || !userInfo.sex || !userInfo.dob) {
       alert('Please complete all fields.');
       return;
@@ -198,12 +316,10 @@ export default function AdhdTestPage() {
     setAnswers(new Array(questions.length).fill(null));
     setCurrent(0);
     setStep('quiz');
-    localStorage.removeItem('adhdAssessmentState');
+    if (typeof window !== 'undefined') localStorage.removeItem('adhdAssessmentState');
   };
 
   const handleAnswer = (answerIndex) => {
-    playClickSound();
-
     const newAnswers = [...answers];
     newAnswers[current] = answerIndex;
     setAnswers(newAnswers);
@@ -215,7 +331,7 @@ export default function AdhdTestPage() {
       setTimeout(() => setMilestoneNotification(''), 3500);
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (current < questions.length - 1) {
         setCurrent(current + 1);
       } else {
@@ -223,21 +339,17 @@ export default function AdhdTestPage() {
         const totalScore = newAnswers.reduce((sum, val) => sum + (val ?? 0), 0);
         setCalculatedScore(totalScore);
 
-        // ✅ save once here (ensure Report.jsx is NOT also saving to avoid duplicates)
-        saveResultsToFirestore(totalScore, newAnswers, userInfo);
+        await saveResultsToFirestore(totalScore, newAnswers, userInfo);
 
         setStep('results');
-        localStorage.removeItem('adhdAssessmentState');
+        if (typeof window !== 'undefined') localStorage.removeItem('adhdAssessmentState');
         confetti({ particleCount: 250, spread: 160, origin: { y: 0.3 }, zIndex: 10001 });
       }
     }, 300);
   };
 
   const handleGoBack = () => {
-    if (current > 0) {
-      playClickSound();
-      setCurrent(current - 1);
-    }
+    if (current > 0) setCurrent(current - 1);
   };
 
   const handleResume = () => {
@@ -257,9 +369,10 @@ export default function AdhdTestPage() {
   };
 
   const handleDownloadPDF = () => {
+    const element = document.getElementById('report-content');
+    if (!element) return;
     setIsDownloading(true);
     setTimeout(() => {
-      const element = document.getElementById('report-content');
       const options = {
         margin: [10, 10, 10, 10],
         filename: `ADHD_Assessment_Report_${(userInfo.name || 'User').replace(/\s/g, '_')}.pdf`,
@@ -267,13 +380,16 @@ export default function AdhdTestPage() {
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
-
-      html2pdf().from(element).set(options).save().finally(() => {
-        setIsDownloading(false);
-      });
-    }, 500);
+      html2pdf().from(element).set(options).save().finally(() => setIsDownloading(false));
+    }, 300);
   };
 
+  // ✅ If not ready yet, or if locked, show ONLY the lock screen (no other UI)
+  if (!authReady || locked) {
+    return <LockScreen timeLeft={timeLeft} />;
+  }
+
+  // Otherwise, render your exact UI:
   return (
     <div className="relative min-h-screen flex items-center justify-center p-6 bg-[#0A0A0A] text-gray-200">
       <audio ref={audioRef} src="/sounds/click.mp3" preload="auto" />
@@ -416,7 +532,6 @@ export default function AdhdTestPage() {
 
         {step === 'results' && (
           <div>
-            {/* your existing report UI */}
             <Report userInfo={userInfo} answers={answers} />
             <div className="mt-8 flex flex-col items-center">
               <button
@@ -426,12 +541,12 @@ export default function AdhdTestPage() {
               >
                 {isDownloading ? '📄 Generating PDF...' : '📄 Download Detailed Report as PDF'}
               </button>
-              <button
-                onClick={handleStartNew}
-                className="mt-4 w-full max-w-xs px-8 py-4 font-semibold text-white rounded-2xl bg-gray-600 hover:bg-gray-700 transition-colors"
+              <a
+                href="/dashboard/adhd-history"
+                className="mt-4 w-full max-w-xs px-8 py-4 font-semibold text-white text-center rounded-2xl bg-gray-600 hover:bg-gray-700 transition-colors"
               >
-                🔄 Restart Assessment
-              </button>
+                View All Results
+              </a>
             </div>
           </div>
         )}
@@ -443,21 +558,18 @@ export default function AdhdTestPage() {
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in { animation: fade-in 0.5s ease-out; }
-
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }
           66% { transform: translate(-20px, 20px) scale(0.9); }
           100% { transform: translate(0px, 0px) scale(1); }
         }
-
         @keyframes blob-delay {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(-30px, 50px) scale(1.1); }
           66% { transform: translate(20px, -20px) scale(0.9); }
           100% { transform: translate(0px, 0px) scale(1); }
         }
-
         .animate-blob { animation: blob 10s infinite ease-in-out; }
         .animate-blob-delay { animation: blob-delay 10s infinite ease-in-out; }
       `}</style>
