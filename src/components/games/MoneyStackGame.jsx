@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Music, XCircle, ChevronLeft, ChevronRight, ChevronDown, RotateCcw } from 'lucide-react';
 import * as Tone from 'tone';
 
-// ===== Playfield constants =====
 const COLS = 15;
 const ROWS = 20;
 const INITIAL_SPEED = 600;
@@ -10,8 +9,9 @@ const INITIAL_SPEED = 600;
 // Circular control sizing (px)
 const CONTROL_SIZE = 180;
 const CONTROL_GAP = 8;
+// Everything below this horizontal line is “control area”
+const FLOOR_CLEAR = CONTROL_SIZE / 2 + CONTROL_GAP + 8;
 
-// Tetris-like shapes
 const SHAPES = [
   [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
   [[0,0,1,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]],
@@ -47,7 +47,6 @@ const Game = ({ onNext, duration }) => {
       window.removeEventListener('touchmove', prevent);
     };
   }, []);
-  // ================================================
 
   const [board, setBoard] = useState(Array.from({ length: ROWS }, () => Array(COLS).fill(0)));
   const [currentPiece, setCurrentPiece] = useState(null);
@@ -58,7 +57,6 @@ const Game = ({ onNext, duration }) => {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
 
-  // Tone.js players
   const placementSoundPlayer = useRef(null);
   const backgroundMusicPlayer = useRef(null);
 
@@ -228,6 +226,7 @@ const Game = ({ onNext, duration }) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  // ===== RENDERING (crisp, solid blocks; no rotation) =====
   const renderBoard = () => {
     const combined = board.map((row) => [...row]);
     if (currentPiece) {
@@ -242,17 +241,23 @@ const Game = ({ onNext, duration }) => {
       }
     }
     return combined.map((row, ri) => (
-      <div key={ri} className="flex">
+      <div key={ri} className="flex leading-none">
         {row.map((cell, ci) => (
           <div
             key={ci}
-            // empty cells are TRANSPARENT so your image shows through
-            className={`w-6 h-6 p-0.5 ${cell === 0
-              ? 'bg-transparent'
-              : 'bg-gradient-to-br from-green-300 via-green-400 to-green-500 shadow-md rotate-3'}`}
+            className={`w-6 h-6 border border-gray-700 box-content ${
+              cell === 0
+                ? 'bg-transparent'
+                : 'bg-emerald-400'
+            }`}
+            style={{
+              // crisp edges, no skew
+              borderRadius: cell === 0 ? 0 : 3,
+              boxShadow: cell === 0 ? 'none' : '0 2px 0 rgba(0,0,0,0.25), inset 0 0 2px rgba(255,255,255,0.25)',
+            }}
           >
             {cell !== 0 && (
-              <div className="w-full h-full bg-green-400 rounded-sm shadow-inner flex items-center justify-center text-sm font-bold text-gray-800">
+              <div className="w-full h-full flex items-center justify-center text-xs font-extrabold text-emerald-950">
                 $
               </div>
             )}
@@ -268,12 +273,14 @@ const Game = ({ onNext, duration }) => {
     return (
       <div className="p-0 bg-transparent rounded-md">
         {shape.map((row, ri) => (
-          <div key={ri} className="flex">
+          <div key={ri} className="flex leading-none">
             {row.map((cell, ci) => (
-              <div key={ci}
-                className={`w-1.5 h-1.5 ${cell === 0
-                  ? 'bg-transparent'
-                  : 'bg-gradient-to-br from-green-300 via-green-400 to-green-500 shadow-md rotate-3'}`}
+              <div
+                key={ci}
+                className={`w-1.5 h-1.5 ${cell === 0 ? 'bg-transparent' : 'bg-emerald-400'}`}
+                style={{
+                  borderRadius: cell === 0 ? 0 : 1,
+                }}
               />
             ))}
           </div>
@@ -284,11 +291,9 @@ const Game = ({ onNext, duration }) => {
 
   return (
     <div
-      className="flex flex-col h-dvh bg-gray-950 text-gray-200 font-sans antialiased select-none"
+      className="flex flex-col h-dvh text-gray-200 font-sans antialiased select-none"
       style={{
-        // Page background (behind the framed board)
-        backgroundImage:
-          'linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url(/images/money.jpg)',
+        backgroundImage: 'linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url(/images/money.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         touchAction: 'none',
@@ -306,14 +311,14 @@ const Game = ({ onNext, duration }) => {
           </button>
 
           <div className="flex-grow flex items-center justify-center space-x-2">
-            <span className="text-xs font-semibold text-green-300 drop-shadow">Cash:</span>
+            <span className="text-xs font-semibold text-emerald-300 drop-shadow">Cash:</span>
             <span className="text-sm font-bold text-white">${score}</span>
-            <span className="text-xs font-semibold text-green-300 drop-shadow ml-4">Time:</span>
+            <span className="text-xs font-semibold text-emerald-300 drop-shadow ml-4">Time:</span>
             <span className="text-sm font-bold text-white">{formatTime(timeLeft)}</span>
           </div>
 
           <div className="flex items-center space-x-2">
-            <h2 className="text-[8px] font-semibold text-green-300 drop-shadow">NEXT</h2>
+            <h2 className="text-[8px] font-semibold text-emerald-300 drop-shadow">NEXT</h2>
             <div className="flex justify-center p-0.5">{renderNextPiece()}</div>
             <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white font-bold border-2 border-white">
               N
@@ -325,34 +330,33 @@ const Game = ({ onNext, duration }) => {
       {/* GAME AREA */}
       <div className="relative flex-1 w-full px-2 pb-2">
         <div
-          className="relative border-4 border-green-500 rounded-md overflow-hidden w-full h-full flex items-start justify-center"
+          className="relative border-4 border-emerald-500 rounded-md overflow-hidden w-full h-full flex items-start justify-center"
           style={{
-            // Board background – your image visible inside the frame
             backgroundImage: 'url(/images/money.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         >
-          {/* Grid content starts at top, with reserved padding at bottom for control */}
-          <div className="w-full flex flex-col items-center"
-               style={{ paddingBottom: CONTROL_SIZE / 2 + CONTROL_GAP + 16 }}>
+          {/* Grid begins at top; keep room at bottom for controls */}
+          <div className="w-full flex flex-col items-center" style={{ paddingBottom: FLOOR_CLEAR + 16 }}>
             {renderBoard()}
           </div>
 
-          {/* Soft watermark (optional). Remove if not needed */}
-          {/* <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-gray-900/40 opacity-20 text-9xl font-extrabold tracking-tighter">$</span>
-          </div> */}
-
-          {/* OPAQUE mask under the circular control so background doesn't show in that zone */}
+          {/* >>> FLOOR LINE (clear boundary where blocks stop) <<< */}
           <div
-            className="absolute left-0 right-0 bg-gray-950/85 pointer-events-none"
-            style={{ height: CONTROL_SIZE / 2 + CONTROL_GAP + 8, bottom: 0 }}
+            className="absolute left-0 right-0"
+            style={{ bottom: FLOOR_CLEAR, height: 0, borderTop: '2px solid #10B981' /* emerald-500 */ }}
           />
 
-          {/* Circular D-pad inside board */}
+          {/* Opaque mask under the circular control (no background peeking) */}
           <div
-            className="pointer-events-auto absolute rounded-full bg-gray-900/70 border border-green-500 shadow-2xl flex items-center justify-center"
+            className="absolute left-0 right-0 bg-gray-950/90 pointer-events-none"
+            style={{ height: FLOOR_CLEAR, bottom: 0 }}
+          />
+
+          {/* Circular D-pad */}
+          <div
+            className="pointer-events-auto absolute rounded-full bg-gray-900/75 border border-emerald-500 shadow-2xl flex items-center justify-center"
             style={{
               width: CONTROL_SIZE,
               height: CONTROL_SIZE,
@@ -365,7 +369,7 @@ const Game = ({ onNext, duration }) => {
               <div />
               <button
                 onClick={() => handlePlayerAction('rotate')}
-                className="w-10 h-10 rounded-full bg-gray-800 text-green-400 border border-green-500 shadow-lg active:scale-95 flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-gray-800 text-emerald-400 border border-emerald-500 shadow-lg active:scale-95 flex items-center justify-center"
                 aria-label="Rotate"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -374,7 +378,7 @@ const Game = ({ onNext, duration }) => {
 
               <button
                 onClick={() => handlePlayerAction('left')}
-                className="w-10 h-10 rounded-full bg-gray-800 text-green-400 border border-green-500 shadow-lg active:scale-95 flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-gray-800 text-emerald-400 border border-emerald-500 shadow-lg active:scale-95 flex items-center justify-center"
                 aria-label="Left"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -382,7 +386,7 @@ const Game = ({ onNext, duration }) => {
 
               <button
                 onClick={() => handlePlayerAction('rotate')}
-                className="w-12 h-12 rounded-full bg-green-400/90 text-gray-900 font-bold border border-white shadow-xl active:scale-95 flex items-center justify-center"
+                className="w-12 h-12 rounded-full bg-emerald-400 text-gray-900 font-bold border border-white shadow-xl active:scale-95 flex items-center justify-center"
                 aria-label="Rotate (Center)"
               >
                 ●
@@ -390,7 +394,7 @@ const Game = ({ onNext, duration }) => {
 
               <button
                 onClick={() => handlePlayerAction('right')}
-                className="w-10 h-10 rounded-full bg-gray-800 text-green-400 border border-green-500 shadow-lg active:scale-95 flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-gray-800 text-emerald-400 border border-emerald-500 shadow-lg active:scale-95 flex items-center justify-center"
                 aria-label="Right"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -399,7 +403,7 @@ const Game = ({ onNext, duration }) => {
               <div />
               <button
                 onClick={() => handlePlayerAction('down')}
-                className="w-10 h-10 rounded-full bg-gray-800 text-green-400 border border-green-500 shadow-lg active:scale-95 flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-gray-800 text-emerald-400 border border-emerald-500 shadow-lg active:scale-95 flex items-center justify-center"
                 aria-label="Down"
               >
                 <ChevronDown className="w-4 h-4" />
