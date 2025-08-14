@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Unlock, Volume2, VolumeX, ChevronLeft, DollarSign, Crown } from 'lucide-react';
+import { Unlock, Volume2, VolumeX, ChevronLeft, DollarSign } from 'lucide-react';
 import Confetti from 'react-confetti';
 
 const useWindowSize = () => {
@@ -29,13 +29,13 @@ const useWindowSize = () => {
 };
 
 const LEVEL_COLORS = [
-    { gradient: 'from-cyan-500 to-blue-700', border: 'border-cyan-400', hoverBg: 'bg-cyan-500' },
-    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' },
+    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' }, // Level 1 (new)
+    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' }, // Level 2 (original)
     { gradient: 'from-blue-500 to-purple-700', border: 'border-blue-400', hoverBg: 'bg-blue-500' },
     { gradient: 'from-teal-500 to-cyan-700', border: 'border-teal-400', hoverBg: 'bg-teal-500' },
     { gradient: 'from-fuchsia-500 to-pink-700', border: 'border-fuchsia-400', hoverBg: 'bg-fuchsia-500' },
     { gradient: 'from-indigo-500 to-blue-700', border: 'border-indigo-400', hoverBg: 'bg-indigo-500' },
-    { gradient: 'from-blue-700 to-indigo-900', border: 'border-blue-400', hoverBg: 'bg-blue-500' },
+    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' }, // Level 7 (new)
 ];
 
 const LEVELS = [
@@ -198,7 +198,7 @@ export default function App() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white font-mono flex flex-col relative overflow-hidden font-orbitron selection:bg-cyan-500 selection:text-black">
+        <div className="min-h-screen text-white font-mono flex flex-col relative overflow-hidden font-orbitron selection:bg-cyan-500 selection:text-black" style={{ backgroundImage: `url('/images/blockstack.png')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
             {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={300} />}
 
             <audio ref={audioRef} src="https://assets.mixkit.co/sfx/preview/mixkit-game-level-music-635.mp3" loop />
@@ -227,31 +227,22 @@ export default function App() {
                 </motion.button>
             </div>
             
-            <div className="absolute top-8 right-24 z-20">
-                <button
-                    onClick={() => setIsPremiumUser(!isPremiumUser)}
-                    className={`py-2 px-4 rounded-full font-bold text-sm transition-all shadow-lg ${isPremiumUser ? 'bg-yellow-500 text-black' : 'bg-gray-700 text-white'}`}
-                >
-                    <Crown className={`w-5 h-5 ${isPremiumUser ? 'text-black' : 'text-white'}`} />
-                </button>
-            </div>
-
-            <div className="flex flex-col items-center justify-center pt-32 pb-8 relative z-10 p-6">
+            <div className="flex flex-col items-center justify-center pt-32 pb-8 relative z-10 p-6 bg-black/50">
                 <motion.h1
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="text-4xl md:text-6xl font-extrabold mb-1 uppercase tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600 font-bebas drop-shadow-[0_0_10px_rgba(59,130,246,0.7)]"
+                    className="text-4xl md:text-6xl font-extrabold mb-1 uppercase tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600 font-bebas drop-shadow-[0_0_10px_rgba(59,130,246,0.7)] text-shadow-md"
                 >
-                    MoneyStack
+                    <strong className="font-extrabold">MoneyStack</strong>
                 </motion.h1>
                 <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="text-lg md:text-xl text-gray-300 font-orbitron"
+                    className="text-lg md:text-xl text-yellow-300 font-orbitron text-shadow-md"
                 >
-                    Build your wealth
+                    <strong className="font-extrabold">Build your wealth</strong>
                 </motion.p>
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -263,9 +254,9 @@ export default function App() {
                         initial={{ y: -5, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                        className="text-3xl md:text-5xl font-extrabold text-yellow-400 drop-shadow-[0_0_10px_rgba(252,211,77,0.7)]"
+                        className="text-3xl md:text-5xl font-extrabold text-yellow-400 drop-shadow-[0_0_10px_rgba(252,211,77,0.7)] text-shadow-lg"
                     >
-                        {formatCurrency(lotteryCounter)}
+                        <strong className="font-extrabold">{formatCurrency(lotteryCounter)}</strong>
                     </motion.div>
                 </motion.div>
             </div>
@@ -307,7 +298,6 @@ export default function App() {
                                             animate={{ scale: 1 }}
                                             transition={{ type: "spring", stiffness: 300, delay: 0.5 + index * 0.05 + 0.2 }}
                                         >
-                                            <Crown className="w-5 h-5 text-yellow-300 animate-pulse" />
                                             <span className="text-xs font-bold text-yellow-300 hidden sm:block">PRO</span>
                                         </motion.div>
                                     )}
