@@ -29,13 +29,13 @@ const useWindowSize = () => {
 };
 
 const LEVEL_COLORS = [
-    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' }, // Level 1 (new)
-    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' }, // Level 2 (original)
+    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' },
+    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' },
     { gradient: 'from-blue-500 to-purple-700', border: 'border-blue-400', hoverBg: 'bg-blue-500' },
     { gradient: 'from-teal-500 to-cyan-700', border: 'border-teal-400', hoverBg: 'bg-teal-500' },
     { gradient: 'from-fuchsia-500 to-pink-700', border: 'border-fuchsia-400', hoverBg: 'bg-fuchsia-500' },
     { gradient: 'from-indigo-500 to-blue-700', border: 'border-indigo-400', hoverBg: 'bg-indigo-500' },
-    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' }, // Level 7 (new)
+    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' },
 ];
 
 const LEVELS = [
@@ -108,13 +108,15 @@ export default function App() {
     const [showPopup, setShowPopup] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [isMusicPlaying, setIsMusicPlaying] = useState(true);
-    const [isPremiumUser, setIsPremiumUser] = useState(true); 
+    const [isPremiumUser, setIsPremiumUser] = useState(true);
     const [lotteryCounter, setLotteryCounter] = useState(1000000);
     const [countdown, setCountdown] = useState(null);
 
     const audioRef = useRef(null);
     const buttonClickSoundRef = useRef(null);
     const countdownSoundRef = useRef(null);
+    const startGameSoundRef = useRef(null);
+    const backButtonSoundRef = useRef(null);
 
     const { width, height } = useWindowSize();
     const router = useRouter();
@@ -165,6 +167,27 @@ export default function App() {
         }
     };
 
+    const playStartGameSound = () => {
+        if (startGameSoundRef.current) {
+            startGameSoundRef.current.currentTime = 0;
+            startGameSoundRef.current.play().catch(e => console.error("Sound playback error:", e));
+        }
+    };
+
+    const playCountdownSound = () => {
+        if (countdownSoundRef.current) {
+            countdownSoundRef.current.currentTime = 0;
+            countdownSoundRef.current.play().catch(e => console.error("Sound playback error:", e));
+        }
+    };
+
+    const playBackButtonSound = () => {
+        if (backButtonSoundRef.current) {
+            backButtonSoundRef.current.currentTime = 0;
+            backButtonSoundRef.current.play().catch(e => console.error("Sound playback error:", e));
+        }
+    };
+
     const handleStartSessionClick = (level) => {
         if (level.premium && !isPremiumUser) {
             alert("This is a premium level! Please upgrade to access.");
@@ -175,6 +198,7 @@ export default function App() {
     };
 
     const handleConfirmStart = () => {
+        playStartGameSound();
         setShowPopup(false);
         setCountdown(3);
 
@@ -182,10 +206,7 @@ export default function App() {
             setCountdown(prev => {
                 const nextCount = prev - 1;
                 if (nextCount > 0) {
-                    if (countdownSoundRef.current) {
-                        countdownSoundRef.current.currentTime = 0;
-                        countdownSoundRef.current.play();
-                    }
+                    playCountdownSound();
                     return nextCount;
                 } else {
                     clearInterval(countdownInterval);
@@ -199,15 +220,19 @@ export default function App() {
 
     return (
         <div className="min-h-screen text-white font-mono flex flex-col relative overflow-hidden font-orbitron selection:bg-cyan-500 selection:text-black" style={{ backgroundImage: `url('/images/blockstack.png')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
+            <div className="absolute inset-0 bg-black/50 z-0"></div>
+            
             {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={300} />}
 
             <audio ref={audioRef} src="https://assets.mixkit.co/sfx/preview/mixkit-game-level-music-635.mp3" loop />
-            <audio ref={buttonClickSoundRef} src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" />
-            <audio ref={countdownSoundRef} src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-bleep-967.mp3" />
+            <audio ref={buttonClickSoundRef} src="/sounds/click.mp3" />
+            <audio ref={startGameSoundRef} src="/sounds/click.mp3" />
+            <audio ref={countdownSoundRef} src="/sounds/click.mp3" />
+            <audio ref={backButtonSoundRef} src="/sounds/click.mp3" />
 
             <div className="absolute top-0 left-0 right-0 p-8 z-20 flex justify-between items-center bg-transparent">
                 <motion.button
-                    onClick={() => router.back()}
+                    onClick={() => { playBackButtonSound(); router.back(); }}
                     initial={{ x: -100 }}
                     animate={{ x: 0 }}
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
@@ -227,7 +252,7 @@ export default function App() {
                 </motion.button>
             </div>
             
-            <div className="flex flex-col items-center justify-center pt-32 pb-8 relative z-10 p-6 bg-black/50">
+            <div className="flex flex-col items-center justify-center pt-32 pb-8 relative z-10 p-6">
                 <motion.h1
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
