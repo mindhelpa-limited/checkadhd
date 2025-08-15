@@ -263,7 +263,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="relative max-w-6xl mx-auto z-10">
-                <h1 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600 leading-tight">
+                <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight">
                     Welcome to Your Dashboard
                 </h1>
                 <p className="text-gray-400 text-base md:text-lg mt-2 mb-8 md:mb-12">
