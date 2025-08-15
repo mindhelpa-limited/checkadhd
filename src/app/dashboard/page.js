@@ -271,7 +271,7 @@ export default function DashboardPage() {
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                    {/* Premium Account card (Blue-Purple) */}
+                    {/* Premium Account card */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -281,82 +281,76 @@ export default function DashboardPage() {
                             boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.2)",
                             rotate: 0.5,
                         }}
-                        className="group relative overflow-hidden p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] md:col-span-2 transition-all duration-300 transform hover:rotate-1"
+                        className="group relative overflow-hidden bg-[#1A1A1A]/70 backdrop-blur-md p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] md:col-span-2 transition-all duration-300"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
-                        <div className="absolute inset-0.5 rounded-[calc(1.5rem+0.5px)] bg-black opacity-60 backdrop-blur-md"></div>
-                        <div className="relative z-10">
-                            <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center text-gray-200">
-                                <SparklesIcon className="h-6 w-6 md:h-8 md:w-8 mr-3 flex-shrink-0 text-yellow-400 drop-shadow-[0_0_5px_rgba(252,211,77,0.5)]" />
-                                Your Premium Account
-                            </h2>
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-purple-900 to-transparent opacity-10 group-hover:opacity-20 transition-opacity duration-300"></div>
 
-                            {userData && (
-                                <ul className="space-y-4 md:space-y-6">
-                                    <motion.li
-                                        whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
-                                        className="flex items-center p-4 rounded-xl transition-all duration-300 relative overflow-hidden bg-gradient-to-r from-blue-900 to-transparent"
-                                    >
-                                        <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-                                        <UserCircleIcon className="h-6 w-6 text-blue-400 mr-4 flex-shrink-0 relative z-10" />
-                                        <div className="relative z-10">
-                                            <strong className="text-white">Email:</strong>
-                                            <p className="text-gray-400">{userData.email}</p>
-                                        </div>
-                                    </motion.li>
+                        <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center text-gray-200">
+                            <SparklesIcon className="h-6 w-6 md:h-8 md:w-8 mr-3 flex-shrink-0 text-yellow-400 drop-shadow-[0_0_5px_rgba(252,211,77,0.5)]" />
+                            Your Premium Account
+                        </h2>
 
-                                    <motion.li
-                                        whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
-                                        className="flex items-center p-4 rounded-xl transition-all duration-300 relative overflow-hidden bg-gradient-to-r from-green-900 to-transparent"
-                                    >
-                                        <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-                                        <TrophyIcon className="h-6 w-6 text-green-400 mr-4 flex-shrink-0 relative z-10" />
-                                        <div className="relative z-10">
-                                            <strong className="text-white">Score:</strong>
-                                            <p className="text-gray-400">
-                                                {hasTakenTest && scoreOutOf100 != null ? `${scoreOutOf100} / 100` : "N/A"}
-                                            </p>
-                                        </div>
-                                    </motion.li>
+                        {userData && (
+                            <ul className="space-y-4 md:space-y-6">
+                                <motion.li
+                                    whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
+                                    className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300"
+                                >
+                                    <UserCircleIcon className="h-6 w-6 text-blue-400 mr-4 flex-shrink-0" />
+                                    <div>
+                                        <strong className="text-white">Email:</strong>
+                                        <p className="text-gray-400">{userData.email}</p>
+                                    </div>
+                                </motion.li>
 
-                                    <motion.li
-                                        whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
-                                        className="flex items-center p-4 rounded-xl transition-all duration-300 relative overflow-hidden bg-gradient-to-r from-purple-900 to-transparent"
-                                    >
-                                        <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-                                        <ChatBubbleBottomCenterTextIcon className="h-6 w-6 text-purple-400 mr-4 flex-shrink-0 relative z-10" />
-                                        <div className="relative z-10">
-                                            <strong className="text-white">ADHD Status:</strong>
-                                            <p className="font-semibold text-blue-400">
-                                                {hasTakenTest && scoreOutOf100 != null ? getAdhdStatus(scoreOutOf100) : "Not available yet"}
-                                            </p>
-                                            {hasTakenTest && riskLevelText && (
-                                                <p className="text-xs text-gray-400 mt-1">{levelLabel} • {riskLevelText}</p>
-                                            )}
-                                        </div>
-                                    </motion.li>
+                                <motion.li
+                                    whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
+                                    className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300"
+                                >
+                                    <TrophyIcon className="h-6 w-6 text-green-400 mr-4 flex-shrink-0" />
+                                    <div>
+                                        <strong className="text-white">Score:</strong>
+                                        <p className="text-gray-400">
+                                            {hasTakenTest && scoreOutOf100 != null ? `${scoreOutOf100} / 100` : "N/A"}
+                                        </p>
+                                    </div>
+                                </motion.li>
 
-                                    <motion.li
-                                        whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
-                                        className="flex items-center p-4 rounded-xl transition-all duration-300 relative overflow-hidden bg-gradient-to-r from-orange-900 to-transparent"
-                                    >
-                                        <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-                                        <CalendarDaysIcon className="h-6 w-6 text-orange-400 mr-4 flex-shrink-0 relative z-10" />
-                                        <div className="relative z-10">
-                                            <strong className="text-white">Last Test:</strong>
-                                            <p className="text-gray-400">
-                                                {hasTakenTest && lastTestDate
-                                                    ? lastTestDate.toLocaleDateString()
-                                                    : "Not taken yet"}
-                                            </p>
-                                        </div>
-                                    </motion.li>
-                                </ul>
-                            )}
-                        </div>
+                                <motion.li
+                                    whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
+                                    className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300"
+                                >
+                                    <ChatBubbleBottomCenterTextIcon className="h-6 w-6 text-purple-400 mr-4 flex-shrink-0" />
+                                    <div>
+                                        <strong className="text-white">ADHD Status:</strong>
+                                        <p className="font-semibold text-blue-400">
+                                            {hasTakenTest && scoreOutOf100 != null ? getAdhdStatus(scoreOutOf100) : "Not available yet"}
+                                        </p>
+                                        {hasTakenTest && riskLevelText && (
+                                            <p className="text-xs text-gray-400 mt-1">{levelLabel} • {riskLevelText}</p>
+                                        )}
+                                    </div>
+                                </motion.li>
+
+                                <motion.li
+                                    whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
+                                    className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300"
+                                >
+                                    <CalendarDaysIcon className="h-6 w-6 text-orange-400 mr-4 flex-shrink-0" />
+                                    <div>
+                                        <strong className="text-white">Last Test:</strong>
+                                        <p className="text-gray-400">
+                                            {hasTakenTest && lastTestDate
+                                                ? lastTestDate.toLocaleDateString()
+                                                : "Not taken yet"}
+                                        </p>
+                                    </div>
+                                </motion.li>
+                            </ul>
+                        )}
                     </motion.div>
 
-                    {/* Actions card (Green-Cyan) */}
+                    {/* Actions card */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -366,10 +360,9 @@ export default function DashboardPage() {
                             boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.2)",
                             rotate: -0.5,
                         }}
-                        className="group relative overflow-hidden p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] flex flex-col justify-between transition-all duration-300 transform hover:-rotate-1"
+                        className="relative overflow-hidden bg-[#1A1A1A]/70 backdrop-blur-md p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] flex flex-col justify-between transition-all duration-300"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-tr from-green-900 to-cyan-900 opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
-                        <div className="absolute inset-0.5 rounded-[calc(1.5rem+0.5px)] bg-black opacity-60 backdrop-blur-md"></div>
+                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-900 via-purple-900 to-transparent opacity-10 group-hover:opacity-20 transition-opacity duration-300"></div>
                         <div className="flex flex-col items-center relative z-10">
                             <h3 className="text-xl font-bold mb-4 text-white text-center">
                                 Ready for your test?
