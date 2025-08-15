@@ -224,7 +224,7 @@ export default function App() {
             
             {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={300} />}
 
-            <audio ref={audioRef} src="https://assets.mixkit.co/sfx/preview/mixkit-game-level-music-635.mp3" loop />
+            <audio ref={audioRef} src="/sounds/pre-session.mp3" loop />
             <audio ref={buttonClickSoundRef} src="/sounds/click.mp3" />
             <audio ref={startGameSoundRef} src="/sounds/click.mp3" />
             <audio ref={countdownSoundRef} src="/sounds/click.mp3" />

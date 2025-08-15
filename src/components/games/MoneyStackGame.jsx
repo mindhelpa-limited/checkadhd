@@ -22,7 +22,11 @@ const SHAPES = [
   [[1,1,0,0],[1,1,0,0],[0,0,0,0],[0,0,0,0]],
 ];
 
-const Game = ({ onNext, duration }) => {
+const Game = ({
+  onNext,
+  duration = 7 * 60 * 1000,          // default to 7 minutes (ms) for your game stage
+  initialRemainingMs,                 // <<< NEW: resume point in ms (optional)
+}) => {
   // ===== Disable page scrolling while mounted =====
   useEffect(() => {
     const { documentElement: html, body } = document;
@@ -53,7 +57,23 @@ const Game = ({ onNext, duration }) => {
   const [nextPiece, setNextPiece] = useState(null);
   const [score, setScore] = useState(0);
   const [gameSpeed] = useState(INITIAL_SPEED);
-  const [timeLeft, setTimeLeft] = useState(duration / 1000);
+
+  // ----- TIMER with resume -----
+  const startMs =
+    typeof initialRemainingMs === 'number' && initialRemainingMs >= 0
+      ? initialRemainingMs
+      : duration;
+
+  // store seconds; initialize from startMs
+  const [timeLeft, setTimeLeft] = useState(Math.ceil(startMs / 1000));
+
+  // if parent ever re-mounts with a different resume value (e.g., tab 2),
+  // update the timer start accordingly.
+  useEffect(() => {
+    setTimeLeft(Math.ceil(startMs / 1000));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialRemainingMs, duration]);
+
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
 
@@ -63,8 +83,10 @@ const Game = ({ onNext, duration }) => {
   useEffect(() => {
     const init = async () => {
       await Tone.start();
-      placementSoundPlayer.current = new Tone.Player('/moneysound.mp3').toDestination();
-      backgroundMusicPlayer.current = new Tone.Player('/meditation.mp3', () => {
+      // Updated to use your 'crush.mp3' file
+      placementSoundPlayer.current = new Tone.Player('/sounds/crush.mp3').toDestination();
+      // Updated to use your 'pre-session.mp3' file
+      backgroundMusicPlayer.current = new Tone.Player('/sounds/pre-session.mp3', () => {
         backgroundMusicPlayer.current.loop = true;
         backgroundMusicPlayer.current.volume.value = -10;
         setIsAudioLoaded(true);
@@ -101,7 +123,7 @@ const Game = ({ onNext, duration }) => {
     }
   };
 
-  // Timer
+  // Timer tick
   useEffect(() => {
     if (timeLeft <= 0) {
       if (isMusicPlaying && backgroundMusicPlayer.current?.loaded) backgroundMusicPlayer.current.stop();
@@ -226,7 +248,7 @@ const Game = ({ onNext, duration }) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // ===== RENDERING (crisp, solid blocks; no rotation) =====
+  // ===== RENDERING =====
   const renderBoard = () => {
     const combined = board.map((row) => [...row]);
     if (currentPiece) {
@@ -246,12 +268,9 @@ const Game = ({ onNext, duration }) => {
           <div
             key={ci}
             className={`w-6 h-6 border border-gray-700 box-content ${
-              cell === 0
-                ? 'bg-transparent'
-                : 'bg-emerald-400'
+              cell === 0 ? 'bg-transparent' : 'bg-emerald-400'
             }`}
             style={{
-              // crisp edges, no skew
               borderRadius: cell === 0 ? 0 : 3,
               boxShadow: cell === 0 ? 'none' : '0 2px 0 rgba(0,0,0,0.25), inset 0 0 2px rgba(255,255,255,0.25)',
             }}
@@ -278,9 +297,7 @@ const Game = ({ onNext, duration }) => {
               <div
                 key={ci}
                 className={`w-1.5 h-1.5 ${cell === 0 ? 'bg-transparent' : 'bg-emerald-400'}`}
-                style={{
-                  borderRadius: cell === 0 ? 0 : 1,
-                }}
+                style={{ borderRadius: cell === 0 ? 0 : 1 }}
               />
             ))}
           </div>
@@ -335,6 +352,7 @@ const Game = ({ onNext, duration }) => {
             backgroundImage: 'url(/images/money.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
+            touchAction: 'none',
           }}
         >
           {/* Grid begins at top; keep room at bottom for controls */}
@@ -342,13 +360,13 @@ const Game = ({ onNext, duration }) => {
             {renderBoard()}
           </div>
 
-          {/* >>> FLOOR LINE (clear boundary where blocks stop) <<< */}
+          {/* Floor boundary */}
           <div
             className="absolute left-0 right-0"
-            style={{ bottom: FLOOR_CLEAR, height: 0, borderTop: '2px solid #10B981' /* emerald-500 */ }}
+            style={{ bottom: FLOOR_CLEAR, height: 0, borderTop: '2px solid #10B981' }}
           />
 
-          {/* Opaque mask under the circular control (no background peeking) */}
+          {/* Opaque mask under the circular control */}
           <div
             className="absolute left-0 right-0 bg-gray-950/90 pointer-events-none"
             style={{ height: FLOOR_CLEAR, bottom: 0 }}

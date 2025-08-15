@@ -5,51 +5,59 @@ import { motion } from "framer-motion";
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import meditationData from "./meditationData"; // ✅ Importing your meditation data
 
-export default function MeditationScreen({ onNext }) {
-  // Timer state for the 5-minute countdown
-  const [minutes, setMinutes] = useState(5);
-  const [seconds, setSeconds] = useState(0);
-  const [timerRunning, setTimerRunning] = useState(true); // 💡 The timer starts automatically
+export default function MeditationScreen({
+  onNext,
+  duration = 5 * 60 * 1000,          // default 5 minutes (ms)
+  initialRemainingMs,                 // optional resume point (ms)
+}) {
+  // ----- TIMER: use ms-based countdown so we can resume precisely -----
+  const startMs = typeof initialRemainingMs === 'number' && initialRemainingMs >= 0
+    ? initialRemainingMs
+    : duration;
 
-  // Audio refs for both voiceover and background music
+  const [timeLeftMs, setTimeLeftMs] = useState(startMs);
+  const [timerRunning, setTimerRunning] = useState(true);
+
+  useEffect(() => {
+    if (!timerRunning) return;
+
+    if (timeLeftMs <= 0) {
+      setTimerRunning(false);
+      onNext?.();
+      return;
+    }
+
+    const endAt = Date.now() + timeLeftMs;
+    const id = setInterval(() => {
+      const left = endAt - Date.now();
+      if (left <= 0) {
+        clearInterval(id);
+        setTimeLeftMs(0);
+        setTimerRunning(false);
+        onNext?.();
+      } else {
+        setTimeLeftMs(left);
+      }
+    }, 250);
+
+    return () => clearInterval(id);
+  }, [timerRunning, timeLeftMs, onNext]);
+
+  const mm = Math.floor(Math.max(0, timeLeftMs) / 60000);
+  const ss = String(Math.floor((Math.max(0, timeLeftMs) % 60000) / 1000)).padStart(2, '0');
+
+  // ----- AUDIO / VIDEO (unchanged, just works as before) -----
   const voiceoverAudioRef = useRef(null);
   const backgroundAudioRef = useRef(null);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.5); // 0.0 to 1.0
   const [isMediaLoaded, setIsMediaLoaded] = useState({ voiceover: false, background: false, video: false });
 
-  // Video background ref
   const videoRef = useRef(null);
   const [mediaError, setMediaError] = useState(false);
 
-  // Use the first meditation entry for the session
   const meditation = meditationData[0];
 
-  // Effect to handle the 5-minute timer
-  useEffect(() => {
-    if (timerRunning) {
-      const timer = setInterval(() => {
-        if (seconds > 0) {
-          setSeconds(seconds - 1);
-        }
-        if (seconds === 0) {
-          if (minutes === 0) {
-            clearInterval(timer);
-            setTimerRunning(false);
-            if (onNext) {
-              onNext();
-            }
-          } else {
-            setMinutes(minutes - 1);
-            setSeconds(59);
-          }
-        }
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [timerRunning, minutes, seconds, onNext]);
-
-  // Effect to manage background music volume and mute status
   useEffect(() => {
     if (backgroundAudioRef.current) {
       backgroundAudioRef.current.volume = volume;
@@ -57,41 +65,25 @@ export default function MeditationScreen({ onNext }) {
     }
   }, [volume, isMuted]);
 
-  // New useEffect to start the media automatically once all files are loaded
   useEffect(() => {
     if (isMediaLoaded.voiceover && isMediaLoaded.background && isMediaLoaded.video) {
-      if (voiceoverAudioRef.current) voiceoverAudioRef.current.play();
-      if (backgroundAudioRef.current) backgroundAudioRef.current.play();
-      if (videoRef.current) videoRef.current.play();
+      // Autoplay when all media are ready
+      try { voiceoverAudioRef.current?.play(); } catch {}
+      try { backgroundAudioRef.current?.play(); } catch {}
+      try { videoRef.current?.play(); } catch {}
     }
   }, [isMediaLoaded]);
-
-  const formatTime = (time) => {
-    return time < 10 ? `0${time}` : time;
-  };
 
   const handleVolumeChange = (e) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
-    if (backgroundAudioRef.current) {
-      backgroundAudioRef.current.volume = newVolume;
-    }
-    if (newVolume > 0 && isMuted) {
-      setIsMuted(false);
-    }
+    if (backgroundAudioRef.current) backgroundAudioRef.current.volume = newVolume;
+    if (newVolume > 0 && isMuted) setIsMuted(false);
   };
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
-
-  const handleMediaLoad = (type) => {
-    setIsMediaLoaded(prev => ({ ...prev, [type]: true }));
-  };
-
-  const handleMediaError = () => {
-    setMediaError(true);
-  };
+  const toggleMute = () => setIsMuted(v => !v);
+  const handleMediaLoad = (type) => setIsMediaLoaded(prev => ({ ...prev, [type]: true }));
+  const handleMediaError = () => setMediaError(true);
 
   const isLoading = !isMediaLoaded.voiceover || !isMediaLoaded.background || !isMediaLoaded.video;
 
@@ -136,12 +128,12 @@ export default function MeditationScreen({ onNext }) {
             <Loader2 size={80} className="text-white animate-spin" />
           ) : (
             <motion.p
-              key={minutes + ":" + seconds}
+              key={mm + ":" + ss}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="text-8xl md:text-9xl font-mono font-bold tracking-tighter"
             >
-              {formatTime(minutes)}:{formatTime(seconds)}
+              {String(mm).padStart(2,'0')}:{ss}
             </motion.p>
           )}
         </div>

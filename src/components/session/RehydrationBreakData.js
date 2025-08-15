@@ -4,7 +4,8 @@ const rehydrationBreakData = {
   duration: 120, // seconds
   description:
     "Take a mindful pause to hydrate. Drink some water slowly, notice the temperature, and allow your body to feel refreshed.",
-  audioSrc: "/audio/rehydration.mp3", // place this file in /public/audio/
+  // Change this line to use the new file path
+  audioSrc: "/sounds/drink-water.mp3", 
   tips: [
     "Sip water slowly, don't gulp",
     "Close your eyes and take deep breaths",

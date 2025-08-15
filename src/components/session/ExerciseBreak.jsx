@@ -2,29 +2,41 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-export default function ExerciseBreak({ onNext }) {
-  // Use a state variable for the timer
-  const [timeLeft, setTimeLeft] = useState(2 * 60); // 2 minutes in seconds
+export default function ExerciseBreak({
+  onNext,
+  duration = 2 * 60 * 1000,          // default 2 minutes (ms)
+  initialRemainingMs,                 // optional resume point (ms)
+}) {
+  const startMs = typeof initialRemainingMs === 'number' && initialRemainingMs >= 0
+    ? initialRemainingMs
+    : duration;
+
+  const [timeLeftMs, setTimeLeftMs] = useState(startMs);
 
   useEffect(() => {
-    // Only run the timer if there's time left
-    if (timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft(prevTime => prevTime - 1);
-      }, 1000); // Update every second
-
-      return () => clearInterval(timer);
-    } else {
-      // Once the timer hits zero, advance to the next screen
-      onNext();
+    if (timeLeftMs <= 0) {
+      onNext?.();
+      return;
     }
-  }, [timeLeft, onNext]);
+    const endAt = Date.now() + timeLeftMs;
+    const id = setInterval(() => {
+      const left = endAt - Date.now();
+      if (left <= 0) {
+        clearInterval(id);
+        setTimeLeftMs(0);
+        onNext?.();
+      } else {
+        setTimeLeftMs(left);
+      }
+    }, 250);
+    return () => clearInterval(id);
+  }, [timeLeftMs, onNext]);
 
-  // Helper function to format the time as MM:SS
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const formatTime = (ms) => {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const minutes = Math.floor(totalSec / 60);
+    const seconds = totalSec % 60;
+    return `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
   };
 
   return (
@@ -43,7 +55,7 @@ export default function ExerciseBreak({ onNext }) {
         </p>
         <div className="mt-8">
           <p className="text-7xl font-bold text-emerald-400">
-            {formatTime(timeLeft)}
+            {formatTime(timeLeftMs)}
           </p>
         </div>
       </div>
