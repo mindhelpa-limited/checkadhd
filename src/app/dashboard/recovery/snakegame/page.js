@@ -29,13 +29,13 @@ const useWindowSize = () => {
 };
 
 const LEVEL_COLORS = [
-    { gradient: 'from-cyan-500 to-blue-700', border: 'border-cyan-400', hoverBg: 'bg-cyan-500' },
+    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' },
     { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' },
     { gradient: 'from-blue-500 to-purple-700', border: 'border-blue-400', hoverBg: 'bg-blue-500' },
     { gradient: 'from-teal-500 to-cyan-700', border: 'border-teal-400', hoverBg: 'bg-teal-500' },
     { gradient: 'from-fuchsia-500 to-pink-700', border: 'border-fuchsia-400', hoverBg: 'bg-fuchsia-500' },
     { gradient: 'from-indigo-500 to-blue-700', border: 'border-indigo-400', hoverBg: 'bg-indigo-500' },
-    { gradient: 'from-blue-700 to-indigo-900', border: 'border-blue-400', hoverBg: 'bg-blue-500' },
+    { gradient: 'from-purple-500 to-indigo-700', border: 'border-purple-400', hoverBg: 'bg-purple-500' },
 ];
 
 const LEVELS = [
@@ -104,7 +104,7 @@ const LEVELS = [
     },
 ];
 
-export default function App() {
+export default function PingMoneyGame() {
     const [showPopup, setShowPopup] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [isMusicPlaying, setIsMusicPlaying] = useState(true);
@@ -115,6 +115,8 @@ export default function App() {
     const audioRef = useRef(null);
     const buttonClickSoundRef = useRef(null);
     const countdownSoundRef = useRef(null);
+    const startGameSoundRef = useRef(null);
+    const backButtonSoundRef = useRef(null);
 
     const { width, height } = useWindowSize();
     const router = useRouter();
@@ -165,6 +167,27 @@ export default function App() {
         }
     };
 
+    const playStartGameSound = () => {
+        if (startGameSoundRef.current) {
+            startGameSoundRef.current.currentTime = 0;
+            startGameSoundRef.current.play().catch(e => console.error("Sound playback error:", e));
+        }
+    };
+
+    const playCountdownSound = () => {
+        if (countdownSoundRef.current) {
+            countdownSoundRef.current.currentTime = 0;
+            countdownSoundRef.current.play().catch(e => console.error("Sound playback error:", e));
+        }
+    };
+
+    const playBackButtonSound = () => {
+        if (backButtonSoundRef.current) {
+            backButtonSoundRef.current.currentTime = 0;
+            backButtonSoundRef.current.play().catch(e => console.error("Sound playback error:", e));
+        }
+    };
+
     const handleStartSessionClick = (level) => {
         if (level.premium && !isPremiumUser) {
             alert("This is a premium level! Please upgrade to access.");
@@ -175,6 +198,7 @@ export default function App() {
     };
 
     const handleConfirmStart = () => {
+        playStartGameSound();
         setShowPopup(false);
         setCountdown(3);
 
@@ -182,14 +206,12 @@ export default function App() {
             setCountdown(prev => {
                 const nextCount = prev - 1;
                 if (nextCount > 0) {
-                    if (countdownSoundRef.current) {
-                        countdownSoundRef.current.currentTime = 0;
-                        countdownSoundRef.current.play();
-                    }
+                    playCountdownSound();
                     return nextCount;
                 } else {
                     clearInterval(countdownInterval);
                     setCountdown(null);
+                    // This is the updated navigation route
                     router.push('/dashboard/recovery/snakegame/session');
                     return null;
                 }
@@ -198,21 +220,24 @@ export default function App() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white font-mono flex flex-col relative overflow-hidden font-orbitron selection:bg-cyan-500 selection:text-black">
-            <div className="absolute inset-0 z-0 bg-gradient-to-br from-cyan-900 to-purple-900 animate-pulse"></div>
+        <div className="min-h-screen text-white font-mono flex flex-col relative overflow-hidden font-orbitron selection:bg-cyan-500 selection:text-black" style={{ backgroundImage: `url('/images/trailmuncher.png')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
+            <div className="absolute inset-0 bg-black/50 z-0"></div>
+
             {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={300} />}
 
-            <audio ref={audioRef} src="https://assets.mixkit.co/sfx/preview/mixkit-game-level-music-635.mp3" loop />
-            <audio ref={buttonClickSoundRef} src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" />
-            <audio ref={countdownSoundRef} src="https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-bleep-967.mp3" />
+            <audio ref={audioRef} src="/sounds/pre-session.mp3" loop />
+            <audio ref={buttonClickSoundRef} src="/sounds/click.mp3" />
+            <audio ref={startGameSoundRef} src="/sounds/click.mp3" />
+            <audio ref={countdownSoundRef} src="/sounds/click.mp3" />
+            <audio ref={backButtonSoundRef} src="/sounds/click.mp3" />
 
             <div className="absolute top-0 left-0 right-0 p-8 z-20 flex justify-between items-center bg-transparent">
                 <motion.button
+                    onClick={() => { playBackButtonSound(); router.back(); }}
                     initial={{ x: -100 }}
                     animate={{ x: 0 }}
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
                     className="p-3 rounded-full bg-gray-800 border-2 border-cyan-500 hover:bg-gray-700 transition-all shadow-lg"
-                    onClick={() => router.back()}
                 >
                     <ChevronLeft className="w-5 h-5 text-white" />
                 </motion.button>
@@ -227,32 +252,23 @@ export default function App() {
                     {isMusicPlaying ? <Volume2 className="w-5 h-5 text-white" /> : <VolumeX className="w-5 h-5 text-white" />}
                 </motion.button>
             </div>
-            
-            <div className="absolute top-8 right-24 z-20">
-                <button
-                    onClick={() => setIsPremiumUser(!isPremiumUser)}
-                    className={`py-2 px-4 rounded-full font-bold text-sm transition-all shadow-lg ${isPremiumUser ? 'bg-yellow-500 text-black' : 'bg-gray-700 text-white'}`}
-                >
-                    <Crown className={`w-5 h-5 ${isPremiumUser ? 'text-black' : 'text-white'}`} />
-                </button>
-            </div>
 
             <div className="flex flex-col items-center justify-center pt-32 pb-8 relative z-10 p-6">
                 <motion.h1
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="text-4xl md:text-6xl font-extrabold mb-1 uppercase tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600 font-bebas drop-shadow-[0_0_10px_rgba(59,130,246,0.7)]"
+                    className="text-4xl md:text-6xl font-extrabold mb-1 uppercase tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600 font-bebas drop-shadow-[0_0_10px_rgba(59,130,246,0.7)] text-shadow-md"
                 >
-                    SnakeGame
+                    <strong className="font-extrabold">SnakeGame</strong>
                 </motion.h1>
                 <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="text-lg md:text-xl text-gray-300 font-orbitron"
+                    className="text-lg md:text-xl text-yellow-300 font-orbitron text-shadow-md"
                 >
-                    Build your wealth
+                    <strong className="font-extrabold">Build your wealth</strong>
                 </motion.p>
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -260,13 +276,13 @@ export default function App() {
                     transition={{ duration: 0.5, delay: 0.4 }}
                     className="mt-4 text-center"
                 >
-                    <motion.div 
+                    <motion.div
                         initial={{ y: -5, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                        className="text-3xl md:text-5xl font-extrabold text-yellow-400 drop-shadow-[0_0_10px_rgba(252,211,77,0.7)]"
+                        className="text-3xl md:text-5xl font-extrabold text-yellow-400 drop-shadow-[0_0_10px_rgba(252,211,77,0.7)] text-shadow-lg"
                     >
-                        {formatCurrency(lotteryCounter)}
+                        <strong className="font-extrabold">{formatCurrency(lotteryCounter)}</strong>
                     </motion.div>
                 </motion.div>
             </div>
@@ -276,7 +292,7 @@ export default function App() {
                     {LEVELS.map((level, index) => {
                         const levelColor = LEVEL_COLORS[index % LEVEL_COLORS.length];
                         const isUnlockedOrPremium = level.unlocked || (level.premium && isPremiumUser);
-                        
+
                         return (
                             <motion.div
                                 key={level.id}
@@ -297,22 +313,21 @@ export default function App() {
                                     }`}
                             >
                                 <div className={`absolute inset-0 ${levelColor.hoverBg} opacity-0 group-hover:opacity-10 transition-opacity`}></div>
-                                
+
                                 <div className="flex justify-between items-center mb-2 z-10 relative">
                                     <h3 className="text-sm font-extrabold uppercase tracking-widest text-white">Level {level.id}</h3>
-                                    
+
                                     {level.premium && (
-                                        <motion.div 
+                                        <motion.div
                                             className="flex items-center space-x-1"
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
                                             transition={{ type: "spring", stiffness: 300, delay: 0.5 + index * 0.05 + 0.2 }}
                                         >
-                                            <Crown className="w-5 h-5 text-yellow-300 animate-pulse" />
                                             <span className="text-xs font-bold text-yellow-300 hidden sm:block">PRO</span>
                                         </motion.div>
                                     )}
-                                    
+
                                     {!level.premium && (
                                         <motion.div
                                             initial={{ scale: 0 }}
@@ -347,7 +362,7 @@ export default function App() {
                     Start Session
                 </motion.button>
             </div>
-            
+
             <AnimatePresence>
                 {showPopup && (
                     <motion.div

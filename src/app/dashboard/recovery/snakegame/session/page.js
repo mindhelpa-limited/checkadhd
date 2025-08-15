@@ -4,26 +4,22 @@ import { useState, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-
-// Session enforcement wrapper (from your hook file)
 import { GameSessionLayout } from "@/hook/useGameSessionManager";
 
-// Your session flow components
 import MeditationScreen from "../../../../../components/session/MeditationScreen";
 import SnakeGame from "../../../../../components/games/SnakeGame";
 import RehydrationBreakScreen from "../../../../../components/session/RehydrationBreakScreen";
 import ExerciseBreak from "../../../../../components/session/ExerciseBreak";
 import ScoreScreen from "../../../../../components/session/ScoreScreen";
 
-// Define stages (kept from your original)
 const STAGES = [
-  { id: 'meditation', component: MeditationScreen, duration: 5 * 60 * 1000 },
-  { id: 'game1', component: SnakeGame, duration: 7 * 60 * 1000 },
-  { id: 'rehydration', component: RehydrationBreakScreen, duration: 2 * 60 * 1000 },
-  { id: 'game2', component: SnakeGame, duration: 7 * 60 * 1000 },
-  { id: 'exercise', component: ExerciseBreak, duration: 2 * 60 * 1000 },
-  { id: 'game3', component: SnakeGame, duration: 7 * 60 * 1000 },
-  { id: 'score', component: ScoreScreen, duration: null },
+  { id: 'meditation', component: MeditationScreen, duration: 5 * 60 * 1000, isGame: false },
+  { id: 'game1', component: SnakeGame, duration: 7 * 60 * 1000, isGame: true },
+  { id: 'rehydration', component: RehydrationBreakScreen, duration: 2 * 60 * 1000, isGame: false },
+  { id: 'game2', component: SnakeGame, duration: 7 * 60 * 1000, isGame: true },
+  { id: 'exercise', component: ExerciseBreak, duration: 2 * 60 * 1000, isGame: false },
+  { id: 'game3', component: SnakeGame, duration: 7 * 60 * 1000, isGame: true },
+  { id: 'score', component: ScoreScreen, duration: null, isGame: false },
 ];
 
 export default function SnakeSessionPage() {
@@ -60,17 +56,40 @@ export default function SnakeSessionPage() {
     }
   };
 
-  const CurrentComponent = STAGES[currentStageIndex].component;
-  const isGameStage = STAGES[currentStageIndex].id.includes('game');
-  const isScoreStage = STAGES[currentStageIndex].id === 'score';
+  const currentStage = STAGES[currentStageIndex];
+  const CurrentComponent = currentStage.component;
+  const isGameStage = currentStage.id.includes('game');
+  const isScoreStage = currentStage.id === 'score';
 
   const scoreScreenProps = useMemo(() => (
     isScoreStage ? { totalScore, highestStreak, totalTime } : {}
   ), [isScoreStage, totalScore, highestStreak, totalTime]);
 
+  const renderContent = () => {
+    if (isGameStage) {
+      return (
+        <CurrentComponent
+          onNext={handleNextStage}
+          initialState={{ score: sessionData.score }}
+          duration={currentStage.duration}
+          title={`Snake Session ${currentStageIndex / 2 + 1}`}
+        />
+      );
+    } else if (isScoreStage) {
+      return <ScoreScreen {...scoreScreenProps} />;
+    } else {
+      return (
+        <CurrentComponent
+          onNext={handleNextStage}
+          sessionScores={sessionData.segmentScores}
+          title={currentStage.id}
+        />
+      );
+    }
+  };
+
   return (
-    <GameSessionLayout gameName="snakegame">
-      {/* Back button */}
+    <>
       <Link href="/dashboard/recovery/snakegame">
         <motion.button
           initial={{ scale: 0 }}
@@ -91,24 +110,15 @@ export default function SnakeSessionPage() {
           transition={{ duration: 0.5 }}
           className="h-full w-full"
         >
-          {isGameStage ? (
-            <CurrentComponent
-              onFinish={handleNextStage}
-              initialState={{ score: sessionData.score }}
-              duration={STAGES[currentStageIndex].duration}
-              title={`Snake Session ${currentStageIndex / 2 + 1}`}
-            />
-          ) : isScoreStage ? (
-            <ScoreScreen {...scoreScreenProps} />
+          {currentStage.isGame ? (
+            <GameSessionLayout gameName="snakegame">
+              {renderContent()}
+            </GameSessionLayout>
           ) : (
-            <CurrentComponent
-              onNext={handleNextStage}
-              sessionScores={sessionData.segmentScores}
-              title={STAGES[currentStageIndex].id}
-            />
+            renderContent()
           )}
         </motion.div>
       </AnimatePresence>
-    </GameSessionLayout>
+    </>
   );
 }

@@ -1,17 +1,16 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { auth, db } from "@/lib/firebase"; // Importing Firebase auth and db
-import { doc, getDoc, updateDoc } from "firebase/firestore"; // Importing Firestore functions
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
 
-const ScoreScreen = ({ totalScore, highestStreak, totalTime }) => {
+const ScoreScreen = ({ totalScore, totalTime, onNext, totalStagesCompleted }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Function to format time from milliseconds to MM:SS format
   const formatTime = (timeInMs) => {
     const totalSeconds = Math.floor(timeInMs / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -19,9 +18,8 @@ const ScoreScreen = ({ totalScore, highestStreak, totalTime }) => {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Asynchronous function to save the score to Firestore
-  const saveScoreToDatabase = async () => {
-    if (loading) return; // Prevent multiple clicks
+  const handleFinishSession = async () => {
+    if (loading) return;
     
     setLoading(true);
     setError(null);
@@ -35,29 +33,51 @@ const ScoreScreen = ({ totalScore, highestStreak, totalTime }) => {
     }
 
     try {
-      // Get a reference to the user's document
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnap = await getDoc(userDocRef);
-      
-      // Get the existing data to update the score
-      const currentData = userDocSnap.exists() ? userDocSnap.data() : { totalMoneyStacked: 0 };
-      
+      const currentData = userDocSnap.exists() ? userDocSnap.data() : { totalMoneyStacked: 0, dailyStreak: 0, totalStreak: 0, lastSessionDate: null };
+
+      // Update Total Money Stacked
       const newTotalMoneyStacked = (currentData.totalMoneyStacked || 0) + totalScore;
       
-      // Update the Firestore document with the new total score and a new best streak
+      // Update Total Streak (sum of all stages ever completed)
+      const newTotalStreak = (currentData.totalStreak || 0) + totalStagesCompleted;
+
+      // Update Daily Streak
+      let newDailyStreak = currentData.dailyStreak || 0;
+      const lastSessionDate = currentData.lastSessionDate?.toDate();
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+
+      const isSameDay = lastSessionDate && lastSessionDate.getDate() === today.getDate() && lastSessionDate.getMonth() === today.getMonth() && lastSessionDate.getFullYear() === today.getFullYear();
+      const isYesterday = lastSessionDate && lastSessionDate.getDate() === yesterday.getDate() && lastSessionDate.getMonth() === yesterday.getMonth() && lastSessionDate.getFullYear() === yesterday.getFullYear();
+
+      if (!isSameDay) {
+        if (isYesterday) {
+          newDailyStreak++;
+        } else {
+          newDailyStreak = 1;
+        }
+      }
+
       await updateDoc(userDocRef, {
         totalMoneyStacked: newTotalMoneyStacked,
-        bestStreak: Math.max(currentData.bestStreak || 0, highestStreak) // Keep the highest streak
+        totalStreak: newTotalStreak,
+        dailyStreak: newDailyStreak,
+        lastSessionDate: Timestamp.now(),
       });
 
-      console.log("Score and streak updated successfully!");
-      
-      // Navigate back to the progress page after saving
-      router.push("/progress");
-      
+      console.log("Progress updated successfully!");
+
+      if (onNext) {
+        onNext();
+      } else {
+        router.push("/dashboard/progress");
+      }
     } catch (e) {
       console.error("Error updating document: ", e);
-      setError("Failed to save your score. Please try again.");
+      setError("Failed to save your progress. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -77,30 +97,15 @@ const ScoreScreen = ({ totalScore, highestStreak, totalTime }) => {
         <p className="text-xl font-medium text-gray-300">
           You've completed the money stacking session. Great job!
         </p>
-
-        {/* Display for final score */}
-        <div className="bg-gray-900 rounded-xl p-6 shadow-lg border border-gray-700 animate-slide-in-up">
-          <h2 className="text-3xl font-semibold text-green-300 mb-2">Final Score</h2>
-          <motion.span
-            className="text-6xl font-bold text-white block leading-none"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
-          >
-            ${totalScore}
-          </motion.span>
-        </div>
-
-        {/* Stats for streak and time */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <motion.div
             className="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-700 animate-slide-in-up"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.7, duration: 0.5 }}
           >
-            <h3 className="text-xl font-semibold text-green-300">Highest Streak</h3>
-            <span className="text-4xl font-bold text-white">{highestStreak}</span>
+            <h3 className="text-xl font-semibold text-green-300">Stages Completed</h3>
+            <span className="text-4xl font-bold text-white">{totalStagesCompleted}</span>
           </motion.div>
           <motion.div
             className="bg-gray-900 rounded-xl p-4 shadow-lg border border-gray-700 animate-slide-in-up"
@@ -113,16 +118,14 @@ const ScoreScreen = ({ totalScore, highestStreak, totalTime }) => {
           </motion.div>
         </div>
         
-        {/* Error message display */}
         {error && <p className="text-red-400 font-medium">{error}</p>}
 
-        {/* Call to action button */}
         <motion.button
           className="w-full py-4 px-6 mt-6 bg-green-500 hover:bg-green-600 text-gray-900 text-xl font-bold rounded-xl shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0, duration: 0.5 }}
-          onClick={saveScoreToDatabase}
+          onClick={handleFinishSession}
           disabled={loading}
         >
           {loading ? "Saving..." : "Finish Session"}

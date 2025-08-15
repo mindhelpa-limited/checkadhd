@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
@@ -7,14 +7,10 @@ import { doc, getDoc, collection, getDocs, query } from "firebase/firestore";
 import { AnimatePresence, motion } from "framer-motion";
 import { DollarSign, Award, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// --- Icon Components (Lucide React for a clean look) ---
-// I've replaced the custom SVG icons with components from the 'lucide-react' library for consistency and ease of use.
-// These are included here for clarity, but you would normally import them directly.
+// --- Icon Components ---
 const FlameIcon = ({ className }) => <Flame className={className} />;
 const TrophyIcon = ({ className }) => <Award className={className} />;
 const DollarSignIcon = ({ className }) => <DollarSign className={className} />;
-
-// --- Loader Component for a clean loading screen experience ---
 const FullScreenLoader = ({ message }) => (
     <div className="fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50 text-white">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-400"></div>
@@ -22,7 +18,6 @@ const FullScreenLoader = ({ message }) => (
     </div>
 );
 
-// --- Main Progress Page Component ---
 export default function ProgressPage() {
     const router = useRouter();
     const [user, setUser] = useState(null);
@@ -38,23 +33,18 @@ export default function ProgressPage() {
                 return;
             }
             setUser(currentUser);
-
             const userDocRef = doc(db, "users", currentUser.uid);
             const logCollectionRef = collection(db, `users/${currentUser.uid}/recoveryLog`);
-
             try {
                 const [userDocSnap, logQuerySnap] = await Promise.all([
                     getDoc(userDocRef),
                     getDocs(query(logCollectionRef))
                 ]);
-
                 if (userDocSnap.exists()) {
                     setUserData(userDocSnap.data());
                 }
-
                 const logs = logQuerySnap.docs.map(d => ({ date: d.id, ...d.data() }));
                 setProgressData(logs);
-
             } catch (error) {
                 console.error("Error fetching progress data:", error);
             } finally {
@@ -64,32 +54,26 @@ export default function ProgressPage() {
         return () => unsubscribe();
     }, [router]);
 
-    // Helper function to generate days for the calendar
     const getCalendarDays = () => {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const days = [];
-
-        // Add leading empty cells for days from the previous month
         for (let i = 0; i < firstDay; i++) {
             days.push(null);
         }
-        // Add days of the current month
         for (let i = 1; i <= daysInMonth; i++) {
             days.push(new Date(year, month, i));
         }
         return days;
     };
 
-    // Helper function to check if a specific day has completed tasks
     const isDayCompleted = (day) => {
         if (!day) return false;
         const dateString = day.toISOString().split('T')[0];
         const log = progressData.find(log => log.date === dateString);
-        // Check if the log exists and has at least one true boolean value (a completed task)
-        return log && Object.values(log).some(val => typeof val === 'boolean' && val === true);
+        return log && log.meditationCompleted === true;
     };
     
     if (loading) {
@@ -97,7 +81,6 @@ export default function ProgressPage() {
     }
 
     return (
-        // Use a darker background for a more premium, modern feel.
         <div className="bg-gray-950 text-white min-h-screen">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -105,36 +88,25 @@ export default function ProgressPage() {
                 transition={{ duration: 0.6, ease: "easeOut" }}
                 className="container mx-auto px-4 py-12 md:py-20"
             >
-                {/* Title with a bolder font and modern gradient. */}
                 <h1 className="text-4xl md:text-5xl font-extrabold mb-10 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-400">
                     Your Progress
                 </h1>
-
-                {/* --- */}
-                
                 <section>
-                    {/* Stats Cards Grid: Use a more prominent grid with vibrant, color-coded themes. */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                        
-                        {/* Current Streak Card */}
                         <div className="bg-gray-800 p-8 rounded-3xl shadow-lg flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-gray-700">
                             <FlameIcon className="w-12 h-12 text-red-500" />
                             <div>
                                 <p className="text-gray-400 text-sm font-medium">Daily Streak</p>
-                                <p className="text-5xl font-extrabold text-white text-center mt-2">{userData?.streak || 0}</p>
+                                <p className="text-5xl font-extrabold text-white text-center mt-2">{userData?.dailyStreak || 0}</p>
                             </div>
                         </div>
-                        
-                        {/* Best Streak Card */}
                         <div className="bg-gray-800 p-8 rounded-3xl shadow-lg flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-gray-700">
                             <TrophyIcon className="w-12 h-12 text-amber-400" />
                             <div>
-                                <p className="text-gray-400 text-sm font-medium">Best Streak</p>
-                                <p className="text-5xl font-extrabold text-white text-center mt-2">{userData?.bestStreak || 0}</p>
+                                <p className="text-gray-400 text-sm font-medium">Total Streak</p>
+                                <p className="text-5xl font-extrabold text-white text-center mt-2">{userData?.totalStreak || 0}</p>
                             </div>
                         </div>
-                        
-                        {/* Total Money Stacked Card */}
                         <div className="bg-gray-800 p-8 rounded-3xl shadow-lg flex flex-col items-center justify-center space-y-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:bg-gray-700">
                             <DollarSignIcon className="w-12 h-12 text-green-400" />
                             <div>
@@ -144,18 +116,13 @@ export default function ProgressPage() {
                         </div>
                     </div>
                 </section>
-
-                {/* --- */}
-                
                 <section>
-                    {/* Calendar View: Use a card with subtle background and animations. */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
                         className="bg-gray-800 p-8 md:p-12 rounded-3xl shadow-lg"
                     >
-                        {/* Calendar Header with navigation buttons */}
                         <div className="flex justify-between items-center mb-8">
                             <button 
                                 onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} 
@@ -173,13 +140,9 @@ export default function ProgressPage() {
                                 <ChevronRight className="w-6 h-6" />
                             </button>
                         </div>
-
-                        {/* Weekday headers */}
                         <div className="grid grid-cols-7 gap-4 text-center text-sm uppercase text-gray-400 font-bold tracking-wide mb-4">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <div key={day}>{day}</div>)}
                         </div>
-
-                        {/* Calendar days grid */}
                         <div className="grid grid-cols-7 gap-4">
                             {getCalendarDays().map((day, index) => (
                                 <AnimatePresence key={index}>
