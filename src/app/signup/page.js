@@ -21,7 +21,7 @@ const FullScreenLoader = ({ message }) => (
 );
 
 const PaymentModal = () => (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
     <div className="bg-[#101b3d] rounded-2xl shadow-lg max-w-md w-full p-6 text-center border border-white/10">
       <h2 className="text-xl font-semibold text-white mb-3">Premium Access Required</h2>
       <p className="text-gray-300 mb-6">
@@ -169,7 +169,13 @@ function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#0a122a] px-4 relative">
       {showPaymentModal && <PaymentModal />}
 
-      <div className="max-w-md w-full bg-[#101b3d] backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/10">
+      {/* ONLY visual change below: hide/disable card when modal is open */}
+      <div
+        className={`max-w-md w-full bg-[#101b3d] backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/10
+        transition-all duration-300
+        ${showPaymentModal ? "opacity-0 pointer-events-none scale-95" : "opacity-100"}`}
+        aria-hidden={showPaymentModal}
+      >
         <h1 className="text-3xl font-semibold text-center text-white">
           ✨ Create Your Premium Account
         </h1>
