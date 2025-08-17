@@ -11,7 +11,7 @@ export default function RecoveryLayout({ children }) {
 
       {/* Recovery-specific Footer */}
       <footer className="p-4 border-t border-gray-700 text-center text-sm text-gray-500">
-        © 2025 BlockStack. All rights reserved.
+        © 2025 Mindhelpa. All rights reserved.
       </footer>
     </div>
   );

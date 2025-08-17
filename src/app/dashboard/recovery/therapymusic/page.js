@@ -4,13 +4,10 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
-// This is the list of your music files located in the public/afrotherapy folder.
-// The `src` path should be relative to the `public` directory.
 const musicTracks = [
   { id: 1, title: 'Koko Me Jo', src: '/afrotherapy/Koko Me Jo.mp3', plays: '11K' },
   { id: 2, title: 'Lift Your Head', src: '/afrotherapy/Lift Your Head.mp3', plays: '21K' },
   { id: 3, title: 'My Time', src: '/afrotherapy/My Time.mp3', plays: '5K' },
-  { id: 4, title: 'Odimmobibi', src: '/afrotherapy/Odimmobibi.mp3', plays: '8K' },
   { id: 5, title: 'One Soul', src: '/afrotherapy/One Soul.mp3', plays: '15K' },
   { id: 6, title: 'One Way Road', src: '/afrotherapy/One Way Road.mp3', plays: '12K' },
   { id: 7, title: 'Osondi', src: '/afrotherapy/Osondi.mp3', plays: '9K' },
@@ -21,25 +18,20 @@ const musicTracks = [
 ];
 
 export default function TherapyMusicPage() {
-  // State to manage the currently selected track and its playing status
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   
-  // useRef to hold the audio element, allowing us to control it without re-renders
   const audioRef = useRef(null);
 
-  // Initialize the audio element once when the component mounts
   useEffect(() => {
     audioRef.current = new Audio();
     
-    // Event listener for updating the progress bar
     const updateProgress = () => {
       const { currentTime, duration } = audioRef.current;
       setProgress((currentTime / duration) * 100 || 0);
     };
 
-    // Event listener for when a track ends
     const handleTrackEnd = () => {
       setIsPlaying(false);
       setProgress(0);
@@ -48,7 +40,6 @@ export default function TherapyMusicPage() {
     audioRef.current.addEventListener('timeupdate', updateProgress);
     audioRef.current.addEventListener('ended', handleTrackEnd);
 
-    // Cleanup function to pause and clear the audio when the component unmounts
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -59,7 +50,6 @@ export default function TherapyMusicPage() {
     };
   }, []);
 
-  // Effect to handle track changes (load new track and play)
   useEffect(() => {
     if (currentTrack) {
       audioRef.current.src = currentTrack.src;
@@ -67,13 +57,11 @@ export default function TherapyMusicPage() {
         setIsPlaying(true);
       }).catch(error => {
         console.error("Audio playback failed:", error);
-        // Fallback to paused state if autoplay is blocked
         setIsPlaying(false);
       });
     }
-  }, [currentTrack]); // This effect only runs when a new track is selected
+  }, [currentTrack]);
 
-  // Effect to handle play/pause state changes
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
@@ -82,19 +70,16 @@ export default function TherapyMusicPage() {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying]); // This effect only runs when the play/pause state is toggled
+  }, [isPlaying]);
 
-  // Handler for playing/pausing the current track from the main play button
   const handleMainPlayPause = () => {
     if (!currentTrack) {
-      // If no track is playing, start with the first one
       setCurrentTrack(musicTracks[0]);
     } else {
       setIsPlaying(!isPlaying);
     }
   };
 
-  // Handler for when a track in the list is clicked
   const handleTrackClick = (track) => {
     if (currentTrack && currentTrack.id === track.id) {
       setIsPlaying(!isPlaying);
@@ -105,20 +90,16 @@ export default function TherapyMusicPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white font-sans p-8 relative overflow-hidden">
-      {/* Background radial gradient for a premium feel */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 to-gray-950 opacity-50 z-0"></div>
 
-      {/* Main container with padding and max width */}
       <div className="relative z-10 max-w-5xl mx-auto">
         
-        {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="flex flex-col md:flex-row items-center md:items-start mb-16 space-y-8 md:space-y-0 md:space-x-12"
         >
-          {/* Album Art with Animation and Glow */}
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="relative w-72 h-72 rounded-3xl overflow-hidden shadow-2xl transition-shadow duration-300 transform-gpu"
@@ -133,7 +114,6 @@ export default function TherapyMusicPage() {
             />
           </motion.div>
 
-          {/* Album Details and Controls */}
           <div className="flex-1 text-center md:text-left mt-6 md:mt-0">
             <motion.h1 
               className="text-5xl md:text-6xl font-extrabold mb-2 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600"
@@ -160,7 +140,6 @@ export default function TherapyMusicPage() {
               {musicTracks.length} songs • {Math.round(musicTracks.length * 3.5)} minutes
             </motion.p>
             
-            {/* Control Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -181,21 +160,10 @@ export default function TherapyMusicPage() {
                   </svg>
                 )}
               </button>
-              <button className="p-4 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors shadow-lg transform-gpu hover:scale-105">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-              </button>
-              <button className="p-4 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors shadow-lg transform-gpu hover:scale-105">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </button>
             </motion.div>
           </div>
         </motion.div>
 
-        {/* Playlist Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -233,7 +201,6 @@ export default function TherapyMusicPage() {
           ))}
         </motion.div>
 
-        {/* Now Playing Footer */}
         <AnimatePresence>
           {currentTrack && (
             <motion.div
@@ -290,7 +257,6 @@ export default function TherapyMusicPage() {
         </AnimatePresence>
       </div>
 
-      {/* Style for the custom scrollbar */}
       <style jsx global>{`
         body::-webkit-scrollbar {
           width: 8px;

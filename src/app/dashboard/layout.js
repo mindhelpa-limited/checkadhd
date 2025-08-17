@@ -74,18 +74,6 @@ export default function DashboardLayout({ children }) {
     { name: "Profile", href: "/dashboard/profile", icon: User },
   ];
 
-  /* ---------------- Loader ---------------- */
-  if (loading) {
-    return (
-      <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className="flex items-center gap-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#3B82F6] border-t-transparent"></div>
-          <p className="text-[#111827] font-medium">Loading…</p>
-        </div>
-      </div>
-    );
-  }
-
   if (isRecoveryPath) return <>{children}</>;
 
   return (
@@ -132,7 +120,7 @@ export default function DashboardLayout({ children }) {
               >
                 <span className={`absolute left-0 top-2 bottom-2 w-1 rounded-full transition-all
                   ${active ? "bg-gradient-to-b from-[#3B82F6] to-[#14B8A6] opacity-100"
-                           : "opacity-0 group-hover:opacity-50 bg-[#93C5FD]"}`} />
+                              : "opacity-0 group-hover:opacity-50 bg-[#93C5FD]"}`} />
                 <tab.icon size={20} className={active ? "text-[#2563EB]" : "text-[#64748B] group-hover:text-[#2563EB]"} />
                 <span className="text-sm font-medium">{tab.name}</span>
               </Link>
@@ -145,8 +133,8 @@ export default function DashboardLayout({ children }) {
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold
-                       bg-white/80 hover:bg-[#FEF2F2] text-[#B91C1C] border border-[#E5E7EB]
-                       shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all"
+                         bg-white/80 hover:bg-[#FEF2F2] text-[#B91C1C] border border-[#E5E7EB]
+                         shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all"
           >
             <LogOut size={18} />
             Logout
@@ -171,7 +159,7 @@ export default function DashboardLayout({ children }) {
         <main className="flex-1 p-5 md:p-10">
           <div className="mx-auto max-w-6xl">
             <div className="relative rounded-2xl border border-[#E5E7EB] bg-white/85 backdrop-blur-xl
-                            shadow-[0_24px_100px_rgba(2,6,23,0.10)]">
+                             shadow-[0_24px_100px_rgba(2,6,23,0.10)]">
               <div className="absolute inset-x-0 -top-[1px] h-[2px] bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#14B8A6] rounded-t-2xl" />
               <div className="p-4 md:p-8">{children}</div>
             </div>
@@ -181,8 +169,8 @@ export default function DashboardLayout({ children }) {
 
       {/* ================= Bottom Dock (Mobile) ================= */}
       <nav className="md:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-md
-                      bg-white/70 backdrop-blur-2xl border border-[#E5E7EB]
-                      shadow-[0_12px_50px_rgba(2,6,23,0.18)] rounded-2xl flex justify-around py-2.5">
+                     bg-white/70 backdrop-blur-2xl border border-[#E5E7EB]
+                     shadow-[0_12px_50px_rgba(2,6,23,0.18)] rounded-2xl flex justify-around py-2.5">
         {tabs.map((tab) => {
           const active = pathname === tab.href;
           return (
@@ -192,7 +180,7 @@ export default function DashboardLayout({ children }) {
               onClick={playClickSound}
               className={`flex flex-col items-center text-[11px] px-3 py-1.5 rounded-xl transition-all
                 ${active ? "text-[#2563EB] bg-[#EFF6FF] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
-                         : "text-[#6B7280] hover:text-[#2563EB] hover:bg-white/50"}`}
+                            : "text-[#6B7280] hover:text-[#2563EB] hover:bg-white/50"}`}
             >
               <tab.icon size={18} className="mb-0.5" />
               <span className="font-medium">{tab.name}</span>

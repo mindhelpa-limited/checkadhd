@@ -12,16 +12,6 @@ import {
   Cog6ToothIcon
 } from "@heroicons/react/24/outline";
 
-/* ---------------- Loader (light theme) ---------------- */
-const FullScreenLoader = ({ message }) => (
-  <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
-    <div className="flex items-center gap-4">
-      <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#3B82F6] border-t-transparent"></div>
-      <p className="text-[#111827] font-medium">{message}</p>
-    </div>
-  </div>
-);
-
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
@@ -108,10 +98,6 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) {
-    return <FullScreenLoader message="Loading your profile..." />;
-  }
-
   return (
     <div className="relative min-h-screen p-6 md:p-10 bg-[#F3F4F6] text-[#111827] overflow-hidden font-sans">
       {/* Subtle background blobs */}
@@ -190,8 +176,8 @@ export default function ProfilePage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold
-                           bg-[#3B82F6] text-white shadow-sm hover:bg-[#336fce] focus:outline-none
-                           focus:ring-4 focus:ring-[#3B82F6]/25"
+                                bg-[#3B82F6] text-white shadow-sm hover:bg-[#336fce] focus:outline-none
+                                focus:ring-4 focus:ring-[#3B82F6]/25"
               >
                 Save Changes
               </motion.button>
@@ -224,11 +210,11 @@ export default function ProfilePage() {
               whileTap={{ scale: 0.98 }}
               disabled={isManagingSubscription || userData?.tier !== 'premium'}
               className={`inline-flex items-center justify-center px-5 py-3 rounded-xl font-semibold
-                         focus:outline-none focus:ring-4
-                         ${isManagingSubscription || userData?.tier !== 'premium'
-                    ? 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
-                    : 'bg-[#14B8A6] text-white hover:bg-[#129a8e] focus:ring-[#14B8A6]/25'
-                  }`}
+                               focus:outline-none focus:ring-4
+                               ${isManagingSubscription || userData?.tier !== 'premium'
+                  ? 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
+                  : 'bg-[#14B8A6] text-white hover:bg-[#129a8e] focus:ring-[#14B8A6]/25'
+                }`}
             >
               {isManagingSubscription ? 'Redirecting...' : 'Manage Subscription'}
             </motion.button>

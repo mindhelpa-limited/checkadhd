@@ -6,249 +6,299 @@ import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 
 const games = [
-    {
-        name: 'MoneyStack',
-        description: 'Stack the blocks with focus and precision. Great for improving attention.',
-        link: '/dashboard/recovery/moneystack',
-        imageUrl: '/images/blockstack.png',
-    },
-    {
-        name: 'Snakegame',
-        description: 'Eat all the dots while navigating obstacles. Helps with timing and control.',
-        link: '/dashboard/recovery/snakegame',
-        imageUrl: '/images/trailmuncher.png',
-    },
-    {
-        name: 'Pingmoney game',
-        description: 'Bounce within the bounds. Supports quick decision making.',
-        link: '/dashboard/recovery/pingmoneygame',
-        imageUrl: '/images/neuralbounds.png',
-    },
+  {
+    name: 'MoneyStack',
+    description: 'Stack the blocks with focus and precision. Great for improving attention.',
+    link: '/dashboard/recovery/moneystack',
+    imageUrl: '/images/blockstack.png',
+  },
+  {
+    name: 'Snakegame',
+    description: 'Eat all the dots while navigating obstacles. Helps with timing and control.',
+    link: '/dashboard/recovery/snakegame',
+    imageUrl: '/images/trailmuncher.png',
+  },
+  {
+    name: 'Pingmoney game',
+    description: 'Bounce within the bounds. Supports quick decision making.',
+    link: '/dashboard/recovery/pingmoneygame',
+    imageUrl: '/images/neuralbounds.png',
+  },
 ];
 
 export default function RecoveryGameSelectionPage() {
-    const [activeTab, setActiveTab] = useState('games');
-    const backgroundAudioRef = useRef(null);
-    const clickAudioRef = useRef(null);
+  const [activeTab, setActiveTab] = useState('games');
+  const backgroundAudioRef = useRef(null);
+  const clickAudioRef = useRef(null);
 
-    useEffect(() => {
-        backgroundAudioRef.current = new Audio('/meditation.mp3');
-        backgroundAudioRef.current.loop = true;
-        backgroundAudioRef.current.volume = 0.5;
+  useEffect(() => {
+    backgroundAudioRef.current = new Audio('/meditation.mp3');
+    backgroundAudioRef.current.loop = true;
+    backgroundAudioRef.current.volume = 0.5;
 
-        clickAudioRef.current = new Audio('/sounds/click.mp3');
-        clickAudioRef.current.volume = 0.7;
+    clickAudioRef.current = new Audio('/sounds/click.mp3');
+    clickAudioRef.current.volume = 0.7;
 
-        return () => {
-            if (backgroundAudioRef.current) {
-                backgroundAudioRef.current.pause();
-                backgroundAudioRef.current = null;
-            }
-            if (clickAudioRef.current) {
-                clickAudioRef.current = null;
-            }
-        };
-    }, []);
-
-    useEffect(() => {
-        if (backgroundAudioRef.current) {
-            if (activeTab === 'therapy-music' || activeTab === 'healing-sounds') {
-                backgroundAudioRef.current.play().catch((error) => {
-                    console.log('Audio play failed, user interaction required.', error);
-                });
-            } else {
-                backgroundAudioRef.current.pause();
-            }
-        }
-    }, [activeTab]);
-
-    const playClickSound = () => {
-        if (clickAudioRef.current) {
-            clickAudioRef.current.currentTime = 0;
-            clickAudioRef.current.play().catch(e => console.error("Click sound playback failed:", e));
-        }
+    return () => {
+      if (backgroundAudioRef.current) {
+        backgroundAudioRef.current.pause();
+        backgroundAudioRef.current = null;
+      }
+      if (clickAudioRef.current) {
+        clickAudioRef.current = null;
+      }
     };
+  }, []);
 
-    const handleTabClick = (tabName) => {
-        playClickSound();
-        setActiveTab(tabName);
-    };
+  useEffect(() => {
+    if (backgroundAudioRef.current) {
+      if (activeTab === 'therapy-music' || activeTab === 'healing-sounds') {
+        backgroundAudioRef.current.play().catch((error) => {
+          console.log('Audio play failed, user interaction required.', error);
+        });
+      } else {
+        backgroundAudioRef.current.pause();
+      }
+    }
+  }, [activeTab]);
 
-    const handleGameClick = () => {
-        playClickSound();
-    };
+  const playClickSound = () => {
+    if (clickAudioRef.current) {
+      clickAudioRef.current.currentTime = 0;
+      clickAudioRef.current.play().catch((e) => console.error('Click sound playback failed:', e));
+    }
+  };
 
-    const MusicTabContent = ({ title, link }) => (
-        <div className="relative overflow-hidden rounded-3xl h-[450px] flex flex-col items-center justify-center text-gray-800 p-8 mt-10 shadow-xl bg-white border border-gray-200">
-            <motion.div
-                className="absolute inset-0 z-0"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1 }}
-            >
+  const handleTabClick = (tabName) => {
+    playClickSound();
+    setActiveTab(tabName);
+  };
+
+  const handleGameClick = () => {
+    playClickSound();
+  };
+
+  const MusicTabContent = ({ title, link }) => (
+    <div
+      className="relative overflow-hidden rounded-3xl h-[450px] flex flex-col items-center justify-center text-[#111827] p-8 mt-10 shadow-xl border border-[#F3F4F6]"
+      style={{
+        // Layered, ADHD-safe glow + light neutral base
+        backgroundImage: `
+          radial-gradient(60% 40% at 20% 0%, rgba(59,130,246,0.10), transparent 60%),
+          radial-gradient(50% 30% at 80% 15%, rgba(20,184,166,0.10), transparent 60%),
+          radial-gradient(40% 30% at 50% 100%, rgba(167,139,250,0.10), transparent 60%),
+          linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 40%, #F3F4F6 100%)
+        `,
+        boxShadow: '0 10px 30px rgba(17,24,39,0.06)',
+      }}
+    >
+      <motion.div
+        className="absolute inset-0 z-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        {/* slow ambient shimmer (very subtle to avoid overstimulation) */}
+        <motion.div
+          className="w-full h-full"
+          animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+          transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
+          style={{
+            backgroundImage:
+              'linear-gradient(270deg, rgba(59,130,246,0.06), rgba(20,184,166,0.06), rgba(167,139,250,0.06), rgba(59,130,246,0.06))',
+            backgroundSize: '400% 400%',
+          }}
+        />
+        <div className="absolute inset-0 bg-white/50"></div>
+        <motion.div
+          className="absolute bottom-0 left-0 w-full h-1/2 filter blur-3xl opacity-40"
+          initial={{ scaleX: 0.6, y: '50%', rotate: 8 }}
+          animate={{ scaleX: [0.6, 1, 0.6], y: ['50%', '42%', '50%'] }}
+          transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.18), rgba(167,139,250,0.18))' }}
+        />
+      </motion.div>
+
+      <div className="relative z-10 flex flex-col items-center text-center">
+        <motion.h2
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text"
+          style={{ backgroundImage: 'linear-gradient(90deg, #3B82F6, #A78BFA)' }}
+        >
+          {title}
+        </motion.h2>
+        <p className="text-xl text-[#111827]/70 mb-8 max-w-lg font-light">
+          Immerse yourself in calming melodies and nature sounds designed for deep focus and relaxation.
+        </p>
+        <Link href={link}>
+          <motion.button
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={playClickSound}
+            className="text-white font-bold py-4 px-10 rounded-full shadow-lg focus:outline-none focus-visible:ring-2"
+            style={{
+              background: 'linear-gradient(135deg, #FB923C, #F87171)', // warm CTA
+              boxShadow: '0 8px 24px rgba(248,113,113,0.35)',
+            }}
+          >
+            Explore Library 🎵
+          </motion.button>
+        </Link>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'games':
+        return (
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mt-10">
+            {games.map((game, index) => (
+              <Link href={game.link} key={index}>
                 <motion.div
-                    className="w-full h-full"
-                    animate={{
-                        backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                    }}
-                    transition={{
-                        duration: 25,
-                        repeat: Infinity,
-                        ease: 'linear',
-                    }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.03 }}
+                  onClick={handleGameClick}
+                  className="group cursor-pointer relative overflow-hidden rounded-3xl transition-all duration-300"
+                  style={{ filter: 'drop-shadow(0 6px 24px rgba(17,24,39,0.06))' }}
+                >
+                  {/* soft glow on hover */}
+                  <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition duration-500 blur-xl"
+                       style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.12), rgba(167,139,250,0.12))' }} />
+                  <div
+                    className="relative p-6 rounded-3xl border overflow-hidden"
                     style={{
-                        backgroundImage:
-                            'linear-gradient(270deg, #e3f2fd, #bbdefb, #90caf9, #bbdefb, #e3f2fd)',
-                        backgroundSize: '400% 400%',
+                      borderColor: '#F3F4F6',
+                      backgroundImage: `
+                        radial-gradient(35% 60% at 15% 0%, rgba(59,130,246,0.08), transparent 70%),
+                        radial-gradient(30% 50% at 85% 10%, rgba(20,184,166,0.08), transparent 70%),
+                        linear-gradient(160deg, #FFFFFF, #F9FAFB 45%, #F3F4F6 100%)
+                      `,
+                      boxShadow: 'inset 0 0 1px rgba(255,255,255,0.6)',
                     }}
-                ></motion.div>
-                <div className="absolute inset-0 bg-white opacity-40"></div>
-                <motion.div
-                    className="absolute bottom-0 left-0 w-full h-1/2 bg-blue-400/20 filter blur-3xl opacity-50"
-                    initial={{ scaleX: 0.5, y: '50%', rotate: 15 }}
-                    animate={{
-                        scaleX: [0.5, 1, 0.5],
-                        y: ['50%', '40%', '50%'],
-                    }}
-                    transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                    }}
-                ></motion.div>
-            </motion.div>
-            <div className="relative z-10 flex flex-col items-center text-center">
-                <motion.h2
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600"
-                >
-                    {title}
-                </motion.h2>
-                <p className="text-xl text-gray-600 mb-8 max-w-lg font-light">
-                    Immerse yourself in a world of calming melodies and sounds designed for deep focus and relaxation.
-                </p>
-                <Link href={link}>
-                    <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={playClickSound}
-                        className="bg-blue-500 text-white font-bold py-4 px-10 rounded-full shadow-lg transition-all duration-300 transform hover:rotate-2 hover:scale-110"
-                    >
-                        Explore Library 🎵
-                    </motion.button>
-                </Link>
-            </div>
-        </div>
-    );
-
-    const renderContent = () => {
-        switch (activeTab) {
-            case 'games':
-                return (
-                    <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mt-10">
-                        {games.map((game, index) => (
-                            <Link href={game.link} key={index}>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                                    whileHover={{ scale: 1.05, rotate: 1, boxShadow: '0 10px 40px rgba(59, 130, 246, 0.1)' }}
-                                    onClick={handleGameClick}
-                                    className="group cursor-pointer relative overflow-hidden rounded-3xl transition-all duration-300 transform hover:z-10"
-                                >
-                                    <div className="absolute inset-0.5 rounded-3xl bg-gradient-to-r from-blue-200 to-purple-300 opacity-0 group-hover:opacity-100 transition duration-500 blur-md"></div>
-                                    <div className="relative p-6 rounded-[calc(1.5rem+0.5px)] shadow-lg transition-all overflow-hidden bg-white border border-gray-200">
-                                        <div className="relative overflow-hidden rounded-2xl mb-4 aspect-w-16 aspect-h-9">
-                                            <Image
-                                                src={game.imageUrl}
-                                                alt={game.name}
-                                                width={500}
-                                                height={300}
-                                                className="rounded-2xl transform group-hover:scale-110 transition-transform duration-500"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                                        </div>
-                                        <div className="relative z-10 flex flex-col items-center text-center">
-                                            <h2 className="text-3xl font-bold text-gray-900 mb-2">{game.name}</h2>
-                                            <p className="text-gray-600 text-base font-light">{game.description}</p>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            </Link>
-                        ))}
+                  >
+                    <div className="relative overflow-hidden rounded-2xl mb-4 aspect-w-16 aspect-h-9">
+                      <Image
+                        src={game.imageUrl}
+                        alt={game.name}
+                        width={500}
+                        height={300}
+                        className="rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0"
+                           style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0))' }} />
                     </div>
-                );
-            case 'therapy-music':
-                return <MusicTabContent title="Therapy Music" link="/dashboard/recovery/therapymusic" />;
-            case 'healing-sounds':
-                return <MusicTabContent title="Healing Sounds" link="/dashboard/recovery/healingsounds" />;
-            default:
-                return null;
-        }
-    };
 
-    const getButtonClass = (tabName) => `
-        px-8 py-4 font-semibold text-xl transition-colors duration-200 relative
-        ${activeTab === tabName
-            ? 'text-blue-500'
-            : 'text-gray-500 hover:text-gray-800'
-        }
-    `;
+                    <div className="relative z-10 flex flex-col items-center text-center">
+                      <h2 className="text-2xl md:text-3xl font-bold mb-2"
+                          style={{ color: '#111827' }}>
+                        {game.name}
+                      </h2>
+                      <p className="text-base font-light" style={{ color: 'rgba(17,24,39,0.70)' }}>
+                        {game.description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              </Link>
+            ))}
+          </div>
+        );
+      case 'therapy-music':
+        return <MusicTabContent title="Therapy Music" link="/dashboard/recovery/therapymusic" />;
+      case 'healing-sounds':
+        return <MusicTabContent title="Healing Sounds" link="/dashboard/recovery/healingsounds" />;
+      default:
+        return null;
+    }
+  };
 
-    return (
-        <div className="py-8 px-0 text-gray-800 bg-gray-100 font-sans min-h-screen">
-            <div className="max-w-4xl mx-auto text-center mb-10">
-                <motion.h1
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="text-5xl md:text-6xl font-extrabold mb-4 font-display text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 drop-shadow-lg"
-                >
-                    Recovery & Growth
-                </motion.h1>
-                <p className="text-xl text-gray-600 max-w-lg mx-auto font-light">
-                    Choose a path to enhance your focus, control, and relaxation.
-                </p>
-            </div>
+  const getButtonClass = (tabName) => `
+    relative px-6 md:px-8 py-3 md:py-4 font-semibold text-base md:text-lg rounded-full transition-all duration-200
+    focus:outline-none focus-visible:ring-2
+    ${activeTab === tabName
+      ? 'text-[#111827] bg-white shadow'
+      : 'text-[#111827]/60 hover:text-[#111827] hover:bg-white/70'}
+  `;
 
-            <div className="flex overflow-x-auto whitespace-nowrap border-b border-gray-200 max-w-6xl mx-auto mb-10 md:justify-center">
-                <button onClick={() => handleTabClick('games')} className={getButtonClass('games')}>
-                    Games
-                    {activeTab === 'games' && (
-                        <motion.div
-                            layoutId="underline"
-                            className="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-full"
-                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        />
-                    )}
-                </button>
-                <button onClick={() => handleTabClick('therapy-music')} className={`${getButtonClass('therapy-music')} ml-8`}>
-                    Therapy Music
-                    {activeTab === 'therapy-music' && (
-                        <motion.div
-                            layoutId="underline"
-                            className="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-full"
-                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        />
-                    )}
-                </button>
-                <button onClick={() => handleTabClick('healing-sounds')} className={`${getButtonClass('healing-sounds')} ml-8`}>
-                    Healing Sounds
-                    {activeTab === 'healing-sounds' && (
-                        <motion.div
-                            layoutId="underline"
-                            className="absolute bottom-0 left-0 w-full h-1 bg-blue-500 rounded-full"
-                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        />
-                    )}
-                </button>
-            </div>
+  return (
+    <div
+      className="py-8 px-0 font-sans min-h-screen"
+      style={{
+        // Page background: calm glows + neutral base
+        backgroundImage: `
+          radial-gradient(60% 40% at 20% 0%, rgba(59,130,246,0.10), transparent 60%),
+          radial-gradient(50% 30% at 80% 12%, rgba(20,184,166,0.10), transparent 60%),
+          radial-gradient(40% 30% at 50% 100%, rgba(167,139,250,0.10), transparent 60%),
+          linear-gradient(to bottom, #FFFFFF, #F9FAFB 40%, #F3F4F6 100%)
+        `,
+        color: '#111827',
+      }}
+    >
+      <div className="max-w-4xl mx-auto text-center mb-10 px-4">
+        <motion.h1
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl md:text-6xl font-extrabold mb-4 font-display text-transparent bg-clip-text drop-shadow-sm"
+          style={{ backgroundImage: 'linear-gradient(90deg, #3B82F6, #A78BFA)' }}
+        >
+          Recovery & Growth
+        </motion.h1>
+        <p className="text-lg md:text-xl max-w-lg mx-auto font-light" style={{ color: 'rgba(17,24,39,0.70)' }}>
+          Choose a path to enhance your focus, control, and relaxation.
+        </p>
+      </div>
 
-            <div className="max-w-6xl mx-auto">
-                {renderContent()}
-            </div>
+      {/* Tabs bar */}
+      <div className="max-w-6xl mx-auto mb-10 px-4">
+        <div
+          className="flex items-center gap-3 md:gap-4 overflow-x-auto whitespace-nowrap rounded-full border backdrop-blur supports-[backdrop-filter]:bg-white/60 bg-white/70"
+          style={{ borderColor: '#F3F4F6' }}
+        >
+          <button onClick={() => handleTabClick('games')} className={getButtonClass('games')}>
+            Games
+            {activeTab === 'games' && (
+              <motion.div
+                layoutId="underline-pill"
+                className="absolute inset-0 rounded-full"
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                style={{ boxShadow: 'inset 0 0 0 2px rgba(59,130,246,0.15)' }}
+              />
+            )}
+          </button>
+
+          <button onClick={() => handleTabClick('therapy-music')} className={getButtonClass('therapy-music')}>
+            Therapy Music
+            {activeTab === 'therapy-music' && (
+              <motion.div
+                layoutId="underline-pill"
+                className="absolute inset-0 rounded-full"
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                style={{ boxShadow: 'inset 0 0 0 2px rgba(59,130,246,0.15)' }}
+              />
+            )}
+          </button>
+
+          <button onClick={() => handleTabClick('healing-sounds')} className={getButtonClass('healing-sounds')}>
+            Healing Sounds
+            {activeTab === 'healing-sounds' && (
+              <motion.div
+                layoutId="underline-pill"
+                className="absolute inset-0 rounded-full"
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                style={{ boxShadow: 'inset 0 0 0 2px rgba(59,130,246,0.15)' }}
+              />
+            )}
+          </button>
         </div>
-    );
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4">{renderContent()}</div>
+    </div>
+  );
 }
