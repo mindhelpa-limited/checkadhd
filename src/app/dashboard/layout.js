@@ -5,153 +5,201 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { Home, Activity, BarChart2, User, LogOut, Menu } from "lucide-react";
+import { Home, Activity, BarChart2, User, LogOut } from "lucide-react";
 import * as Tone from 'tone';
 
+/* ---------------- Auth hook (unchanged logic) ---------------- */
 const useAuth = () => {
-    const [user, setUser] = useState(null);
-    const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            if (currentUser) {
-                const userDocRef = doc(db, "users", currentUser.uid);
-                const docSnap = await getDoc(userDocRef);
-                if (docSnap.exists()) {
-                    setUserData(docSnap.data());
-                }
-                setUser(currentUser);
-            } else {
-                setUser(null);
-                setUserData(null);
-            }
-            setLoading(false);
-        });
-        return () => unsubscribe();
-    }, []);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) setUserData(docSnap.data());
+        setUser(currentUser);
+      } else {
+        setUser(null);
+        setUserData(null);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-    return { user, userData, loading };
+  return { user, userData, loading };
 };
 
 export default function DashboardLayout({ children }) {
-    const pathname = usePathname();
-    const router = useRouter();
-    const { user, userData, loading } = useAuth();
-    const isRecoveryPath = pathname.startsWith("/dashboard/recovery/");
-    const clickSoundPlayer = useRef(null);
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, userData, loading } = useAuth();
+  const isRecoveryPath = pathname.startsWith("/dashboard/recovery/");
+  const clickSoundPlayer = useRef(null);
 
-    useEffect(() => {
-        const initTone = async () => {
-            await Tone.start();
-            clickSoundPlayer.current = new Tone.Player("/sounds/click.mp3").toDestination();
-        };
-        initTone();
-    }, []);
-
-    const playClickSound = async () => {
-        if (clickSoundPlayer.current?.loaded) {
-            await Tone.start();
-            clickSoundPlayer.current.start();
-        }
+  /* ---------------- Tiny sound (unchanged) ---------------- */
+  useEffect(() => {
+    const initTone = async () => {
+      await Tone.start();
+      clickSoundPlayer.current = new Tone.Player("/sounds/click.mp3").toDestination();
     };
+    initTone();
+  }, []);
 
-    const handleLogout = async () => {
-        await signOut(auth);
-        router.push("/login");
-    };
-
-    const getFirstName = () => {
-        if (userData?.displayName) {
-            return userData.displayName.split(" ")[0];
-        }
-        if (userData?.email) {
-            return userData.email.split("@")[0];
-        }
-        return "User";
-    };
-
-    const tabs = [
-        { name: "Home", href: "/dashboard", icon: Home },
-        { name: "Recovery", href: "/dashboard/recovery", icon: Activity },
-        { name: "Progress", href: "/dashboard/progress", icon: BarChart2 },
-        { name: "Profile", href: "/dashboard/profile", icon: User },
-    ];
-
-    if (loading) {
-        return (
-            <div className="fixed inset-0 bg-gray-950 flex items-center justify-center z-50">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-        );
+  const playClickSound = async () => {
+    if (clickSoundPlayer.current?.loaded) {
+      await Tone.start();
+      clickSoundPlayer.current.start();
     }
+  };
 
-    if (isRecoveryPath) {
-        return <>{children}</>;
-    }
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/login");
+  };
 
+  const getFirstName = () => {
+    if (userData?.displayName) return userData.displayName.split(" ")[0];
+    if (userData?.email) return userData.email.split("@")[0];
+    return "User";
+  };
+
+  const tabs = [
+    { name: "Home", href: "/dashboard", icon: Home },
+    { name: "Recovery", href: "/dashboard/recovery", icon: Activity },
+    { name: "Progress", href: "/dashboard/progress", icon: BarChart2 },
+    { name: "Profile", href: "/dashboard/profile", icon: User },
+  ];
+
+  /* ---------------- Loader ---------------- */
+  if (loading) {
     return (
-        <div className="min-h-screen flex flex-col md:flex-row bg-gray-950 text-gray-100 font-sans">
-            {/* Sidebar for Desktop */}
-            <aside className={`hidden md:flex w-72 bg-gray-900 shadow-xl border-r border-gray-800 flex-col p-8`}>
-                <div className="flex-grow flex flex-col">
-                    <h2 className="text-2xl font-bold mb-10 text-center text-blue-500 tracking-wider">ADHD Check</h2>
-                    <nav className="space-y-4 flex-grow">
-                        {tabs.map((tab) => (
-                            <Link
-                                key={tab.href}
-                                href={tab.href}
-                                onClick={playClickSound}
-                                className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-200 ease-in-out ${
-                                    pathname === tab.href ? "bg-blue-600 text-white shadow-lg" : "hover:bg-gray-800 hover:text-white text-gray-400"
-                                }`}
-                            >
-                                <tab.icon size={22} className="flex-shrink-0" />
-                                <span className="text-lg font-medium">{tab.name}</span>
-                            </Link>
-                        ))}
-                    </nav>
-                </div>
-                <button
-                    onClick={handleLogout}
-                    className="mt-8 flex items-center gap-4 p-4 rounded-xl transition-colors duration-200 ease-in-out hover:bg-gray-800 text-red-400"
-                >
-                    <LogOut size={22} />
-                    <span className="text-lg font-medium">Logout</span>
-                </button>
-            </aside>
-
-            <div className="flex-1 flex flex-col overflow-hidden bg-gray-900 text-gray-100 shadow-xl border-l border-gray-800">
-                {/* Top Header for Mobile */}
-                <header className="md:hidden flex items-center justify-between bg-gray-900 p-4 border-b border-gray-800 shadow-sm text-gray-100">
-                    <h1 className="text-lg font-semibold">Welcome, {getFirstName()}</h1>
-                    <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-red-500">
-                        <LogOut size={22} />
-                    </button>
-                </header>
-
-                {/* Main Content */}
-                <main className="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar bg-gradient-to-br from-gray-900 to-black">
-                    {children}
-                </main>
-            </div>
-
-            {/* Bottom Navigation for Mobile */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 shadow-lg flex justify-around py-3 z-20">
-                {tabs.map((tab) => (
-                    <Link
-                        key={tab.href}
-                        href={tab.href}
-                        onClick={playClickSound}
-                        className={`flex flex-col items-center text-xs w-full pt-1 pb-0.5 transition-colors duration-200 ${
-                            pathname === tab.href ? "text-blue-500" : "text-gray-500 hover:text-blue-400"
-                        }`}
-                    >
-                        <tab.icon size={22} className="mb-1" />
-                        <span className="text-sm">{tab.name}</span>
-                    </Link>
-                ))}
-            </nav>
+      <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="flex items-center gap-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#3B82F6] border-t-transparent"></div>
+          <p className="text-[#111827] font-medium">Loading…</p>
         </div>
+      </div>
     );
+  }
+
+  if (isRecoveryPath) return <>{children}</>;
+
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row font-sans text-[#111827] bg-[#F3F4F6] relative">
+      {/* ===== Premium background ===== */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(900px_500px_at_8%_0%,#93C5FD_0%,transparent_40%),radial-gradient(900px_500px_at_100%_12%,#5EEAD4_0%,transparent_45%)] opacity-25" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(17,24,39,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(17,24,39,0.05)_1px,transparent_1px)] bg-[size:42px_42px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_0%,rgba(255,255,255,0.5),transparent_60%)]" />
+      </div>
+
+      {/* ================= Sidebar (Desktop) ================= */}
+      <aside className="hidden md:flex w-72 bg-white/70 backdrop-blur-xl border-r border-[#E5E7EB] shadow-[0_20px_80px_rgba(2,6,23,0.08)] flex-col">
+        {/* Brand header with gradient cap + brand name */}
+        <div className="relative">
+          <div className="h-1.5 bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#14B8A6]" />
+          <div className="px-6 py-6">
+            <h2 className="text-[20px] leading-tight font-semibold tracking-tight">
+              <span className="text-[#1D4ED8]">ADHD</span> Check
+            </h2>
+            <p className="text-sm text-[#6B7280] mt-1">Hi, {getFirstName()}</p>
+            {/* Branded pill */}
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs
+                            bg-[#EFF6FF] text-[#1E3A8A] ring-1 ring-[#DBEAFE]">
+              Healing is Possible
+            </div>
+          </div>
+        </div>
+
+        {/* Nav */}
+        <nav className="px-3 pb-4 space-y-1.5 flex-1">
+          {tabs.map((tab) => {
+            const active = pathname === tab.href;
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                onClick={playClickSound}
+                className={`group relative flex items-center gap-3 rounded-xl px-3 py-3 transition-all
+                  ${active
+                    ? "bg-white shadow-[0_10px_40px_rgba(2,6,23,0.08)] text-[#0F172A] border border-[#E5E7EB]"
+                    : "text-[#475569] hover:text-[#0F172A] hover:bg-white/60 hover:shadow-[0_6px_24px_rgba(2,6,23,0.06)]"
+                  }`}
+              >
+                <span className={`absolute left-0 top-2 bottom-2 w-1 rounded-full transition-all
+                  ${active ? "bg-gradient-to-b from-[#3B82F6] to-[#14B8A6] opacity-100"
+                           : "opacity-0 group-hover:opacity-50 bg-[#93C5FD]"}`} />
+                <tab.icon size={20} className={active ? "text-[#2563EB]" : "text-[#64748B] group-hover:text-[#2563EB]"} />
+                <span className="text-sm font-medium">{tab.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Logout */}
+        <div className="px-4 pb-6">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold
+                       bg-white/80 hover:bg-[#FEF2F2] text-[#B91C1C] border border-[#E5E7EB]
+                       shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all"
+          >
+            <LogOut size={18} />
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* ================= Main Area ================= */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Topbar (Mobile) */}
+        <header className="md:hidden sticky top-0 z-30 flex items-center justify-between bg-white/70 backdrop-blur-xl border-b border-[#E5E7EB] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-gradient-to-r before:from-[#3B82F6] before:via-[#60A5FA] before:to-[#14B8A6] px-4 py-3">
+          <div>
+            <h1 className="text-base font-semibold">Hi, {getFirstName()}</h1>
+            <p className="text-xs text-[#6B7280]">Your calm focus space</p>
+          </div>
+          <button onClick={handleLogout} className="p-2 text-[#6B7280] hover:text-[#EF4444]">
+            <LogOut size={20} />
+          </button>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 p-5 md:p-10">
+          <div className="mx-auto max-w-6xl">
+            <div className="relative rounded-2xl border border-[#E5E7EB] bg-white/85 backdrop-blur-xl
+                            shadow-[0_24px_100px_rgba(2,6,23,0.10)]">
+              <div className="absolute inset-x-0 -top-[1px] h-[2px] bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#14B8A6] rounded-t-2xl" />
+              <div className="p-4 md:p-8">{children}</div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {/* ================= Bottom Dock (Mobile) ================= */}
+      <nav className="md:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-md
+                      bg-white/70 backdrop-blur-2xl border border-[#E5E7EB]
+                      shadow-[0_12px_50px_rgba(2,6,23,0.18)] rounded-2xl flex justify-around py-2.5">
+        {tabs.map((tab) => {
+          const active = pathname === tab.href;
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              onClick={playClickSound}
+              className={`flex flex-col items-center text-[11px] px-3 py-1.5 rounded-xl transition-all
+                ${active ? "text-[#2563EB] bg-[#EFF6FF] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                         : "text-[#6B7280] hover:text-[#2563EB] hover:bg-white/50"}`}
+            >
+              <tab.icon size={18} className="mb-0.5" />
+              <span className="font-medium">{tab.name}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
 }

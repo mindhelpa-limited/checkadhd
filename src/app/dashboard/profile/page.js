@@ -6,219 +6,235 @@ import { onAuthStateChanged, updateProfile, getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { motion } from 'framer-motion';
 import {
-    CreditCardIcon,
-    CheckCircleIcon,
-    XCircleIcon,
-    Cog6ToothIcon
+  CreditCardIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  Cog6ToothIcon
 } from "@heroicons/react/24/outline";
 
-// --- Loader Component ---
+/* ---------------- Loader (light theme) ---------------- */
 const FullScreenLoader = ({ message }) => (
-    <div className="fixed inset-0 bg-[#0A0A0A] flex items-center justify-center z-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-        <p className="ml-4 text-gray-200 font-medium">{message}</p>
+  <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="flex items-center gap-4">
+      <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#3B82F6] border-t-transparent"></div>
+      <p className="text-[#111827] font-medium">{message}</p>
     </div>
+  </div>
 );
 
-// --- Main Profile Page Component ---
 export default function ProfilePage() {
-    const router = useRouter();
-    const [user, setUser] = useState(null);
-    const [userData, setUserData] = useState(null);
-    const [displayName, setDisplayName] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState("");
-    const [isManagingSubscription, setIsManagingSubscription] = useState(false);
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [displayName, setDisplayName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [isManagingSubscription, setIsManagingSubscription] = useState(false);
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            if (!currentUser) {
-                router.push("/login");
-                return;
-            }
-            setUser(currentUser);
-            
-            const userDocRef = doc(db, "users", currentUser.uid);
-            const docSnap = await getDoc(userDocRef);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        router.push("/login");
+        return;
+      }
+      setUser(currentUser);
 
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                setUserData(data);
-                setDisplayName(data.displayName || currentUser.displayName || "");
-            }
-            setLoading(false);
-        });
-        return () => unsubscribe();
-    }, [router]);
+      const userDocRef = doc(db, "users", currentUser.uid);
+      const docSnap = await getDoc(userDocRef);
 
-    const handleUpdateProfile = async (e) => {
-        e.preventDefault();
-        if (!user) return;
-        setMessage("");
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setUserData(data);
+        setDisplayName(data.displayName || currentUser.displayName || "");
+      } else {
+        setDisplayName(currentUser.displayName || "");
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [router]);
 
-        try {
-            await updateProfile(user, { displayName: displayName });
-            const userDocRef = doc(db, "users", user.uid);
-            await setDoc(userDocRef, { displayName: displayName }, { merge: true });
-            setMessage("✅ Profile updated successfully!");
-            setUserData(prev => ({...prev, displayName}));
-        } catch (error) {
-            console.error("Error updating profile:", error);
-            setMessage("❌ Failed to update profile. Please try again.");
-        }
-    };
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    if (!user) return;
+    setMessage("");
 
-    // --- FIXED Manage Subscription Function ---
-    const handleManageSubscription = async () => {
-        setIsManagingSubscription(true);
-        setMessage("");
-        try {
-            const currentUser = getAuth().currentUser;
-            if (!currentUser) {
-                router.push("/login");
-                return;
-            }
-
-            // 🔑 Get Firebase ID token
-            const token = await currentUser.getIdToken();
-
-            // Call API with Authorization header
-            const res = await fetch("/api/manage-subscription", {
-                method: "POST",
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            // Read raw text first (helps debug if server returns HTML)
-            const raw = await res.text();
-            let data;
-            try {
-                data = JSON.parse(raw);
-            } catch {
-                console.error("Non-JSON response from /api/manage-subscription:\n", raw);
-                throw new Error("Server returned HTML instead of JSON. Check API route & auth.");
-            }
-
-            if (!res.ok) {
-                throw new Error(data.error || "Could not open billing portal.");
-            }
-
-            // ✅ Redirect to Stripe Billing Portal
-            window.location.href = data.url;
-        } catch (error) {
-            setMessage(`❌ ${error.message}`);
-            setIsManagingSubscription(false);
-        }
-    };
-
-    if (loading) {
-        return <FullScreenLoader message="Loading Your Profile..." />;
+    try {
+      await updateProfile(user, { displayName });
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, { displayName }, { merge: true });
+      setMessage("✅ Profile updated successfully!");
+      setUserData((prev) => ({ ...(prev || {}), displayName }));
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setMessage("❌ Failed to update profile. Please try again.");
     }
+  };
 
-    return (
-        <div className="relative min-h-screen p-6 md:p-10 text-gray-200 bg-[#0A0A0A] overflow-hidden font-sans">
-            {/* Background animation */}
-            <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
-                <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob" />
-                <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob-delay" />
-            </div>
+  const handleManageSubscription = async () => {
+    setIsManagingSubscription(true);
+    setMessage("");
+    try {
+      const currentUser = getAuth().currentUser;
+      if (!currentUser) {
+        router.push("/login");
+        return;
+      }
 
-            <div className="relative max-w-4xl mx-auto z-10 py-8">
-                <h1 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600 mb-2 flex items-center">
-                    <Cog6ToothIcon className="h-10 w-10 text-purple-400 mr-4" />
-                    Your Profile
-                </h1>
-                <p className="text-gray-400 text-lg mb-8">
-                    Manage your account details and subscription.
-                </p>
+      const token = await currentUser.getIdToken();
 
-                {/* Account Details Card */}
-                <motion.div className="group relative overflow-hidden p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] mb-8">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80"></div>
-                    <div className="absolute inset-0.5 rounded-[calc(1.5rem+0.5px)] bg-black opacity-60 backdrop-blur-md"></div>
-                    <div className="relative z-10">
-                        <h2 className="text-xl md:text-2xl font-bold mb-6 text-gray-200">
-                            Account Details
-                        </h2>
-                        
-                        {message && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className={`flex items-center p-4 rounded-lg mb-4 text-sm font-semibold 
-                                    ${message.startsWith('✅') ? 'bg-green-600/20 text-green-300' : 'bg-red-600/20 text-red-300'}`}
-                            >
-                                {message.startsWith('✅') ? <CheckCircleIcon className="h-5 w-5 mr-2" /> : <XCircleIcon className="h-5 w-5 mr-2" />}
-                                <p>{message.substring(3).trim()}</p>
-                            </motion.div>
-                        )}
+      const res = await fetch("/api/manage-subscription", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-                        <form onSubmit={handleUpdateProfile} className="space-y-6">
-                            <div>
-                                <label htmlFor="displayName" className="block text-sm font-medium text-gray-400 mb-2">Display Name</label>
-                                <input 
-                                    id="displayName"
-                                    type="text"
-                                    value={displayName}
-                                    onChange={(e) => setDisplayName(e.target.value)}
-                                    className="w-full p-4 bg-[#1A1A1A] border border-[#2c2c2c] rounded-2xl text-gray-200"
-                                />
-                            </div>
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-2">Email Address</label>
-                                <input 
-                                    id="email"
-                                    type="email"
-                                    value={userData?.email || ""}
-                                    readOnly
-                                    className="w-full p-4 bg-[#1A1A1A] border border-[#2c2c2c] rounded-2xl text-gray-500 cursor-not-allowed"
-                                />
-                            </div>
-                            <div className="pt-4">
-                                <motion.button
-                                    type="submit"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-8 rounded-2xl"
-                                >
-                                    Save Changes
-                                </motion.button>
-                            </div>
-                        </form>
-                    </div>
-                </motion.div>
+      const raw = await res.text();
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        console.error("Non-JSON response from /api/manage-subscription:\n", raw);
+        throw new Error("Server returned HTML instead of JSON. Check API route & auth.");
+      }
 
-                {/* Subscription Card */}
-                <motion.div className="group relative overflow-hidden p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c]">
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-900 to-cyan-900 opacity-80"></div>
-                    <div className="absolute inset-0.5 rounded-[calc(1.5rem+0.5px)] bg-black opacity-60 backdrop-blur-md"></div>
-                    <div className="relative z-10">
-                        <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center text-gray-200">
-                            <CreditCardIcon className="h-6 w-6 mr-2 text-green-400" />
-                            Subscription
-                        </h2>
-                        
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-                            <div>
-                                <p className="text-gray-400">Your current plan:</p>
-                                <p className="text-2xl font-extrabold text-green-400 capitalize">
-                                    {userData?.tier || 'Free'}
-                                </p>
-                            </div>
-                            <motion.button 
-                                onClick={handleManageSubscription}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                disabled={isManagingSubscription || userData?.tier !== 'premium'}
-                                className="w-full md:w-auto py-3 px-6 rounded-2xl font-semibold
-                                           bg-gradient-to-r from-teal-500 to-green-600 text-white
-                                           disabled:bg-gray-700 disabled:text-gray-400"
-                            >
-                                {isManagingSubscription ? 'Redirecting...' : 'Manage Subscription'}
-                            </motion.button>
-                        </div>
-                    </div>
-                </motion.div>
-            </div>
+      if (!res.ok) {
+        throw new Error(data.error || "Could not open billing portal.");
+      }
+
+      window.location.href = data.url;
+    } catch (error) {
+      setMessage(`❌ ${error.message}`);
+      setIsManagingSubscription(false);
+    }
+  };
+
+  if (loading) {
+    return <FullScreenLoader message="Loading your profile..." />;
+  }
+
+  return (
+    <div className="relative min-h-screen p-6 md:p-10 bg-[#F3F4F6] text-[#111827] overflow-hidden font-sans">
+      {/* Subtle background blobs */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+        <div className="absolute -top-24 -left-20 w-80 h-80 bg-[#3B82F6] rounded-full blur-3xl opacity-10" />
+        <div className="absolute -bottom-24 -right-20 w-96 h-96 bg-[#14B8A6] rounded-full blur-3xl opacity-10" />
+      </div>
+
+      <div className="relative max-w-4xl mx-auto py-4">
+        <div className="flex items-center gap-3 mb-2">
+          <Cog6ToothIcon className="h-8 w-8 text-[#3B82F6]" />
+          <h1 className="text-3xl md:text-4xl font-bold">Your Profile</h1>
         </div>
-    );
+        <p className="text-[#4B5563] mb-8">
+          Manage your account details and subscription.
+        </p>
+
+        {/* Account Details */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white border border-[#E5E7EB] rounded-2xl shadow-[0_8px_30px_rgba(2,6,23,0.06)] p-6 md:p-8 mb-8"
+        >
+          <h2 className="text-xl md:text-2xl font-semibold mb-6">Account Details</h2>
+
+          {message && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={`flex items-center gap-2 p-4 rounded-xl mb-5 text-sm font-medium 
+                ${message.startsWith('✅')
+                  ? 'bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]'
+                  : 'bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]'
+                }`}
+            >
+              {message.startsWith('✅') ? (
+                <CheckCircleIcon className="h-5 w-5" />
+              ) : (
+                <XCircleIcon className="h-5 w-5" />
+              )}
+              <p>{message.substring(3).trim()}</p>
+            </motion.div>
+          )}
+
+          <form onSubmit={handleUpdateProfile} className="space-y-6">
+            <div>
+              <label htmlFor="displayName" className="block text-sm font-medium text-[#374151] mb-2">
+                Display Name
+              </label>
+              <input
+                id="displayName"
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="w-full p-3.5 bg-white border border-[#E5E7EB] rounded-xl text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-4 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6]"
+                placeholder="Your name"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-[#374151] mb-2">
+                Email Address
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={userData?.email || user?.email || ""}
+                readOnly
+                className="w-full p-3.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-[#6B7280] cursor-not-allowed"
+              />
+            </div>
+
+            <div className="pt-2">
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold
+                           bg-[#3B82F6] text-white shadow-sm hover:bg-[#336fce] focus:outline-none
+                           focus:ring-4 focus:ring-[#3B82F6]/25"
+              >
+                Save Changes
+              </motion.button>
+            </div>
+          </form>
+        </motion.div>
+
+        {/* Subscription */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white border border-[#E5E7EB] rounded-2xl shadow-[0_8px_30px_rgba(2,6,23,0.06)] p-6 md:p-8"
+        >
+          <h2 className="text-xl md:text-2xl font-semibold mb-6 flex items-center">
+            <CreditCardIcon className="h-6 w-6 mr-2 text-[#14B8A6]" />
+            Subscription
+          </h2>
+
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <p className="text-[#6B7280]">Your current plan:</p>
+              <p className="text-2xl font-bold text-[#111827] capitalize">
+                {userData?.tier || 'Free'}
+              </p>
+            </div>
+
+            <motion.button
+              onClick={handleManageSubscription}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={isManagingSubscription || userData?.tier !== 'premium'}
+              className={`inline-flex items-center justify-center px-5 py-3 rounded-xl font-semibold
+                         focus:outline-none focus:ring-4
+                         ${isManagingSubscription || userData?.tier !== 'premium'
+                    ? 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
+                    : 'bg-[#14B8A6] text-white hover:bg-[#129a8e] focus:ring-[#14B8A6]/25'
+                  }`}
+            >
+              {isManagingSubscription ? 'Redirecting...' : 'Manage Subscription'}
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
 }
