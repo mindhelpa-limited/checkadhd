@@ -34,7 +34,7 @@ const ScoreRing = ({ score }) => {
         <div className="relative w-32 h-32 flex items-center justify-center">
             <svg className="w-full h-full transform -rotate-90 animate-spin-slow">
                 <circle
-                    className="text-[#2c2c2c]"
+                    className="text-gray-200"
                     strokeWidth="8"
                     stroke="currentColor"
                     fill="transparent"
@@ -43,7 +43,7 @@ const ScoreRing = ({ score }) => {
                     cy="64"
                 />
                 <circle
-                    className="text-blue-400 transition-all duration-1000 ease-in-out"
+                    className="text-blue-500 transition-all duration-1000 ease-in-out"
                     strokeWidth="8"
                     strokeDasharray={circumference}
                     strokeDashoffset={offset}
@@ -55,34 +55,34 @@ const ScoreRing = ({ score }) => {
                     cy="64"
                 />
             </svg>
-            <span className="absolute text-3xl font-bold text-white">{score}</span>
+            <span className="absolute text-3xl font-bold text-gray-800">{score}</span>
         </div>
     );
 };
 
 const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) => (
-    <div className="fixed inset-0 z-50 bg-[#0A0A0A] bg-opacity-80 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-gray-100 bg-opacity-80 flex items-center justify-center p-4">
         <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="relative bg-[#1A1A1A]/70 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] max-w-sm w-full animate-fade-in"
+            className="relative bg-white/70 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-gray-200 max-w-sm w-full animate-fade-in"
         >
             <button
                 onClick={() => { playClickSound(); onClose(); }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
             >
                 <XMarkIcon className="h-6 w-6" />
             </button>
             <div className="text-center">
-                <ClockIcon className="h-16 w-16 text-blue-400 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-white mb-2">Retake Not Yet Available</h3>
-                <p className="text-gray-400 mb-6">
+                <ClockIcon className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">Retake Not Yet Available</h3>
+                <p className="text-gray-600 mb-6">
                     You must wait 14 days between tests to ensure accurate results.
                 </p>
-                <div className="bg-[#1A1A1A] p-4 rounded-xl mb-4">
-                    <p className="text-gray-400">Time remaining until retake:</p>
-                    <strong className="text-2xl text-white font-bold block mt-1">
+                <div className="bg-gray-100 p-4 rounded-xl mb-4">
+                    <p className="text-gray-500">Time remaining until retake:</p>
+                    <strong className="text-2xl text-gray-800 font-bold block mt-1">
                         {timeLeft}
                     </strong>
                 </div>
@@ -98,9 +98,9 @@ const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) =
 );
 
 const FullScreenLoader = ({ message }) => (
-    <div className="fixed inset-0 bg-[#0A0A0A] flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-        <p className="ml-4 text-gray-200">{message}</p>
+        <p className="ml-4 text-gray-700">{message}</p>
     </div>
 );
 
@@ -137,7 +137,6 @@ export default function DashboardPage() {
     };
 
     useEffect(() => {
-        // ... (existing logic, no changes)
         const unsub = onAuthStateChanged(auth, async (currentUser) => {
             if (!currentUser) {
                 router.replace("/login");
@@ -253,13 +252,13 @@ export default function DashboardPage() {
     }
 
     return (
-        <main className="relative min-h-screen p-6 md:p-10 text-gray-200 bg-[#0A0A0A] overflow-hidden font-sans">
+        <main className="relative min-h-screen p-6 md:p-10 text-gray-800 bg-gray-50 overflow-hidden font-sans">
             <audio ref={audioRef} src="/sounds/click.mp3" preload="auto" />
 
             {/* Pulsing background effect */}
             <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
-                <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob" />
-                <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob-delay" />
+                <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-blue-100 rounded-full mix-blend-screen filter blur-3xl opacity-50 animate-blob" />
+                <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-purple-100 rounded-full mix-blend-screen filter blur-3xl opacity-50 animate-blob-delay" />
             </div>
 
             <div className="relative max-w-6xl mx-auto z-10">
@@ -271,17 +270,17 @@ export default function DashboardPage() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         whileHover={{
                             scale: 1.02,
-                            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.2)",
+                            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1), 0 0 40px rgba(59, 130, 246, 0.05)",
                             rotate: -0.5,
                         }}
-                        className="relative overflow-hidden bg-gradient-to-br from-[#1c1c1c] to-[#121212] p-6 md:p-8 rounded-3xl shadow-[inset_0_0_15px_rgba(59,130,246,0.1),_0_20px_40px_rgba(0,0,0,0.5)] border border-[#3c3c3c] flex flex-col justify-between transition-all duration-300"
+                        className="relative overflow-hidden bg-gradient-to-br from-white to-gray-50 p-6 md:p-8 rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.05)] border border-gray-200 flex flex-col justify-between transition-all duration-300"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-900 via-purple-900 to-transparent opacity-10 group-hover:opacity-20 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-100 via-purple-100 to-transparent opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
                         <div className="flex flex-col items-center relative z-10">
-                            <h3 className="text-xl font-bold mb-4 text-white text-center">
+                            <h3 className="text-xl font-bold mb-4 text-gray-900 text-center">
                                 Ready for your test?
                             </h3>
-                            <p className="text-gray-400 mb-6 text-sm md:text-base text-center">
+                            <p className="text-gray-600 mb-6 text-sm md:text-base text-center">
                                 Take the ADHD test to get an up-to-date assessment.
                             </p>
 
@@ -305,7 +304,7 @@ export default function DashboardPage() {
                                 className={`w-full px-8 py-4 text-lg font-semibold text-white rounded-2xl shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-opacity-50
                                     ${retakeAvailable
                                         ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-xl hover:-translate-y-1 focus:ring-blue-500"
-                                        : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-400 text-gray-200 cursor-not-allowed"
                                     }`}
                             >
                                 {hasTakenTest ? "Retake the Test" : "Take the ADHD Test"}
@@ -320,68 +319,68 @@ export default function DashboardPage() {
                         transition={{ duration: 0.5 }}
                         whileHover={{
                             scale: 1.02,
-                            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.2)",
+                            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1), 0 0 40px rgba(59, 130, 246, 0.05)",
                             rotate: 0.5,
                         }}
-                        className="group relative overflow-hidden bg-gradient-to-br from-[#1c1c1c] to-[#121212] p-6 md:p-8 rounded-3xl shadow-[inset_0_0_15px_rgba(59,130,246,0.1),_0_20px_40px_rgba(0,0,0,0.5)] border border-[#3c3c3c] md:col-span-2 transition-all duration-300"
+                        className="group relative overflow-hidden bg-gradient-to-br from-white to-gray-50 p-6 md:p-8 rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.05)] border border-gray-200 md:col-span-2 transition-all duration-300"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-purple-900 to-transparent opacity-10 group-hover:opacity-20 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-purple-100 to-transparent opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
 
-                        <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center text-gray-200">
-                            <SparklesIcon className="h-6 w-6 md:h-8 md:w-8 mr-3 flex-shrink-0 text-yellow-400 drop-shadow-[0_0_5px_rgba(252,211,77,0.5)]" />
+                        <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center text-gray-900">
+                            <SparklesIcon className="h-6 w-6 md:h-8 md:w-8 mr-3 flex-shrink-0 text-yellow-500 drop-shadow-[0_0_5px_rgba(252,211,77,0.5)]" />
                             Your Premium Account
                         </h2>
 
                         {userData && (
                             <ul className="space-y-4 md:space-y-6">
                                 <motion.li
-                                    whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
-                                    className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300"
+                                    whileHover={{ scale: 1.02, backgroundColor: '#f3f4f6' }}
+                                    className="flex items-center p-4 bg-gray-100 rounded-xl transition-all duration-300"
                                 >
-                                    <UserCircleIcon className="h-6 w-6 text-blue-400 mr-4 flex-shrink-0" />
+                                    <UserCircleIcon className="h-6 w-6 text-blue-500 mr-4 flex-shrink-0" />
                                     <div>
-                                        <strong className="text-white">Email:</strong>
-                                        <p className="text-gray-400">{userData.email}</p>
+                                        <strong className="text-gray-900">Email:</strong>
+                                        <p className="text-gray-600">{userData.email}</p>
                                     </div>
                                 </motion.li>
 
                                 <motion.li
-                                    whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
-                                    className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300"
+                                    whileHover={{ scale: 1.02, backgroundColor: '#f3f4f6' }}
+                                    className="flex items-center p-4 bg-gray-100 rounded-xl transition-all duration-300"
                                 >
-                                    <TrophyIcon className="h-6 w-6 text-green-400 mr-4 flex-shrink-0 animate-shine" />
+                                    <TrophyIcon className="h-6 w-6 text-green-500 mr-4 flex-shrink-0 animate-shine-light" />
                                     <div>
-                                        <strong className="text-white">Score:</strong>
-                                        <p className="text-gray-400">
+                                        <strong className="text-gray-900">Score:</strong>
+                                        <p className="text-gray-600">
                                             {hasTakenTest && scoreOutOf100 != null ? `${scoreOutOf100} / 100` : "N/A"}
                                         </p>
                                     </div>
                                 </motion.li>
 
                                 <motion.li
-                                    whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
-                                    className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300"
+                                    whileHover={{ scale: 1.02, backgroundColor: '#f3f4f6' }}
+                                    className="flex items-center p-4 bg-gray-100 rounded-xl transition-all duration-300"
                                 >
-                                    <ChatBubbleBottomCenterTextIcon className="h-6 w-6 text-purple-400 mr-4 flex-shrink-0" />
+                                    <ChatBubbleBottomCenterTextIcon className="h-6 w-6 text-purple-500 mr-4 flex-shrink-0" />
                                     <div>
-                                        <strong className="text-white">ADHD Status:</strong>
-                                        <p className="font-semibold text-blue-400">
+                                        <strong className="text-gray-900">ADHD Status:</strong>
+                                        <p className="font-semibold text-blue-600">
                                             {hasTakenTest && scoreOutOf100 != null ? getAdhdStatus(scoreOutOf100) : "Not available yet"}
                                         </p>
                                         {hasTakenTest && riskLevelText && (
-                                            <p className="text-xs text-gray-400 mt-1">{levelLabel} • {riskLevelText}</p>
+                                            <p className="text-xs text-gray-500 mt-1">{levelLabel} • {riskLevelText}</p>
                                         )}
                                     </div>
                                 </motion.li>
 
                                 <motion.li
-                                    whileHover={{ scale: 1.02, backgroundColor: '#2c2c2c' }}
-                                    className="flex items-center p-4 bg-[#1A1A1A] rounded-xl transition-all duration-300"
+                                    whileHover={{ scale: 1.02, backgroundColor: '#f3f4f6' }}
+                                    className="flex items-center p-4 bg-gray-100 rounded-xl transition-all duration-300"
                                 >
-                                    <CalendarDaysIcon className="h-6 w-6 text-orange-400 mr-4 flex-shrink-0" />
+                                    <CalendarDaysIcon className="h-6 w-6 text-orange-500 mr-4 flex-shrink-0" />
                                     <div>
-                                        <strong className="text-white">Last Test:</strong>
-                                        <p className="text-gray-400">
+                                        <strong className="text-gray-900">Last Test:</strong>
+                                        <p className="text-gray-600">
                                             {hasTakenTest && lastTestDate
                                                 ? lastTestDate.toLocaleDateString()
                                                 : "Not taken yet"}
@@ -436,11 +435,11 @@ export default function DashboardPage() {
                     to { transform: rotate(630deg); }
                 }
 
-                @keyframes shine {
-                    0%, 100% { color: #86efac; filter: drop-shadow(0 0 5px rgba(134, 239, 172, 0.5)); }
-                    50% { color: #facc15; filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.8)); }
+                @keyframes shine-light {
+                    0%, 100% { color: #86efac; filter: drop-shadow(0 0 5px rgba(22, 163, 74, 0.5)); }
+                    50% { color: #facc15; filter: drop-shadow(0 0 10px rgba(234, 179, 8, 0.8)); }
                 }
-                .animate-shine { animation: shine 3s infinite ease-in-out; }
+                .animate-shine-light { animation: shine-light 3s infinite ease-in-out; }
             `}</style>
         </main>
     );
