@@ -2,13 +2,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
-import { onAuthStateChanged, updateProfile } from "firebase/auth";
+import { onAuthStateChanged, updateProfile, getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { motion } from 'framer-motion';
 import {
-    UserCircleIcon,
-    EnvelopeIcon,
-    KeyIcon,
     CreditCardIcon,
     CheckCircleIcon,
     XCircleIcon,
@@ -70,24 +67,43 @@ export default function ProfilePage() {
             setMessage("❌ Failed to update profile. Please try again.");
         }
     };
-    
+
+    // --- FIXED Manage Subscription Function ---
     const handleManageSubscription = async () => {
         setIsManagingSubscription(true);
         setMessage("");
         try {
-            const response = await fetch('/api/manage-subscription', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.uid })
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Could not open billing portal.");
+            const currentUser = getAuth().currentUser;
+            if (!currentUser) {
+                router.push("/login");
+                return;
             }
 
-            const { url } = await response.json();
-            window.location.href = url; // Redirect to the Stripe Customer Portal
+            // 🔑 Get Firebase ID token
+            const token = await currentUser.getIdToken();
+
+            // Call API with Authorization header
+            const res = await fetch("/api/manage-subscription", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            // Read raw text first (helps debug if server returns HTML)
+            const raw = await res.text();
+            let data;
+            try {
+                data = JSON.parse(raw);
+            } catch {
+                console.error("Non-JSON response from /api/manage-subscription:\n", raw);
+                throw new Error("Server returned HTML instead of JSON. Check API route & auth.");
+            }
+
+            if (!res.ok) {
+                throw new Error(data.error || "Could not open billing portal.");
+            }
+
+            // ✅ Redirect to Stripe Billing Portal
+            window.location.href = data.url;
         } catch (error) {
             setMessage(`❌ ${error.message}`);
             setIsManagingSubscription(false);
@@ -100,7 +116,7 @@ export default function ProfilePage() {
 
     return (
         <div className="relative min-h-screen p-6 md:p-10 text-gray-200 bg-[#0A0A0A] overflow-hidden font-sans">
-            {/* Pulsing background effect from the dashboard */}
+            {/* Background animation */}
             <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
                 <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob" />
                 <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob-delay" />
@@ -116,17 +132,8 @@ export default function ProfilePage() {
                 </p>
 
                 {/* Account Details Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    whileHover={{
-                        scale: 1.01,
-                        boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.2)",
-                    }}
-                    className="group relative overflow-hidden p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] transition-all duration-300 transform mb-8"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
+                <motion.div className="group relative overflow-hidden p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] mb-8">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80"></div>
                     <div className="absolute inset-0.5 rounded-[calc(1.5rem+0.5px)] bg-black opacity-60 backdrop-blur-md"></div>
                     <div className="relative z-10">
                         <h2 className="text-xl md:text-2xl font-bold mb-6 text-gray-200">
@@ -148,36 +155,30 @@ export default function ProfilePage() {
                         <form onSubmit={handleUpdateProfile} className="space-y-6">
                             <div>
                                 <label htmlFor="displayName" className="block text-sm font-medium text-gray-400 mb-2">Display Name</label>
-                                <div className="relative">
-                                    <UserCircleIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                                    <input 
-                                        id="displayName"
-                                        type="text"
-                                        value={displayName}
-                                        onChange={(e) => setDisplayName(e.target.value)}
-                                        className="w-full p-4 pl-24 bg-[#1A1A1A] border border-[#2c2c2c] rounded-2xl text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                                    />
-                                </div>
+                                <input 
+                                    id="displayName"
+                                    type="text"
+                                    value={displayName}
+                                    onChange={(e) => setDisplayName(e.target.value)}
+                                    className="w-full p-4 bg-[#1A1A1A] border border-[#2c2c2c] rounded-2xl text-gray-200"
+                                />
                             </div>
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-2">Email Address</label>
-                                <div className="relative">
-                                    <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                                    <input 
-                                        id="email"
-                                        type="email"
-                                        value={userData?.email || ""}
-                                        readOnly
-                                        className="w-full p-4 pl-24 bg-[#1A1A1A] border border-[#2c2c2c] rounded-2xl text-gray-500 cursor-not-allowed transition-all"
-                                    />
-                                </div>
+                                <input 
+                                    id="email"
+                                    type="email"
+                                    value={userData?.email || ""}
+                                    readOnly
+                                    className="w-full p-4 bg-[#1A1A1A] border border-[#2c2c2c] rounded-2xl text-gray-500 cursor-not-allowed"
+                                />
                             </div>
                             <div className="pt-4">
                                 <motion.button
                                     type="submit"
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+                                    className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-8 rounded-2xl"
                                 >
                                     Save Changes
                                 </motion.button>
@@ -187,17 +188,8 @@ export default function ProfilePage() {
                 </motion.div>
 
                 {/* Subscription Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    whileHover={{
-                        scale: 1.01,
-                        boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.2)",
-                    }}
-                    className="group relative overflow-hidden p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] transition-all duration-300 transform"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-900 to-cyan-900 opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
+                <motion.div className="group relative overflow-hidden p-6 md:p-8 rounded-3xl shadow-2xl border border-[#2c2c2c]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-900 to-cyan-900 opacity-80"></div>
                     <div className="absolute inset-0.5 rounded-[calc(1.5rem+0.5px)] bg-black opacity-60 backdrop-blur-md"></div>
                     <div className="relative z-10">
                         <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center text-gray-200">
@@ -217,10 +209,9 @@ export default function ProfilePage() {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 disabled={isManagingSubscription || userData?.tier !== 'premium'}
-                                className="w-full md:w-auto py-3 px-6 rounded-2xl shadow-lg font-semibold transition-all
-                                    bg-gradient-to-r from-teal-500 to-green-600 text-white
-                                    hover:shadow-xl hover:-translate-y-1
-                                    disabled:bg-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none"
+                                className="w-full md:w-auto py-3 px-6 rounded-2xl font-semibold
+                                           bg-gradient-to-r from-teal-500 to-green-600 text-white
+                                           disabled:bg-gray-700 disabled:text-gray-400"
                             >
                                 {isManagingSubscription ? 'Redirecting...' : 'Manage Subscription'}
                             </motion.button>
@@ -228,29 +219,6 @@ export default function ProfilePage() {
                     </div>
                 </motion.div>
             </div>
-            
-            <style jsx global>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap');
-                
-                body {
-                    font-family: 'Inter', sans-serif;
-                }
-
-                @keyframes blob {
-                    0% { transform: translate(0px, 0px) scale(1); }
-                    33% { transform: translate(30px, -50px) scale(1.1); }
-                    66% { transform: translate(-20px, 20px) scale(0.9); }
-                    100% { transform: translate(0px, 0px) scale(1); }
-                }
-                @keyframes blob-delay {
-                    0% { transform: translate(0px, 0px) scale(1); }
-                    33% { transform: translate(-30px, 50px) scale(1.1); }
-                    66% { transform: translate(20px, -20px) scale(0.9); }
-                    100% { transform: translate(0px, 0px) scale(1); }
-                }
-                .animate-blob { animation: blob 15s infinite ease-in-out; }
-                .animate-blob-delay { animation: blob-delay 15s infinite ease-in-out; }
-            `}</style>
         </div>
     );
 }

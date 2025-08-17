@@ -1,32 +1,38 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { admin, db } from "@/lib/firebase-admin";
+
+export const runtime = "nodejs";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
 
 export async function POST(request) {
   try {
-    // Basic sanity check
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error("Missing STRIPE_SECRET_KEY");
-    }
+    const authHeader = request.headers.get("authorization") || "";
+    const idToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!idToken) return NextResponse.json({ error: "Missing auth token" }, { status: 401 });
+    const { uid } = await admin.auth().verifyIdToken(idToken);
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: "2024-06-20",
-    });
+    const userRef = db.collection("users").doc(uid);
+    const snap = await userRef.get();
+    let customerId = snap.exists ? snap.data()?.stripeCustomerId : null;
+
+    if (!customerId) {
+      const fbUser = await admin.auth().getUser(uid);
+      const customer = await stripe.customers.create({
+        email: fbUser.email || undefined,
+        metadata: { firebase_uid: uid },
+      });
+      customerId = customer.id;
+      await userRef.set({ stripeCustomerId: customerId }, { merge: true });
+    }
 
     const { couponCode = "", billingCycle = "monthly" } = await request.json();
 
-    // Map toggle -> your Stripe lookup keys
-    const lookupKey =
-      billingCycle === "yearly" ? "premium_yearly_gbp" : "premium_monthly_gbp";
+    const lookupKey = billingCycle === "yearly" ? "premium_yearly_gbp" : "premium_monthly_gbp";
 
-    // Resolve lookup key to actual Price ID
-    const prices = await stripe.prices.list({
-      lookup_keys: [lookupKey],
-      active: true,
-      limit: 1,
-    });
-    if (!prices.data.length) {
-      throw new Error(`Stripe price not found for lookup key: ${lookupKey}`);
-    }
+    const prices = await stripe.prices.list({ lookup_keys: [lookupKey], active: true, limit: 1 });
+    if (!prices.data.length) throw new Error(`Stripe price not found: ${lookupKey}`);
     const priceId = prices.data[0].id;
 
     const origin =
@@ -36,28 +42,23 @@ export async function POST(request) {
 
     const sessionOptions = {
       mode: "subscription",
-      payment_method_types: ["card"],
+      customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/signup?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
-      // Optional:
-      // automatic_tax: { enabled: true }, // if you use Stripe Tax
-      // billing_address_collection: "auto",
-      // allow_promotion_codes: true, // use this if you prefer promo codes instead of hard-coded coupon IDs
+      metadata: { firebase_uid: uid },
+      // allow_promotion_codes: true,
+      // automatic_tax: { enabled: true },
     };
 
-    // Keep your existing coupon logic (or switch to allow_promotion_codes above)
     if (couponCode === "DRKELVIN100") {
-      sessionOptions.discounts = [{ coupon: "sQc5dFTN" }]; // your coupon ID
+      sessionOptions.discounts = [{ coupon: "sQc5dFTN" }];
     }
 
     const session = await stripe.checkout.sessions.create(sessionOptions);
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    console.error("❌ Error creating Stripe session:", err.message);
-    return NextResponse.json(
-      { error: err.message || "Error creating checkout session" },
-      { status: 500 }
-    );
+    console.error("❌ create-checkout-session error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
