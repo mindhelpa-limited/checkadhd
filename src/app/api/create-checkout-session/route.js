@@ -1,56 +1,103 @@
+// /app/api/create-checkout-session/route.js
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { admin, db } from "@/lib/firebase-admin";
 
 export const runtime = "nodejs";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2024-06-20",
+});
 
 export async function POST(request) {
   try {
-    const authHeader = request.headers.get("authorization") || "";
-    const idToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-    if (!idToken) return NextResponse.json({ error: "Missing auth token" }, { status: 401 });
-    const { uid } = await admin.auth().verifyIdToken(idToken);
-
-    const userRef = db.collection("users").doc(uid);
-    const snap = await userRef.get();
-    let customerId = snap.exists ? snap.data()?.stripeCustomerId : null;
-
-    if (!customerId) {
-      const fbUser = await admin.auth().getUser(uid);
-      const customer = await stripe.customers.create({
-        email: fbUser.email || undefined,
-        metadata: { firebase_uid: uid },
-      });
-      customerId = customer.id;
-      await userRef.set({ stripeCustomerId: customerId }, { merge: true });
+    // ---- Body (works for both auth + guest) ----
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      // no body is fine
     }
+    const {
+      couponCode = "",
+      billingCycle = "monthly",
+      email = "", // optional prefill for guests
+    } = body;
 
-    const { couponCode = "", billingCycle = "monthly" } = await request.json();
-
-    const lookupKey = billingCycle === "yearly" ? "premium_yearly_gbp" : "premium_monthly_gbp";
-
-    const prices = await stripe.prices.list({ lookup_keys: [lookupKey], active: true, limit: 1 });
-    if (!prices.data.length) throw new Error(`Stripe price not found: ${lookupKey}`);
+    // ---- Price lookup (monthly/yearly) ----
+    const lookupKey =
+      billingCycle === "yearly" ? "premium_yearly_gbp" : "premium_monthly_gbp";
+    const prices = await stripe.prices.list({
+      lookup_keys: [lookupKey],
+      active: true,
+      limit: 1,
+    });
+    if (!prices.data.length)
+      throw new Error(`Stripe price not found: ${lookupKey}`);
     const priceId = prices.data[0].id;
 
+    // ---- Success/Cancel URLs ----
     const origin =
       process.env.NEXT_PUBLIC_SITE_URL ||
       request.headers.get("origin") ||
       "http://localhost:3000";
 
+    // ---- Try Firebase auth (optional) ----
+    let uid = null;
+    let customerId = null;
+
+    const authHeader = request.headers.get("authorization") || "";
+    const idToken = authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : null;
+
+    if (idToken) {
+      try {
+        const decoded = await admin.auth().verifyIdToken(idToken);
+        uid = decoded.uid;
+
+        // Ensure/use saved Stripe customer for this UID
+        const userRef = db.collection("users").doc(uid);
+        const snap = await userRef.get();
+        customerId = snap.exists ? snap.data()?.stripeCustomerId : null;
+
+        if (!customerId) {
+          const fbUser = await admin.auth().getUser(uid);
+          const customer = await stripe.customers.create({
+            email: fbUser.email || undefined,
+            metadata: { firebase_uid: uid },
+          });
+          customerId = customer.id;
+          await userRef.set({ stripeCustomerId: customerId }, { merge: true });
+        }
+      } catch {
+        // Invalid/missing token -> proceed as guest
+        uid = null;
+        customerId = null;
+      }
+    }
+
+    // ---- Build session options (SUBSCRIPTION MODE) ----
     const sessionOptions = {
       mode: "subscription",
-      customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/signup?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
-      metadata: { firebase_uid: uid },
+      client_reference_id: uid || `guest-${crypto.randomUUID()}`,
+      metadata: { firebase_uid: uid || "" },
       // allow_promotion_codes: true,
       // automatic_tax: { enabled: true },
     };
 
+    // If authenticated, attach the existing Stripe customer
+    if (customerId) {
+      sessionOptions.customer = customerId;
+    } else {
+      // Guest checkout: DO NOT use customer_creation in subscription mode
+      if (email) sessionOptions.customer_email = email; // optional prefill
+    }
+
+    // Optional hard-coded coupon example
     if (couponCode === "DRKELVIN100") {
       sessionOptions.discounts = [{ coupon: "sQc5dFTN" }];
     }
@@ -59,6 +106,9 @@ export async function POST(request) {
     return NextResponse.json({ url: session.url });
   } catch (err) {
     console.error("❌ create-checkout-session error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Internal error" },
+      { status: 500 }
+    );
   }
 }
