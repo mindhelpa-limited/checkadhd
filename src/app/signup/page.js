@@ -23,7 +23,7 @@ const FullScreenLoader = ({ message }) => (
 const PaymentModal = () => (
   <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
     <div className="bg-[#101b3d] rounded-2xl shadow-lg max-w-md w-full p-6 text-center border border-white/10">
-      <h2 className="text-xl font-semibold text-white mb-3">Premium Access Required</h2>
+      <h2 className="text-xl font-semibold text-white mb-3">Access Required</h2>
       <p className="text-gray-300 mb-6">
         Please complete your payment to create an account and unlock your dashboard.
       </p>
@@ -58,16 +58,18 @@ function SignUpPage() {
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  // Create/update Firestore user doc (mark premium if sessionId exists)
-  const createOrUpdateUser = async (user) => {
+  // 🆕 track which product they bought
+  const [productTag, setProductTag] = useState("free");
+
+  // Create/update Firestore user doc (mark with correct product)
+  const createOrUpdateUser = async (user, tierTag = "free") => {
     const userRef = doc(db, "users", user.uid);
-    const tier = sessionId ? "premium" : "free";
 
     await setDoc(
       userRef,
       {
         email: user.email,
-        tier,
+        tier: tierTag,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       },
@@ -75,7 +77,7 @@ function SignUpPage() {
     );
   };
 
-  // On mount: if no session_id -> show pay modal; else fetch checkout email
+  // On mount: if no session_id -> show pay modal; else fetch checkout email + product
   useEffect(() => {
     (async () => {
       try {
@@ -87,9 +89,28 @@ function SignUpPage() {
 
         const res = await fetch(`/api/get-session-details?id=${encodeURIComponent(sessionId)}`);
         const data = await res.json();
+
         if (data?.email) {
           setEmail(data.email);
-          setIsEmailLocked(true); // lock the email field
+          setIsEmailLocked(true);
+
+          // 🆕 explicitly handle which product
+          let tag = "premium"; // default
+          switch (data.product) {
+            case "recovery":
+              tag = "recovery";
+              break;
+            case "coaching":
+              tag = "coaching";
+              break;
+            case "institute":
+              tag = "institute";
+              break;
+            case "premium":
+            default:
+              tag = "premium";
+          }
+          setProductTag(tag);
         }
       } catch (e) {
         console.error("Failed to fetch session email:", e);
@@ -116,34 +137,26 @@ function SignUpPage() {
     setLoading(true);
 
     try {
-      // If another user is logged in in this browser, sign them out first
       if (auth.currentUser && auth.currentUser.email !== email) {
         await signOut(auth);
       }
 
-      // Check if this email already exists
       const methods = await fetchSignInMethodsForEmail(auth, email);
 
       if (methods.length > 0) {
-        // Existing account
         if (methods.includes("password")) {
-          // Try to sign them in with the password they entered
           try {
             const cred = await signInWithEmailAndPassword(auth, email, password);
-            await createOrUpdateUser(cred.user); // mark premium if session_id present
+            await createOrUpdateUser(cred.user, productTag);
             router.push("/dashboard");
             return;
           } catch (err) {
-            // Wrong password or other issue → send reset link
             await sendPasswordResetEmail(auth, email);
-            setError(
-              "This email already has an account. We just sent a password reset link to your inbox."
-            );
+            setError("This email already has an account. We just sent a password reset link.");
             setLoading(false);
             return;
           }
         } else {
-          // Registered with Google/other provider
           setError(
             `This email is already registered with ${methods[0]}. Please use that sign-in method.`
           );
@@ -152,9 +165,9 @@ function SignUpPage() {
         }
       }
 
-      // New email → create account (Firebase auto-signs in on success)
+      // New account
       const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await createOrUpdateUser(cred.user);
+      await createOrUpdateUser(cred.user, productTag);
       router.push("/dashboard");
     } catch (err) {
       console.error("Auth error:", err?.code, err?.message);
@@ -169,7 +182,6 @@ function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#0a122a] px-4 relative">
       {showPaymentModal && <PaymentModal />}
 
-      {/* ONLY visual change below: hide/disable card when modal is open */}
       <div
         className={`max-w-md w-full bg-[#101b3d] backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/10
         transition-all duration-300
@@ -177,7 +189,7 @@ function SignUpPage() {
         aria-hidden={showPaymentModal}
       >
         <h1 className="text-3xl font-semibold text-center text-white">
-          ✨ Create Your Premium Account
+          ✨ Create Your Account
         </h1>
         <p className="text-center text-gray-300 mt-2">
           Complete your registration to access your dashboard.
