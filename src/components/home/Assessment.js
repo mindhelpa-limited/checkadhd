@@ -84,7 +84,7 @@ export default function Assessment() {
           <div className={`w-full h-full transform transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <div className="relative overflow-hidden rounded-3xl shadow-2xl border border-white/10">
               <Image
-                src="/images/how-it-works.png"
+                src="/images/how-it-works.jpg"
                 alt="Image representing how the platform works"
                 width={800}
                 height={600}
