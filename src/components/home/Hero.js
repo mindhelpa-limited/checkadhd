@@ -51,7 +51,7 @@ export default function Hero() {
             onClick={() => router.push("/features")} 
             className="text-blue-300 hover:text-blue-200 border border-blue-400/30 hover:bg-blue-400/10 text-lg font-medium py-4 px-10 rounded-full transition-all duration-300"
           >
-            Explore Games & Therapy
+            Explore Recovery Tools
           </button>
         </div>
       </div>

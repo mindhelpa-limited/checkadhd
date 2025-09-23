@@ -4,30 +4,29 @@ import { Plus } from "lucide-react";
 
 const faqs = [
   {
-    question: "What does the £50/month plan include?",
+    question: "What does the £50 one-time fee include?",
     answer:
-      "Your subscription includes the full ADHD assessment, a personalized recovery dashboard, daily AI-powered meditations and affirmations, access to our library of healing sounds and music therapy, gamified brain-training games, and exclusive access to our daily 30-minute recovery sessions.",
+      "Your one-time payment of £50 covers the full ADHD self-assessment with 75 clinically-validated questions, instant scoring, a downloadable PDF report of your results, and lifetime access to your private dashboard where you can view your results anytime.",
   },
   {
     question: "Is the ADHD assessment a clinical diagnosis?",
     answer:
-    "No. Our assessment is an evidence-based tool designed to provide helpful insights and a strong baseline, but it does not replace a clinical diagnosis from a qualified healthcare provider. You can, however, share your results with your doctor.",
+      "No. Our assessment is an evidence-based tool designed to provide helpful insights and a strong baseline, but it does not replace a clinical diagnosis from a qualified healthcare provider. You can, however, share your results with your doctor.",
   },
-  // --- UPDATED FAQ FOR GAMIFIED RECOVERY SESSIONS ---
   {
-    question: "How do the 30-minute gamified recovery sessions work?",
+    question: "What other services do you provide?",
     answer:
-      "Our sessions combine guided meditations, brain-training games designed to improve memory, attention, and focus, and timed focus exercises into a single, structured routine. It's designed to help you build consistency in a gentle, engaging, and progressive way.",
+      "In addition to the £50 one-time ADHD assessment, we offer optional add-ons: Goal Tracker & Recovery Tools for £20/month, and access to One-on-One Coaching sessions for mental health support. These services are designed to complement your assessment and provide ongoing recovery support.",
   },
   {
     question: "Can I cancel my subscription anytime?",
     answer:
-      "Yes, absolutely. You can cancel your subscription at any time directly from your account profile. You will retain access to all premium features until the end of your current billing cycle.",
+      "The ADHD test itself is a one-time fee — no subscription is required. For optional services like Goal Tracker, Recovery Tools, or Coaching, you can cancel your subscription at any time directly from your account profile. You will retain access to those premium services until the end of your current billing cycle.",
   },
   {
     question: "Is my data secure?",
     answer:
-      "Yes. We prioritize your privacy and security. We use industry‑standard encryption and best practices to ensure your personal information and assessment results remain private and protected at all times.",
+      "Yes. We prioritize your privacy and security. We use industry-standard encryption and best practices to ensure your personal information and assessment results remain private and protected at all times.",
   },
 ];
 
@@ -92,21 +91,28 @@ export default function FAQ() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative bg-[#0a122a] py-24 sm:py-32 overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="relative bg-[#0a122a] py-24 sm:py-32 overflow-hidden"
+    >
       {/* Floating Glow Effects */}
       <div className="absolute inset-0 -z-10 animate-float-container">
         <div className="absolute top-[10%] left-[5%] w-[500px] h-[500px] bg-[#A78BFA]/20 blur-[120px] rounded-full animate-float" />
         <div className="absolute bottom-[-10%] right-[5%] w-[400px] h-[400px] bg-blue-400/10 blur-[100px] rounded-full animate-float-slow" />
       </div>
 
-      <div className={`max-w-4xl mx-auto px-6 lg:px-8 relative z-10 transform transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+      <div
+        className={`max-w-4xl mx-auto px-6 lg:px-8 relative z-10 transform transition-all duration-1000 ${
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        }`}
+      >
         <div className="text-center mb-16">
           <h2 className="font-serif text-4xl sm:text-5xl font-bold text-white">
             Frequently Asked Questions
           </h2>
           <p className="mt-4 text-lg text-white/70 max-w-2xl mx-auto">
             Find quick answers to common questions about our platform, the
-            assessment, and the recovery program.
+            assessment, and our optional recovery services.
           </p>
         </div>
 
@@ -124,17 +130,33 @@ export default function FAQ() {
       </div>
       <style jsx>{`
         @keyframes float {
-          0% { transform: translate(0, 0); }
-          50% { transform: translate(-10px, -10px); }
-          100% { transform: translate(0, 0); }
+          0% {
+            transform: translate(0, 0);
+          }
+          50% {
+            transform: translate(-10px, -10px);
+          }
+          100% {
+            transform: translate(0, 0);
+          }
         }
         @keyframes float-slow {
-          0% { transform: translate(0, 0); }
-          50% { transform: translate(10px, 10px); }
-          100% { transform: translate(0, 0); }
+          0% {
+            transform: translate(0, 0);
+          }
+          50% {
+            transform: translate(10px, 10px);
+          }
+          100% {
+            transform: translate(0, 0);
+          }
         }
-        .animate-float { animation: float 10s ease-in-out infinite; }
-        .animate-float-slow { animation: float-slow 12s ease-in-out infinite; }
+        .animate-float {
+          animation: float 10s ease-in-out infinite;
+        }
+        .animate-float-slow {
+          animation: float-slow 12s ease-in-out infinite;
+        }
       `}</style>
     </section>
   );

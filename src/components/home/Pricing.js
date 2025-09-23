@@ -5,13 +5,13 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import {
   ClipboardList,
-  CalendarCheck,
-  Headphones,
-  Music,
-  Brain,
-  Dumbbell,
-  Activity,
-  Video,
+  FileText,
+  CheckCircle,
+  BarChart2,
+  Lightbulb,
+  Printer,
+  LayoutDashboard,
+  Infinity,
 } from "lucide-react";
 
 // Reusable list item with reveal animation + icon
@@ -40,10 +40,7 @@ const FeatureListItem = ({ title, icon }) => {
           isItemVisible ? "animate-bounce-in" : ""
         }`}
       >
-        {/* Icon gets a consistent size/color */}
-        <div className="text-blue-300">
-          {icon}
-        </div>
+        <div className="text-blue-300">{icon}</div>
       </div>
       <span className="text-gray-200">{title}</span>
     </li>
@@ -52,42 +49,42 @@ const FeatureListItem = ({ title, icon }) => {
 
 export default function PricingHighlight() {
   const router = useRouter();
-  const [billingCycle, setBillingCycle] = useState("monthly"); // "monthly" | "yearly"
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  // Final 8 items — assessment-only package
   const features = [
     {
       title: "Comprehensive 75-Question ADHD Assessment",
       icon: <ClipboardList className="w-5 h-5" />,
     },
     {
-      title: "Personalized ADHD Recovery Calendar for structured progress",
-      icon: <CalendarCheck className="w-5 h-5" />,
+      title: "Instant PDF Report of Results",
+      icon: <FileText className="w-5 h-5" />,
     },
     {
-      title: "Daily Targeted Meditations with affirmations",
-      icon: <Headphones className="w-5 h-5" />,
+      title: "Clinically-Validated ADHD Scoring (ASRS + DSM-5 Based)",
+      icon: <CheckCircle className="w-5 h-5" />,
     },
     {
-      title: "Healing sounds & music therapy library",
-      icon: <Music className="w-5 h-5" />,
+      title: "Personalized Strengths & Challenges Breakdown",
+      icon: <BarChart2 className="w-5 h-5" />,
     },
     {
-      title: "Gamified brain-training & daily streak tracking",
-      icon: <Brain className="w-5 h-5" />,
+      title: "Professional Recommendations for Next Steps",
+      icon: <Lightbulb className="w-5 h-5" />,
     },
     {
-      title: "Recommended daily exercise for physical wellbeing",
-      icon: <Dumbbell className="w-5 h-5" />,
+      title: "Printable Insights for Sharing with Doctor or Coach",
+      icon: <Printer className="w-5 h-5" />,
     },
     {
-      title: "Cognitive Care Plan: water, fruit & dietary tracking",
-      icon: <Activity className="w-5 h-5" />,
+      title: "Secure Online Dashboard to View Results Anytime",
+      icon: <LayoutDashboard className="w-5 h-5" />,
     },
     {
-      title: "Exclusive daily 30-minute recovery sessions",
-      icon: <Video className="w-5 h-5" />,
+      title: "Lifetime Access — One-Time Payment, No Subscriptions",
+      icon: <Infinity className="w-5 h-5" />,
     },
   ];
 
@@ -102,12 +99,6 @@ export default function PricingHighlight() {
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => sectionRef.current && observer.unobserve(sectionRef.current);
   }, []);
-
-  const price = billingCycle === "monthly" ? 50 : 500;
-  const suffix = billingCycle === "monthly" ? "/ month" : "/ year";
-  const perMonthBreakdown =
-    billingCycle === "yearly" ? ` (£${(500 / 12).toFixed(2)}/mo)` : "";
-  const savedText = billingCycle === "yearly" ? "Save £100 vs monthly" : null;
 
   return (
     <section
@@ -128,13 +119,14 @@ export default function PricingHighlight() {
         {/* Heading */}
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-base font-semibold tracking-widest text-blue-400 uppercase">
-            Simple, All-Inclusive Pricing
+            Simple, One-Time Pricing
           </p>
           <h2 className="mt-4 font-serif text-4xl sm:text-5xl font-bold text-white">
-            One Plan, Unlimited Potential
+            Lifetime Access for Just £50
           </h2>
           <p className="mt-6 text-lg text-gray-300">
-            Get full access to every feature with our premium subscription. No hidden fees, no complicated tiers.
+            Get everything you need for a clear ADHD assessment — one plan, one
+            payment, no subscriptions.
           </p>
         </div>
 
@@ -149,7 +141,7 @@ export default function PricingHighlight() {
             <div className="relative w-full h-auto p-4 sm:p-8">
               <Image
                 src="/images/price-value.png"
-                alt="Visual representation of premium plan"
+                alt="Visual representation of ADHD toolkit"
                 width={1000}
                 height={800}
                 className="w-full h-auto object-contain animate-image-float-pulse"
@@ -164,59 +156,24 @@ export default function PricingHighlight() {
             }`}
           >
             <h3 className="text-3xl font-serif font-bold text-white">
-              Premium Recovery Plan
+              ADHD Assessment Package
             </h3>
 
-            {/* Toggle */}
-            <div className="mt-6 inline-flex rounded-xl bg-white/10 p-1">
-              <button
-                type="button"
-                onClick={() => setBillingCycle("monthly")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  billingCycle === "monthly"
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-300 hover:text-white"
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                type="button"
-                onClick={() => setBillingCycle("yearly")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  billingCycle === "yearly"
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-300 hover:text-white"
-                }`}
-              >
-                Yearly
-              </button>
-            </div>
-
-            <p className="mt-4 text-5xl font-extrabold text-white">
-              £{price}
-              <span className="text-xl font-medium text-gray-400"> {suffix}</span>
-              <span className="text-lg font-medium text-gray-400">
-                {perMonthBreakdown}
-              </span>
+            {/* Static price */}
+            <p className="mt-6 text-5xl font-extrabold text-white">
+              £50 <span className="text-xl font-medium text-gray-400"> one-time</span>
             </p>
-
-            {savedText && (
-              <p className="mt-2 inline-block rounded-full bg-green-600/20 text-green-300 px-3 py-1 text-sm">
-                {savedText}
-              </p>
-            )}
 
             <p className="mt-4 text-gray-300">
-              Everything you need to build focus, consistency, and a calmer mind.
+              A single payment for lifetime access to your ADHD results and insights.
             </p>
 
-            {/* CTA → pricing page */}
+            {/* CTA */}
             <button
               onClick={() => router.push("/pricing")}
               className="mt-8 w-full text-white font-bold py-4 rounded-full text-lg shadow-lg transition-all transform hover:scale-105 pulsing-button"
             >
-              {billingCycle === "monthly" ? "Choose £50/month" : "Choose £500/year"}
+              Get Lifetime Access
             </button>
 
             <ul className="mt-8 space-y-4">
@@ -239,12 +196,28 @@ export default function PricingHighlight() {
           background-image: linear-gradient(90deg, #3b82f6, #1d4ed8, #3b82f6);
           background-size: 200% auto;
         }
-        .pulsing-button:hover { animation: pulse-button-bg 1s infinite linear; }
-        @keyframes pulse-button-bg { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
-        @keyframes bounce-in { 0%{transform:scale(0);opacity:0} 60%{transform:scale(1.2);opacity:1} 80%{transform:scale(0.9)} 100%{transform:scale(1)} }
+        .pulsing-button:hover {
+          animation: pulse-button-bg 1s infinite linear;
+        }
+        @keyframes pulse-button-bg {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        @keyframes bounce-in {
+          0% { transform: scale(0); opacity: 0; }
+          60% { transform: scale(1.2); opacity: 1; }
+          80% { transform: scale(0.9); }
+          100% { transform: scale(1); }
+        }
         .animate-bounce-in { animation: bounce-in 0.6s ease-out; }
-        @keyframes float { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-10px,-10px)} }
-        @keyframes float-slow { 0%,100%{transform:translate(0,0)} 50%{transform:translate(10px,10px)} }
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(-10px, -10px); }
+        }
+        @keyframes float-slow {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(10px, 10px); }
+        }
         .animate-float { animation: float 10s ease-in-out infinite; }
         .animate-float-slow { animation: float-slow 12s ease-in-out infinite; }
         @keyframes image-float-pulse {

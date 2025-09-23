@@ -50,7 +50,7 @@ export default function HowItWorks() {
             </p>
           </div>
 
-          {/* Step 2 - Updated Image & Button */}
+          {/* Step 2 */}
           <div className="flex-1 bg-white/5 p-8 rounded-2xl shadow-xl border border-transparent hover:border-blue-500/20 transition-colors duration-300 flex flex-col">
             <div className="relative w-full h-48 mb-6">
               <Image
@@ -77,12 +77,12 @@ export default function HowItWorks() {
             </button>
           </div>
 
-          {/* Step 3 - Updated Content */}
+          {/* Step 3 - Updated for Recovery Tools */}
           <div className="flex-1 bg-white/5 p-8 rounded-2xl shadow-xl border border-transparent hover:border-blue-500/20 transition-colors duration-300 flex flex-col">
             <div className="relative w-full h-48 mb-6">
               <Image
                 src="/images/daily-routine.png"
-                alt="A personalized daily routine"
+                alt="Your personal recovery dashboard"
                 fill
                 className="rounded-xl object-cover"
               />
@@ -91,10 +91,10 @@ export default function HowItWorks() {
               <div className="bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-400/30 p-3 rounded-full shadow-lg text-blue-200 flex items-center justify-center w-12 h-12">
                 <span className="text-2xl font-bold">3</span>
               </div>
-              <h3 className="text-2xl font-semibold text-white">Start Your Gamified Flow</h3>
+              <h3 className="text-2xl font-semibold text-white">Begin Your Recovery Flow</h3>
             </div>
             <p className="text-gray-300 leading-relaxed max-w-prose mt-auto">
-              Access your dashboard to begin your daily 30-minute recovery session. This structured experience combines guided meditation, brain-training games, and quick breaks to help you build focus and consistency. You can also explore our library of healing sounds and music therapy anytime.
+              Log into your dashboard to unlock daily recovery tools. From goal tracking and visualization to meditation videos, motivational clips, and healing sounds — everything is structured to keep you consistent. Your streaks, progress, and personal growth are all in one place, helping you build clarity step by step.
             </p>
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function HowItWorks() {
         .animate-float-slow { animation: float-slow 12s ease-in-out infinite; }
       `}</style>
 
-      {/* Manual Divider added here */}
+      {/* Manual Divider */}
       <div className="absolute bottom-0 left-0 w-full h-px">
         <div className="h-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
       </div>

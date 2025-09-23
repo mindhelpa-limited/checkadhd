@@ -20,43 +20,48 @@ export default function Features() {
           </p>
         </div>
 
-        {/* Feature Block 2 (now updated for the new games and therapy) */}
+        {/* Feature Block 2 (updated for Recovery Tools instead of Games) */}
         <div className="grid lg:grid-cols-2 gap-16 items-center mt-0">
           <img
             src="/images/grow-guidance.jpg"
-            alt="Young woman meditating in a serene flower garden"
+            alt="Person writing in a journal as part of recovery"
             className="rounded-3xl shadow-xl hover:scale-[1.02] transition-transform duration-500"
           />
           <div>
             <h3 className="font-serif text-3xl font-bold text-white">
-              Gamified Recovery: Find Your Flow
+              Recovery That Fits Your Life
             </h3>
             <p className="mt-4 text-gray-300">
-              Transform your daily recovery with our structured 30-minute session. Each day, you'll engage in a series of focus-building activities designed to boost your concentration and provide a rewarding experience.
+              Move beyond testing into tools that help you heal, grow, and stay
+              consistent. Designed with ADHD recovery in mind, these supports
+              keep you grounded while guiding your progress.
             </p>
             <ul className="mt-6 space-y-4 text-gray-400">
               <li className="flex items-start gap-3">
                 <span className="text-blue-400 mt-1">✔</span>
                 <div>
-                  <strong className="text-white">Structured Daily Session:</strong>
+                  <strong className="text-white">Goal Tracker:</strong>
                   <br />
-                  A 30-minute routine with meditation, gaming, and breaks for rehydration and exercise.
+                  Set, track, and celebrate your daily and weekly milestones with
+                  a clear sense of progress.
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-blue-400 mt-1">✔</span>
                 <div>
-                  <strong className="text-white">Engaging Games:</strong>
+                  <strong className="text-white">Recovery Tools:</strong>
                   <br />
-                  Dive into **MoneyStack**, a captivating stacking game reminiscent of Tetris; slither your way to rewards in **Snake**, collecting credits as you grow; or enjoy the fast-paced action of **PingPong**.
+                  Journaling, focus practices, and structured exercises built to
+                  support your attention and wellbeing.
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-blue-400 mt-1">✔</span>
                 <div>
-                  <strong className="text-white">Healing Sounds:</strong>
+                  <strong className="text-white">One-on-One Coaching:</strong>
                   <br />
-                  Access a library of **Afrotherapy music and healing sounds** for calm and focus anytime.
+                  Personalized guidance from a coach who helps you apply your
+                  insights into real-life strategies.
                 </div>
               </li>
             </ul>
@@ -99,10 +104,9 @@ export default function Features() {
             className="rounded-3xl shadow-xl hover:scale-[1.02] transition-transform duration-500"
           />
         </div>
-
       </div>
 
-      {/* Manual Divider added here */}
+      {/* Manual Divider */}
       <div className="absolute bottom-0 left-0 w-full h-px">
         <div className="h-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
       </div>
