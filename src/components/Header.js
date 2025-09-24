@@ -38,7 +38,7 @@ export default function Header() {
     const navLinks = (
         <>
             <MobileMenuItem href="/" onClick={() => setMenuOpen(false)}>Home</MobileMenuItem>
-            <MobileMenuItem href="/features" onClick={() => setMenuOpen(false)}>Features</MobileMenuItem>
+            <MobileMenuItem href="/features" onClick={() => setMenuOpen(false)}>Services</MobileMenuItem>
             <MobileMenuItem href="/how-it-works" onClick={() => setMenuOpen(false)}>How It Works</MobileMenuItem>
             <MobileMenuItem href="/assessment" onClick={() => setMenuOpen(false)}>Assessment</MobileMenuItem>
             <MobileMenuItem href="/pricing" onClick={() => setMenuOpen(false)}>Pricing</MobileMenuItem>
@@ -57,7 +57,7 @@ export default function Header() {
                 {/* Desktop Menu */}
                 <nav className="hidden md:flex space-x-8 font-sans font-medium text-white items-center">
                     <Link href="/" className="hover:text-blue-400 transition-all duration-200">Home</Link>
-                    <Link href="/features" className="hover:text-blue-400 transition-all duration-200">Features</Link>
+                    <Link href="/features" className="hover:text-blue-400 transition-all duration-200">Services</Link>
                     <Link href="/how-it-works" className="hover:text-blue-400 transition-all duration-200">How It Works</Link>
                     <Link href="/assessment" className="hover:text-blue-400 transition-all duration-200">Assessment</Link>
                     <Link href="/pricing" className="hover:text-blue-400 transition-all duration-200">Pricing</Link>

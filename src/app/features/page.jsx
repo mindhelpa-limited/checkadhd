@@ -12,32 +12,33 @@ import {
 import Footer from "../../components/home/Footer";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { auth, db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { useState } from "react";
 
 /* ----------------- Services ----------------- */
 const services = [
   {
     name: "ADHD Assessment",
-    description: "A complete ADHD test built on DSM-5 standards to help you understand your mind better.",
+    description:
+      "A complete ADHD test built on DSM-5 standards to help you understand your mind better.",
     imageUrl: "/images/blockstack.png",
-    dest: "/dashboard", // ✅ premium goes here
-    premiumRequired: true,
+    dest: "/pricing", // ✅ goes straight to pricing page
+    isAdhd: true,
   },
   {
     name: "Mental Health Recovery Tools",
-    description: "Daily trackers and science-based exercises for resilience, focus, and calm.",
+    description:
+      "Daily trackers and science-based exercises for resilience, focus, and calm.",
     imageUrl: "/images/trailmuncher.png",
-    dest: "/dashboard/recovery/tools",
-    premiumRequired: false,
+    dest: "#",
+    isAdhd: false,
   },
   {
     name: "Psychiatrist-Led Coaching",
-    description: "Work directly with licensed professionals for personalized guidance and strategies.",
+    description:
+      "Work directly with licensed professionals for personalized guidance and strategies.",
     imageUrl: "/images/neuralbounds.png",
-    dest: "/dashboard/recovery/coaching",
-    premiumRequired: false,
+    dest: "#",
+    isAdhd: false,
   },
 ];
 
@@ -47,13 +48,15 @@ const musicTiles = [
     name: "Therapy Music",
     description: "A curated library of guided, calming tracks to help you reset.",
     imageUrl: "/images/music.png",
-    dest: "/dashboard/recovery/therapymusic",
+    dest: "#",
+    isAdhd: false,
   },
   {
     name: "Healing Sounds",
     description: "Ambient sounds and soundscapes for deep relaxation and focus.",
     imageUrl: "/images/healing.png",
-    dest: "/dashboard/recovery/healingsounds",
+    dest: "#",
+    isAdhd: false,
   },
 ];
 
@@ -63,90 +66,36 @@ const FeatureCard = ({ icon, title, description }) => (
     <div className="w-16 h-16 flex items-center justify-center bg-blue-500/10 text-blue-400 rounded-full mx-auto transition-transform duration-300 group-hover:scale-110 group-hover:text-white">
       {icon}
     </div>
-    <h3 className="mt-6 text-xl font-serif font-semibold text-white text-center">{title}</h3>
+    <h3 className="mt-6 text-xl font-serif font-semibold text-white text-center">
+      {title}
+    </h3>
     <p className="mt-2 text-gray-400 text-center text-base">{description}</p>
   </div>
 );
 
-/* ----------------- Modal ----------------- */
-function ProceedModal({ open, onClose, onProceed, title, loggedOut, premiumNeeded, isPremium }) {
+/* ----------------- Coming Soon Modal ----------------- */
+function ComingSoonModal({ open, onClose }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
-      <div className="bg-[#101b3d] border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+      <div className="bg-[#101b3d] border border-white/10 rounded-2xl p-8 w-full max-w-md shadow-2xl relative text-center">
         {/* Close icon */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-white transition"
         >
-          <X size={20} />
+          <X size={22} />
         </button>
 
-        <h3 className="text-xl font-semibold text-white">{title}</h3>
-        {!loggedOut ? (
-          premiumNeeded ? (
-            isPremium ? (
-              <p className="text-green-400 mt-2">
-                ✅ It works — you are a Premium member. Ready to continue?
-              </p>
-            ) : (
-              <p className="text-red-400 mt-2">
-                ⚠️ This feature requires Premium. Please upgrade to continue.
-              </p>
-            )
-          ) : (
-            <p className="text-gray-300 mt-2">
-              You’re signed in. Would you like to proceed?
-            </p>
-          )
-        ) : (
-          <p className="text-gray-300 mt-2">
-            You’re logged out. Log in if you’ve already subscribed, or view plans to subscribe.
-          </p>
-        )}
-
-        <div className="mt-6 flex flex-col gap-3">
-          {!loggedOut ? (
-            <>
-              {premiumNeeded && !isPremium ? (
-                <button
-                  onClick={() => (window.location.href = "/pricing")}
-                  className="w-full rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 transition-colors"
-                >
-                  💳 Upgrade to Premium
-                </button>
-              ) : (
-                <button
-                  onClick={onProceed}
-                  className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 transition-colors"
-                >
-                  Proceed
-                </button>
-              )}
-              <button
-                onClick={onClose}
-                className="w-full rounded-xl border border-white/20 text-white font-semibold py-3 hover:bg-white/5 transition-colors"
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => (window.location.href = "/login")}
-                className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 transition-colors"
-              >
-                Log in
-              </button>
-              <button
-                onClick={() => (window.location.href = "/pricing")}
-                className="w-full rounded-xl border border-white/20 text-white font-semibold py-3 hover:bg-white/5 transition-colors"
-              >
-                View Plans
-              </button>
-            </>
-          )}
+        {/* Spinner */}
+        <div className="flex justify-center mb-6">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
+
+        <h3 className="text-2xl font-semibold text-white">Coming Soon</h3>
+        <p className="mt-3 text-gray-300">
+          This feature is under development. Stay tuned!
+        </p>
       </div>
     </div>
   );
@@ -156,48 +105,15 @@ function ProceedModal({ open, onClose, onProceed, title, loggedOut, premiumNeede
 export default function FeaturesPage() {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("Proceed?");
-  const [pendingDest, setPendingDest] = useState(null);
-  const [premiumNeeded, setPremiumNeeded] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
-  const [loggedOut, setLoggedOut] = useState(false);
 
-  useEffect(() => {
-    const checkTier = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        try {
-          const ref = doc(db, "users", user.uid);
-          const snap = await getDoc(ref);
-          if (snap.exists()) {
-            setIsPremium(snap.data()?.tier === "premium");
-          }
-        } catch (err) {
-          console.error("Error checking tier:", err);
-        }
-      }
-    };
-    checkTier();
-  }, []);
-
-  const handleExploreClick = (label, dest, premiumRequired) => {
-    setModalTitle(`Proceed to ${label}?`);
-    setPendingDest(dest);
-    setPremiumNeeded(premiumRequired);
-
-    const user = auth.currentUser;
-    if (!user) {
-      setLoggedOut(true);
+  const handleExploreClick = (isAdhd, dest) => {
+    if (isAdhd) {
+      // ✅ ADHD Assessment goes directly
+      router.push(dest);
+    } else {
+      // ✅ All others open Coming Soon modal
       setModalOpen(true);
-      return;
     }
-    setLoggedOut(false);
-    setModalOpen(true);
-  };
-
-  const proceed = () => {
-    setModalOpen(false);
-    if (pendingDest) router.push(pendingDest);
   };
 
   return (
@@ -214,7 +130,10 @@ export default function FeaturesPage() {
           />
         </div>
         <div className="absolute inset-0 z-10 flex items-center justify-center">
-          <svg viewBox="0 0 200 200" className="w-[80vw] max-w-md h-auto text-blue-500/20 animate-spin-slow">
+          <svg
+            viewBox="0 0 200 200"
+            className="w-[80vw] max-w-md h-auto text-blue-500/20 animate-spin-slow"
+          >
             <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="1" />
             <circle cx="100" cy="100" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" />
             <path
@@ -287,7 +206,7 @@ export default function FeaturesPage() {
                 <h3 className="text-xl font-semibold text-white">{s.name}</h3>
                 <p className="mt-2 text-gray-400">{s.description}</p>
                 <button
-                  onClick={() => handleExploreClick(s.name, s.dest, s.premiumRequired)}
+                  onClick={() => handleExploreClick(s.isAdhd, s.dest)}
                   className="mt-4 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 transition-colors"
                 >
                   Explore
@@ -302,9 +221,7 @@ export default function FeaturesPage() {
       <div className="bg-[#0a122a] py-16 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <Music2 className="w-10 h-10 text-purple-300 mx-auto" />
-          <h2 className="mt-3 text-4xl font-serif font-bold text-white">
-            Therapy Music & Healing Sounds
-          </h2>
+          <h2 className="mt-3 text-4xl font-serif font-bold text-white">Therapy Music & Healing Sounds</h2>
           <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
             Immerse yourself in calming tracks and soundscapes for deep focus and relaxation.
           </p>
@@ -330,7 +247,7 @@ export default function FeaturesPage() {
                 <h3 className="text-xl font-semibold text-white">{m.name}</h3>
                 <p className="mt-2 text-gray-400">{m.description}</p>
                 <button
-                  onClick={() => handleExploreClick(m.name, m.dest, false)}
+                  onClick={() => handleExploreClick(false, m.dest)}
                   className="mt-4 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 transition-colors"
                 >
                   Explore Library
@@ -373,9 +290,7 @@ export default function FeaturesPage() {
 
       {/* CTA */}
       <div className="bg-[#0a122a] py-24 text-center px-4">
-        <h2 className="text-3xl md:text-4xl font-extrabold font-serif">
-          Ready to Build the Life You Deserve?
-        </h2>
+        <h2 className="text-3xl md:text-4xl font-extrabold font-serif">Ready to Build the Life You Deserve?</h2>
         <p className="mt-4 text-lg text-gray-300">
           Your mental health journey doesn’t have to be chaotic. Recovery is possible — and we’ll guide you globally.
         </p>
@@ -426,15 +341,7 @@ export default function FeaturesPage() {
         }
       `}</style>
 
-      <ProceedModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onProceed={proceed}
-        title={modalTitle}
-        loggedOut={loggedOut}
-        premiumNeeded={premiumNeeded}
-        isPremium={isPremium}
-      />
+      <ComingSoonModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   );
 }
