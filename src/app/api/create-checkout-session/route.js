@@ -22,6 +22,7 @@ export async function POST(request) {
       couponCode = "",
       billingCycle = "monthly",
       email = "", // optional prefill for guests
+      successRedirect = "/signup", // 👈 default fallback
     } = body;
 
     // ---- Price lookup (monthly/yearly) ----
@@ -81,7 +82,7 @@ export async function POST(request) {
     const sessionOptions = {
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}/signup?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${origin}${successRedirect}?session_id={CHECKOUT_SESSION_ID}`, // 👈 dynamic redirect
       cancel_url: `${origin}/pricing`,
       client_reference_id: uid || `guest-${crypto.randomUUID()}`,
       metadata: { firebase_uid: uid || "" },

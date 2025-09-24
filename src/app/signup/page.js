@@ -5,10 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   fetchSignInMethodsForEmail,
-  sendPasswordResetEmail,
-  signOut,
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
@@ -49,7 +46,7 @@ export default function SignUpPageWrapper() {
 function SignUpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session_id"); // present when redirected from Stripe
+  const sessionId = searchParams.get("session_id"); // from Stripe
 
   const [email, setEmail] = useState("");
   const [isEmailLocked, setIsEmailLocked] = useState(false);
@@ -58,10 +55,10 @@ function SignUpPage() {
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  // 🆕 track which product they bought
+  // Track product they bought
   const [productTag, setProductTag] = useState("free");
 
-  // Create/update Firestore user doc (mark with correct product)
+  // Create/update Firestore user doc
   const createOrUpdateUser = async (user, tierTag = "free") => {
     const userRef = doc(db, "users", user.uid);
 
@@ -77,7 +74,25 @@ function SignUpPage() {
     );
   };
 
-  // On mount: if no session_id -> show pay modal; else fetch checkout email + product
+  // Decide redirect based on product tag
+  const redirectToDashboard = (tag) => {
+    switch (tag) {
+      case "recovery":
+        router.push("/dashboard/recovery");
+        break;
+      case "coaching":
+        router.push("/dashboard/coaching");
+        break;
+      case "institute":
+        router.push("/dashboard/institute");
+        break;
+      default:
+        router.push("/dashboard");
+        break;
+    }
+  };
+
+  // On mount → check payment session
   useEffect(() => {
     (async () => {
       try {
@@ -87,14 +102,15 @@ function SignUpPage() {
           return;
         }
 
-        const res = await fetch(`/api/get-session-details?id=${encodeURIComponent(sessionId)}`);
+        const res = await fetch(
+          `/api/get-session-details?id=${encodeURIComponent(sessionId)}`
+        );
         const data = await res.json();
 
         if (data?.email) {
           setEmail(data.email);
           setIsEmailLocked(true);
 
-          // 🆕 explicitly handle which product
           let tag = "premium"; // default
           switch (data.product) {
             case "recovery":
@@ -106,11 +122,22 @@ function SignUpPage() {
             case "institute":
               tag = "institute";
               break;
-            case "premium":
-            default:
-              tag = "premium";
           }
           setProductTag(tag);
+
+          // ✅ If user already logged in → go straight
+          if (auth.currentUser) {
+            await createOrUpdateUser(auth.currentUser, tag);
+            redirectToDashboard(tag);
+            return;
+          }
+
+          // ✅ If email already exists → redirect to login
+          const methods = await fetchSignInMethodsForEmail(auth, data.email);
+          if (methods.length > 0) {
+            router.push(`/login?email=${encodeURIComponent(data.email)}&product=${tag}`);
+            return;
+          }
         }
       } catch (e) {
         console.error("Failed to fetch session email:", e);
@@ -118,60 +145,21 @@ function SignUpPage() {
         setLoading(false);
       }
     })();
-  }, [sessionId]);
+  }, [sessionId, router]);
 
-  // Error code → friendly message
-  const friendly = (code) => {
-    const map = {
-      "auth/invalid-email": "Please enter a valid email address.",
-      "auth/weak-password": "Please choose a stronger password (at least 6 characters).",
-      "auth/email-already-in-use": "This email already has an account.",
-      "auth/network-request-failed": "Network error. Please try again.",
-    };
-    return map[code] || "Something went wrong. Please try again.";
-  };
-
+  // Handle signup (only runs for brand new email)
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      if (auth.currentUser && auth.currentUser.email !== email) {
-        await signOut(auth);
-      }
-
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-
-      if (methods.length > 0) {
-        if (methods.includes("password")) {
-          try {
-            const cred = await signInWithEmailAndPassword(auth, email, password);
-            await createOrUpdateUser(cred.user, productTag);
-            router.push("/dashboard");
-            return;
-          } catch (err) {
-            await sendPasswordResetEmail(auth, email);
-            setError("This email already has an account. We just sent a password reset link.");
-            setLoading(false);
-            return;
-          }
-        } else {
-          setError(
-            `This email is already registered with ${methods[0]}. Please use that sign-in method.`
-          );
-          setLoading(false);
-          return;
-        }
-      }
-
-      // New account
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await createOrUpdateUser(cred.user, productTag);
-      router.push("/dashboard");
+      redirectToDashboard(productTag);
     } catch (err) {
-      console.error("Auth error:", err?.code, err?.message);
-      setError(`Firebase: ${friendly(err?.code)}`);
+      console.error("Signup error:", err?.code, err?.message);
+      setError("Could not create account. Please try again.");
       setLoading(false);
     }
   };
@@ -196,12 +184,16 @@ function SignUpPage() {
         </p>
 
         {error && (
-          <p className="bg-red-900 text-red-300 text-center p-3 rounded-lg mt-4">{error}</p>
+          <p className="bg-red-900 text-red-300 text-center p-3 rounded-lg mt-4">
+            {error}
+          </p>
         )}
 
         <form onSubmit={handleSignUp} className="mt-6 space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-300">Email Address</label>
+            <label className="block text-sm font-medium text-gray-300">
+              Email Address
+            </label>
             <input
               type="email"
               value={email}
@@ -215,7 +207,9 @@ function SignUpPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300">Password</label>
+            <label className="block text-sm font-medium text-gray-300">
+              Password
+            </label>
             <input
               type="password"
               value={password}
@@ -229,7 +223,7 @@ function SignUpPage() {
             type="submit"
             className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-transform"
           >
-            🚀 Create Account
+            🚀 Continue
           </button>
         </form>
       </div>
