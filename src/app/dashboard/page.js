@@ -159,7 +159,6 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    // ... (existing logic, no changes)
     const unsub = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
         router.replace("/login");
@@ -214,29 +213,7 @@ export default function DashboardPage() {
           setLastTestDate(takenAt || null);
           setLoading(false);
 
-          if (takenAt) {
-            const retakeDate = new Date(takenAt.getTime() + 14 * 24 * 60 * 60 * 1000);
-            const updateTimer = () => {
-              const now = new Date().getTime();
-              const diff = retakeDate.getTime() - now;
-              if (diff > 0) {
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                setTimeLeft(`${days}d ${hours}h ${minutes}m`);
-                setRetakeAvailable(false);
-              } else {
-                setTimeLeft("Now!");
-                setRetakeAvailable(true);
-              }
-            };
-            updateTimer();
-            const timerId = setInterval(updateTimer, 60_000);
-            return () => clearInterval(timerId);
-          } else {
-            setRetakeAvailable(true);
-            setTimeLeft("");
-          }
+          setRetakeAvailable(true);
         },
         (err) => {
           console.error("Latest result subscription error:", err);
@@ -255,13 +232,10 @@ export default function DashboardPage() {
     return () => unsub();
   }, [router]);
 
+  // ✅ UPDATED: Removed the if/else check to always allow test retake
   const handleTestButtonClick = () => {
     playClickSound();
-    if (retakeAvailable) {
-      router.push("/dashboard/adhd-test");
-    } else {
-      setShowModal(true);
-    }
+    router.push("/dashboard/adhd-test");
   };
 
   const handleViewResultsClick = () => {
@@ -349,21 +323,13 @@ export default function DashboardPage() {
             <div className="relative z-10">
               <motion.button
                 onClick={handleTestButtonClick}
-                whileHover={{ scale: retakeAvailable ? 1.03 : 1 }}
-                whileTap={{ scale: retakeAvailable ? 0.98 : 1 }}
-                className={`w-full px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-opacity-40 ${
-                  retakeAvailable
-                    ? "text-white"
-                    : "text-[#9CA3AF] cursor-not-allowed"
-                }`}
-                style={
-                  retakeAvailable
-                    ? {
-                        background: 'linear-gradient(135deg, #FB923C, #F87171)',
-                        boxShadow: '0 10px 28px rgba(248,113,113,0.35)'
-                      }
-                    : { background: '#E5E7EB' }
-                }
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-opacity-40 text-white"
+                style={{
+                  background: 'linear-gradient(135deg, #FB923C, #F87171)',
+                  boxShadow: '0 10px 28px rgba(248,113,113,0.35)'
+                }}
               >
                 {hasTakenTest ? "Retake the Test" : "Take the ADHD Test"}
               </motion.button>

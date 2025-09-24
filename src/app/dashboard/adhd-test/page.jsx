@@ -114,62 +114,9 @@ function riskFromPercent(scorePercentage) {
   return { level: "Low likelihood of ADHD traits", riskLevelText: "Low Risk" };
 }
 
-const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
-
-function LockScreen({ timeLeft }) {
-  return (
-    <main className="relative min-h-screen flex items-center justify-center p-6 bg-[#0A0A0A] text-gray-200">
-      <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
-        <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
-        <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob-delay" />
-      </div>
-      <div className="relative z-10 bg-[#1A1A1A]/70 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] max-w-sm w-full text-center animate-fade-in">
-        <h3 className="text-2xl font-bold text-white mb-2">Retake Not Yet Available</h3>
-        <p className="text-gray-400 mb-6">
-          You can take the ADHD test once every 14 days. Please check back later.
-        </p>
-        <div className="bg-[#1A1A1A] p-4 rounded-xl mb-6">
-          <p className="text-gray-400">Time remaining until retake:</p>
-          <strong className="text-2xl text-white font-bold block mt-1">{timeLeft || "—"}</strong>
-        </div>
-        <a
-          href="/dashboard/adhd-history"
-          className="w-full inline-block px-8 py-3 text-sm font-semibold text-white rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors"
-        >
-          View Your Results
-        </a>
-      </div>
-      <style jsx global>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fade-in 0.5s ease-out; }
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        @keyframes blob-delay {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(-30px, 50px) scale(1.1); }
-          66% { transform: translate(20px, -20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob { animation: blob 10s infinite ease-in-out; }
-        .animate-blob-delay { animation: blob-delay 10s infinite ease-in-out; }
-      `}</style>
-    </main>
-  );
-}
-
 export default function AdhdTestPage() {
   const router = useRouter();
-
-  const [authReady, setAuthReady] = useState(false);
-  const [locked, setLocked] = useState(true);
-  const [timeLeft, setTimeLeft] = useState("");
+  
   const [step, setStep] = useState('disclaimer');
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState(() => new Array(questions.length).fill(null));
@@ -178,7 +125,7 @@ export default function AdhdTestPage() {
   const [milestoneNotification, setMilestoneNotification] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
   const [calculatedScore, setCalculatedScore] = useState(0);
-
+  
   const audioRef = useRef(null);
   const playClickSound = () => {
     if (audioRef.current) {
@@ -186,50 +133,6 @@ export default function AdhdTestPage() {
       audioRef.current.play();
     }
   };
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u) => {
-      if (!u) {
-        router.replace("/login");
-        return;
-      }
-      setAuthReady(true);
-
-      const colRef = collection(db, "users", u.uid, "results");
-      const qLatest = query(colRef, orderBy("takenAt", "desc"), limit(1));
-      const snap = await getDocs(qLatest);
-      const d0 = snap.docs[0];
-
-      if (!d0) {
-        setLocked(false);
-        return;
-      }
-      const lastTaken = d0.data()?.takenAt?.toDate?.() ?? (d0.data()?.takenAt ? new Date(d0.data().takenAt) : null);
-      if (!lastTaken) {
-        setLocked(false);
-        return;
-      }
-
-      const nextAllowed = new Date(lastTaken.getTime() + FOURTEEN_DAYS_MS);
-      const update = () => {
-        const diff = nextAllowed.getTime() - Date.now();
-        if (diff <= 0) {
-          setLocked(false);
-          setTimeLeft("Now!");
-        } else {
-          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          setTimeLeft(`${days}d ${hours}h ${minutes}m`);
-          setLocked(true);
-        }
-      };
-      update();
-      const tid = setInterval(update, 60_000);
-      return () => clearInterval(tid);
-    });
-    return () => unsub();
-  }, [router, db]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -254,28 +157,13 @@ export default function AdhdTestPage() {
   const saveResultsToFirestore = async (totalScore, answerArray, userInfo) => {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
-
-    const colRef = collection(db, "users", currentUser.uid, "results");
-    const qLatest = query(colRef, orderBy("takenAt", "desc"), limit(1));
-    const latestSnap = await getDocs(qLatest);
-    const lastDoc = latestSnap.docs[0];
-    if (lastDoc) {
-      const lastTaken = lastDoc.data()?.takenAt?.toDate?.() ?? (lastDoc.data()?.takenAt ? new Date(lastDoc.data().takenAt) : null);
-      if (lastTaken) {
-        const nextAllowed = new Date(lastTaken.getTime() + FOURTEEN_DAYS_MS);
-        if (Date.now() < nextAllowed.getTime()) {
-          setLocked(true);
-          return;
-        }
-      }
-    }
-
+    
     const maxScore = answerArray.length * 4;
     const scorePercentage = Math.round((totalScore / maxScore) * 100);
     const { level, riskLevelText } = riskFromPercent(scorePercentage);
-
+    
     try {
-      await addDoc(colRef, {
+      await addDoc(collection(db, "users", currentUser.uid, "results"), {
         takenAt: serverTimestamp(),
         scorePercentage,
         level,
@@ -285,7 +173,7 @@ export default function AdhdTestPage() {
         sex: userInfo?.sex || null,
         dob: userInfo?.dob || null,
       });
-
+      
       await updateDoc(doc(db, "users", currentUser.uid), { lastTest: serverTimestamp() });
       console.log("✅ Test result saved");
     } catch (error) {
@@ -294,8 +182,6 @@ export default function AdhdTestPage() {
   };
 
   const handleStart = () => {
-    if (!authReady) return;
-    if (locked) return;
     if (!userInfo.name || !userInfo.sex || !userInfo.dob) {
       alert('Please complete all fields.');
       return;
@@ -371,10 +257,6 @@ export default function AdhdTestPage() {
     }, 300);
   };
 
-  if (!authReady || locked) {
-    return <LockScreen timeLeft={timeLeft} />;
-  }
-
   return (
     <div className="relative min-h-screen flex items-center justify-center p-6 bg-[#0A0A0A] text-gray-200">
       <audio ref={audioRef} src="/sounds/click.mp3" preload="auto" />
@@ -409,9 +291,7 @@ export default function AdhdTestPage() {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">A Quick Note on Accuracy</h2>
             <div className="p-6 md:p-8 bg-gray-900/50 rounded-2xl border border-gray-700 mb-8">
               <p className="text-gray-400 text-lg leading-relaxed">
-                You can only take this <strong>ADHD test once every two weeks</strong>.
-                This helps ensure that your results are <strong>accurate and meaningful</strong>,
-                reflecting a consistent period of time rather than a single moment.
+                This test is a tool to help you reflect on your habits and tendencies. For a proper diagnosis, please consult a qualified healthcare professional.
               </p>
             </div>
             <button onClick={() => setStep('form')} className="w-full px-8 py-4 text-lg font-semibold text-white rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors">
@@ -425,7 +305,7 @@ export default function AdhdTestPage() {
             <div className="text-center text-5xl mb-4">🧠</div>
             <h2 className="text-3xl font-bold text-white text-center mb-2">Personal Information</h2>
             <p className="text-gray-400 text-center mb-8">Please provide your details to personalize your report.</p>
-
+            
             <div className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-gray-400 font-semibold mb-2">Full Name</label>
@@ -536,28 +416,6 @@ export default function AdhdTestPage() {
           </div>
         )}
       </div>
-
-      <style jsx global>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fade-in 0.5s ease-out; }
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        @keyframes blob-delay {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(-30px, 50px) scale(1.1); }
-          66% { transform: translate(20px, -20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob { animation: blob 10s infinite ease-in-out; }
-        .animate-blob-delay { animation: blob-delay 10s infinite ease-in-out; }
-      `}</style>
     </div>
   );
 }

@@ -70,7 +70,7 @@ export default function DashboardLayout({ children }) {
   const tabs = [
     { name: "Home", href: "/dashboard", icon: Home },
     { name: "Recovery", href: "/dashboard/recovery", icon: Activity },
-    { name: "Progress", href: "/dashboard/progress", icon: BarChart2 },
+    { name: "Coach", href: "/dashboard/progress", icon: BarChart2 },
     { name: "Profile", href: "/dashboard/profile", icon: User },
   ];
 
@@ -133,8 +133,8 @@ export default function DashboardLayout({ children }) {
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold
-                         bg-white/80 hover:bg-[#FEF2F2] text-[#B91C1C] border border-[#E5E7EB]
-                         shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all"
+                           bg-white/80 hover:bg-[#FEF2F2] text-[#B91C1C] border border-[#E5E7EB]
+                           shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all"
           >
             <LogOut size={18} />
             Logout
@@ -156,12 +156,10 @@ export default function DashboardLayout({ children }) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-5 md:p-10">
-          <div className="mx-auto max-w-6xl">
-            <div className="relative rounded-2xl border border-[#E5E7EB] bg-white/85 backdrop-blur-xl
-                             shadow-[0_24px_100px_rgba(2,6,23,0.10)]">
-              <div className="absolute inset-x-0 -top-[1px] h-[2px] bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#14B8A6] rounded-t-2xl" />
-              <div className="p-4 md:p-8">{children}</div>
+        <main className="flex-1 p-0 md:p-0">
+          <div className="w-full h-full">
+            <div className="p-0 md:p-0">
+              {children}
             </div>
           </div>
         </main>
