@@ -22,10 +22,7 @@ import {
 // Third-party Libraries
 import * as Tone from 'tone';
 
-// --- Auth Hook ---
-/**
- * Custom hook to manage Firebase authentication state and fetch user data from Firestore.
- */
+// --- Auth Hook (Unchanged) ---
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -50,7 +47,6 @@ const useAuth = () => {
       }
       setLoading(false);
     });
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
@@ -58,19 +54,11 @@ const useAuth = () => {
 };
 
 // --- Dashboard Layout Component ---
-/**
- * Layout component for the dashboard, including sidebar/bottom dock navigation,
- * authentication checks, and a click sound effect.
- */
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, userData, loading } = useAuth();
-  
-  // Special handling for recovery path (full screen content)
   const isRecoveryPath = pathname.startsWith("/dashboard/recovery/");
-  
-  // Tone.js player reference for click sound
   const clickSoundPlayer = useRef(null);
 
   /* * Initialize Tone.js and load the sound file once. */
@@ -78,7 +66,6 @@ export default function DashboardLayout({ children }) {
     const initTone = async () => {
       await Tone.start();
       clickSoundPlayer.current = new Tone.Player("/sounds/click.mp3").toDestination();
-      // Ensure the audio is loaded
       await new Promise(resolve => {
         if (clickSoundPlayer.current.loaded) {
           resolve();
@@ -92,9 +79,17 @@ export default function DashboardLayout({ children }) {
     }
   }, []);
 
-  /**
-   * Plays the pre-loaded click sound.
-   */
+  // 👇 ADDED HOOK TO FORCE SCROLL TO TOP ON PAGE CHANGE
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    // Optionally, you could try to scroll the main content div instead of the window:
+    // const mainContent = document.getElementById('main-content-scroll-area');
+    // if (mainContent) {
+    //   mainContent.scrollTo(0, 0);
+    // }
+  }, [pathname]);
+
+
   const playClickSound = async () => {
     if (clickSoundPlayer.current?.loaded) {
       if (Tone.context.state !== 'running') {
@@ -104,17 +99,11 @@ export default function DashboardLayout({ children }) {
     }
   };
 
-  /**
-   * Handles user logout via Firebase and redirects to the login page.
-   */
   const handleLogout = async () => {
     await signOut(auth);
     router.push("/login");
   };
 
-  /**
-   * Extracts the first name from displayName or email.
-   */
   const getFirstName = () => {
     if (userData?.displayName) {
       return userData.displayName.split(" ")[0];
@@ -125,7 +114,6 @@ export default function DashboardLayout({ children }) {
     return "User";
   };
 
-  // Define the navigation tabs
   const tabs = [
     { name: "Assessment", href: "/dashboard", icon: ClipboardList },
     { name: "Recovery", href: "/dashboard/recovery", icon: Activity },
@@ -134,7 +122,6 @@ export default function DashboardLayout({ children }) {
     { name: "Profile", href: "/dashboard/profile", icon: User },
   ];
 
-  // Render children directly for full-screen content (e.g., specific recovery steps)
   if (isRecoveryPath) return <>{children}</>;
 
   return (
@@ -152,7 +139,6 @@ export default function DashboardLayout({ children }) {
         
         {/* Brand Header */}
         <div className="relative">
-          {/* Gradient Cap */}
           <div className="h-1.5 bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#14B8A6]" />
           
           <div className="px-6 py-6">
@@ -210,8 +196,6 @@ export default function DashboardLayout({ children }) {
 
       {/* ================= Main Content Area ================= */}
       <div className="flex-1 flex flex-col">
-        
-        {/* Topbar (Mobile) - REMOVED */}
         
         {/* Content View */}
         <main className="flex-1 p-0 md:p-0 overflow-y-auto">
