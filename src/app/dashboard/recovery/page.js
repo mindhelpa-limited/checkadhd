@@ -10,24 +10,25 @@ const games = [
     name: 'MoneyStack',
     description: 'Stack the blocks with focus and precision. Great for improving attention.',
     link: '/dashboard/recovery/moneystack',
-    imageUrl: '/images/blockstack.png',
+    imageUrl: '/images/block.png',
   },
   {
     name: 'Snakegame',
     description: 'Eat all the dots while navigating obstacles. Helps with timing and control.',
     link: '/dashboard/recovery/snakegame',
-    imageUrl: '/images/trailmuncher.png',
+    imageUrl: '/images/snakegame.png',
   },
   {
     name: 'Pingmoney game',
     description: 'Bounce within the bounds. Supports quick decision making.',
     link: '/dashboard/recovery/pingmoneygame',
-    imageUrl: '/images/neuralbounds.png',
+    imageUrl: '/images/neural.png',
   },
 ];
 
 export default function RecoveryGameSelectionPage() {
-  const [activeTab, setActiveTab] = useState('games');
+  // 1. Updated initial activeTab to the new first tab
+  const [activeTab, setActiveTab] = useState('goal-tracker');
   const backgroundAudioRef = useRef(null);
   const clickAudioRef = useRef(null);
 
@@ -77,6 +78,98 @@ export default function RecoveryGameSelectionPage() {
   const handleGameClick = () => {
     playClickSound();
   };
+
+  // 2. New Content Component for Goal Tracker Tab
+  const GoalTrackerTabContent = () => (
+    <div
+      className="relative overflow-hidden rounded-3xl h-[450px] flex flex-col items-center justify-center text-[#111827] p-8 mt-10 shadow-xl border border-[#F3F4F6]"
+      style={{
+        // Beautiful, inviting background
+        backgroundImage: `
+          radial-gradient(60% 40% at 20% 0%, rgba(16,185,129,0.10), transparent 60%),
+          radial-gradient(50% 30% at 80% 15%, rgba(59,130,246,0.10), transparent 60%),
+          linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 40%, #F3F4F6 100%)
+        `,
+        boxShadow: '0 10px 30px rgba(17,24,39,0.06)',
+      }}
+    >
+      <div className="relative z-10 flex flex-col items-center text-center">
+        <motion.h2
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text"
+          style={{ backgroundImage: 'linear-gradient(90deg, #10B981, #3B82F6)' }} // Green-Blue gradient
+        >
+          Your Growth Path
+        </motion.h2>
+        <p className="text-xl text-[#111827]/70 mb-10 max-w-lg font-light">
+          Set, monitor, and achieve your recovery and personal growth milestones.
+        </p>
+        <Link href="/goal-tracker">
+          <motion.button
+            whileHover={{ scale: 1.06, rotate: 1 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={playClickSound}
+            className="text-white font-bold py-4 px-12 rounded-full shadow-xl focus:outline-none focus-visible:ring-2"
+            style={{
+              // Very beautiful button: vibrant gradient and deep shadow
+              background: 'linear-gradient(135deg, #10B981, #059669)', // Emerald Green
+              boxShadow: '0 12px 30px rgba(16, 185, 129, 0.45)',
+            }}
+          >
+            Start Tracking Goals 🚀
+          </motion.button>
+        </Link>
+      </div>
+    </div>
+  );
+
+  // 3. New Content Component for Videos Tab
+  const VideosTabContent = () => (
+    <div
+      className="relative overflow-hidden rounded-3xl h-[450px] flex flex-col items-center justify-center text-[#111827] p-8 mt-10 shadow-xl border border-[#F3F4F6]"
+      style={{
+        // Calm, focused background
+        backgroundImage: `
+          radial-gradient(60% 40% at 20% 0%, rgba(251,191,36,0.10), transparent 60%),
+          radial-gradient(50% 30% at 80% 15%, rgba(249,115,22,0.10), transparent 60%),
+          linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 40%, #F3F4F6 100%)
+        `,
+        boxShadow: '0 10px 30px rgba(17,24,39,0.06)',
+      }}
+    >
+      <div className="relative z-10 flex flex-col items-center text-center">
+        <motion.h2
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text"
+          style={{ backgroundImage: 'linear-gradient(90deg, #F59E0B, #F97316)' }} // Amber-Orange gradient
+        >
+          Inspirational Videos
+        </motion.h2>
+        <p className="text-xl text-[#111827]/70 mb-10 max-w-lg font-light">
+          Watch curated videos to guide your journey and keep you motivated.
+        </p>
+        <Link href="/dashboard/recovery/videos">
+          <motion.button
+            whileHover={{ scale: 1.06, rotate: -1 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={playClickSound}
+            className="text-white font-bold py-4 px-12 rounded-full shadow-xl focus:outline-none focus-visible:ring-2"
+            style={{
+              // Beautiful button: warm gradient and deep shadow
+              background: 'linear-gradient(135deg, #F59E0B, #F97316)', // Amber-Orange
+              boxShadow: '0 12px 30px rgba(245, 158, 11, 0.45)',
+            }}
+          >
+            Watch Now ▶️
+          </motion.button>
+        </Link>
+      </div>
+    </div>
+  );
 
   const MusicTabContent = ({ title, link }) => (
     <div
@@ -152,6 +245,11 @@ export default function RecoveryGameSelectionPage() {
 
   const renderContent = () => {
     switch (activeTab) {
+      // 4. Added new cases for goal tracker and videos
+      case 'goal-tracker':
+        return <GoalTrackerTabContent />;
+      case 'videos':
+        return <VideosTabContent />;
       case 'games':
         return (
           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mt-10">
@@ -168,7 +266,7 @@ export default function RecoveryGameSelectionPage() {
                 >
                   {/* soft glow on hover */}
                   <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition duration-500 blur-xl"
-                       style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.12), rgba(167,139,250,0.12))' }} />
+                    style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.12), rgba(167,139,250,0.12))' }} />
                   <div
                     className="relative p-6 rounded-3xl border overflow-hidden"
                     style={{
@@ -190,12 +288,12 @@ export default function RecoveryGameSelectionPage() {
                         className="rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute inset-0"
-                           style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0))' }} />
+                        style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0))' }} />
                     </div>
 
                     <div className="relative z-10 flex flex-col items-center text-center">
                       <h2 className="text-2xl md:text-3xl font-bold mb-2"
-                          style={{ color: '#111827' }}>
+                        style={{ color: '#111827' }}>
                         {game.name}
                       </h2>
                       <p className="text-base font-light" style={{ color: 'rgba(17,24,39,0.70)' }}>
@@ -240,12 +338,17 @@ export default function RecoveryGameSelectionPage() {
       }}
     >
       <div className="max-w-4xl mx-auto text-center mb-10 px-4">
+        {/* 5. Reduced font size and beautified heading */}
         <motion.h1
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-5xl md:text-6xl font-extrabold mb-4 font-display text-transparent bg-clip-text drop-shadow-sm"
-          style={{ backgroundImage: 'linear-gradient(90deg, #3B82F6, #A78BFA)' }}
+          // Reduced from text-5xl md:text-6xl to text-4xl md:text-5xl
+          className="text-4xl md:text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text"
+          style={{
+            backgroundImage: 'linear-gradient(90deg, #3B82F6, #A78BFA)',
+            textShadow: '0 2px 4px rgba(59, 130, 246, 0.2), 0 0 1px rgba(17, 24, 39, 0.1)', // subtle shadow
+          }}
         >
           Recovery & Growth
         </motion.h1>
@@ -260,9 +363,34 @@ export default function RecoveryGameSelectionPage() {
           className="flex items-center gap-3 md:gap-4 overflow-x-auto whitespace-nowrap rounded-full border backdrop-blur supports-[backdrop-filter]:bg-white/60 bg-white/70"
           style={{ borderColor: '#F3F4F6' }}
         >
-          <button onClick={() => handleTabClick('games')} className={getButtonClass('games')}>
-            Games
-            {activeTab === 'games' && (
+          {/* 6. Tabs in new order: Goal Tracker, Videos, Therapy Music, Games, Healing Sounds */}
+          <button onClick={() => handleTabClick('goal-tracker')} className={getButtonClass('goal-tracker')}>
+            Goal Tracker
+            {activeTab === 'goal-tracker' && (
+              <motion.div
+                layoutId="underline-pill"
+                className="absolute inset-0 rounded-full"
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                style={{ boxShadow: 'inset 0 0 0 2px rgba(16, 185, 129, 0.3)' }} // New color for tracker
+              />
+            )}
+          </button>
+
+          <button onClick={() => handleTabClick('videos')} className={getButtonClass('videos')}>
+            Videos
+            {activeTab === 'videos' && (
+              <motion.div
+                layoutId="underline-pill"
+                className="absolute inset-0 rounded-full"
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                style={{ boxShadow: 'inset 0 0 0 2px rgba(245, 158, 11, 0.3)' }} // New color for videos
+              />
+            )}
+          </button>
+
+          <button onClick={() => handleTabClick('therapy-music')} className={getButtonClass('therapy-music')}>
+            Therapy Music
+            {activeTab === 'therapy-music' && (
               <motion.div
                 layoutId="underline-pill"
                 className="absolute inset-0 rounded-full"
@@ -272,9 +400,9 @@ export default function RecoveryGameSelectionPage() {
             )}
           </button>
 
-          <button onClick={() => handleTabClick('therapy-music')} className={getButtonClass('therapy-music')}>
-            Therapy Music
-            {activeTab === 'therapy-music' && (
+          <button onClick={() => handleTabClick('games')} className={getButtonClass('games')}>
+            Games
+            {activeTab === 'games' && (
               <motion.div
                 layoutId="underline-pill"
                 className="absolute inset-0 rounded-full"

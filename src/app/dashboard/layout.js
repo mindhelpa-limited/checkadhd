@@ -143,7 +143,7 @@ export default function DashboardLayout({ children }) {
       </aside>
 
       {/* ================= Main Area ================= */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
         {/* Topbar (Mobile) */}
         <header className="md:hidden sticky top-0 z-30 flex items-center justify-between bg-white/70 backdrop-blur-xl border-b border-[#E5E7EB] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-gradient-to-r before:from-[#3B82F6] before:via-[#60A5FA] before:to-[#14B8A6] px-4 py-3">
           <div>
@@ -156,7 +156,7 @@ export default function DashboardLayout({ children }) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-0 md:p-0">
+        <main className="flex-1 p-0 md:p-0 overflow-y-auto">
           <div className="w-full h-full">
             <div className="p-0 md:p-0">
               {children}
