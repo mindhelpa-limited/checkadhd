@@ -4,8 +4,11 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
-// Used a more standard, smaller size for icons in tabs for better mobile look
-import { Target, Video, Music, Volume2, Gamepad } from 'lucide-react'; 
+import { Target, Video, Music, Volume2, Gamepad } from 'lucide-react';
+
+// ===================================================================
+// I. UTILITY & CONSTANTS (Content is Retained)
+// ===================================================================
 
 const games = [
   {
@@ -29,28 +32,251 @@ const games = [
 ];
 
 // Helper component to render the icon for a given tab
-const TabIcon = ({ tabName, size = 18 }) => { // Slightly smaller icon for elegance
+const TabIcon = ({ tabName, size = 18 }) => {
+  // All icons are white/light gray by default in dark mode
+  const colorClass = 'text-white/80'; 
   switch (tabName) {
     case 'goal-tracker':
-      return <Target size={size} className="mr-2" />;
+      return <Target size={size} className={`mr-2 ${colorClass}`} />;
     case 'videos':
-      return <Video size={size} className="mr-2" />;
+      return <Video size={size} className={`mr-2 ${colorClass}`} />;
     case 'therapy-music':
-      return <Music size={size} className="mr-2" />;
+      return <Music size={size} className={`mr-2 ${colorClass}`} />;
     case 'healing-sounds':
-      return <Volume2 size={size} className="mr-2" />;
+      return <Volume2 size={size} className={`mr-2 ${colorClass}`} />;
     case 'games':
-      return <Gamepad size={size} className="mr-2" />;
+      return <Gamepad size={size} className={`mr-2 ${colorClass}`} />;
     default:
       return null;
   }
 };
 
+// UTILITY: Color Mapping 
+// Note: Colors remain the same but will contrast more sharply with the dark background
+const tabColors = {
+  'goal-tracker': { primary: '#059669', secondary: '#3B82F6', text: '#059669' }, // Emerald/Blue
+  'videos': { primary: '#D97706', secondary: '#F97316', text: '#D97706' }, // Amber/Orange
+  'therapy-music': { primary: '#1D4ED8', secondary: '#A78BFA', text: '#1D4ED8' }, // Blue/Violet
+  'games': { primary: '#9333EA', secondary: '#EC4899', text: '#9333EA' }, // Violet/Pink
+  'healing-sounds': { primary: '#0891B2', secondary: '#059669', text: '#0891B2' }, // Cyan/Emerald
+};
+
+// Dark Mode base colors
+const DARK_BG_COLOR = '#0A0A0A'; // Deepest background
+const DARK_CARD_COLOR = '#1A1A1A'; // Card background
+const DARK_BORDER_COLOR = '#2A2A2A'; // Subtle border/divider color
+const LIGHT_TEXT_COLOR = '#F5F5F5'; // Primary text color
+const MUTED_TEXT_COLOR = '#A3A3A3'; // Secondary/muted text color
+
+// ===================================================================
+// II. SHARED UI COMPONENTS (Adapted for Beautiful Dark Mode)
+// ===================================================================
+
+/**
+ * Component: Call-to-Action Link Button with Gradient and Hover Effects
+ * (Vibrant Gradient, Strong Shadow against Dark BG)
+ */
+const ContentLinkButton = ({ href, text, primaryColor, secondaryColor, shadowColor, onClick }) => (
+  <Link href={href} passHref>
+    <motion.button
+      whileHover={{ scale: 1.05, rotate: 0.5, boxShadow: `0 15px 40px ${shadowColor}`, y: -2 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onClick}
+      className="text-white font-extrabold py-3 px-10 sm:py-4 sm:px-14 rounded-full shadow-2xl focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-opacity-70 flex items-center gap-2 transition-all duration-300 transform hover:z-20"
+      style={{
+        background: `linear-gradient(145deg, ${primaryColor}, ${secondaryColor})`, // Deeper 145deg gradient
+        boxShadow: `0 8px 25px ${shadowColor}80`, // Stronger initial shadow
+        textShadow: '0 1px 2px rgba(0,0,0,0.4)', // Subtle text shadow for pop
+      }}
+    >
+      {text}
+    </motion.button>
+  </Link>
+);
+
+/**
+ * Component: Motion Pill for Active Tab Indicator
+ * (Dark Glassmorphism effect for the active tab)
+ */
+const ActivePill = () => (
+  <motion.div
+    layoutId="underline-pill"
+    className="absolute inset-0 rounded-full"
+    transition={{ type: 'spring', stiffness: 400, damping: 30 }} // Smoother, tighter spring
+    style={{
+      // Dark Glassmorphism Pill
+      boxShadow: `
+        0 4px 15px rgba(0, 0, 0, 0.4), 
+        inset 0 0 0 1px ${DARK_BORDER_COLOR},
+        inset 0 2px 4px rgba(255, 255, 255, 0.05)
+      `,
+      background: 'rgba(35, 35, 35, 0.7)', // Slightly transparent dark color
+      backdropFilter: 'blur(10px)', // Glass effect
+    }}
+  />
+);
+
+// ===================================================================
+// III. TAB CONTENT COMPONENTS (Adapted for Beautiful Dark Mode)
+// ===================================================================
+
+/**
+ * Content Wrapper with Dark Theme styling (Enhanced Dark Card Design)
+ */
+const DarkContentWrapper = ({ children, primary, secondary }) => (
+  <motion.div
+    key={primary}
+    initial={{ opacity: 0, y: 30, scale: 0.98 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    transition={{ type: 'spring', damping: 20, stiffness: 150 }}
+    className="relative overflow-hidden rounded-[2.5rem] min-h-[450px] flex flex-col items-center justify-center p-8 sm:p-14 mt-6 sm:mt-12 border transform hover:scale-[1.005] transition-transform duration-700 ease-out"
+    style={{
+      // DARK, RICH BACKGROUND GRADIENTS
+      backgroundImage: `
+        radial-gradient(100% 70% at 20% 100%, ${primary}15, transparent 70%),
+        radial-gradient(90% 60% at 80% 0%, ${secondary}15, transparent 70%),
+        linear-gradient(180deg, ${DARK_CARD_COLOR} 0%, ${DARK_CARD_COLOR} 40%, ${DARK_BG_COLOR} 100%)
+      `,
+      // BORDER & SHADOW: Subtle inner glow, deep outer shadow
+      boxShadow: '0 25px 60px rgba(0,0,0,0.5), inset 0 0 2px rgba(255,255,255,0.05)',
+      borderColor: DARK_BORDER_COLOR,
+      color: LIGHT_TEXT_COLOR
+    }}
+  >
+    <div className="relative z-10 flex flex-col items-center text-center max-w-2xl">
+      {children}
+    </div>
+  </motion.div>
+);
+
+
+const GoalTrackerTabContent = () => {
+  const { primary, secondary } = tabColors['goal-tracker'];
+  // Using secondary color for CTA shadow for contrast
+  const shadowColor = tabColors['goal-tracker'].secondary; 
+
+  return (
+    <DarkContentWrapper primary={primary} secondary={secondary}>
+      <motion.h2
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="text-5xl sm:text-7xl font-black mb-6 font-display tracking-tighter"
+        // BOLD GRADIENT TEXT EFFECT
+        style={{
+          backgroundImage: `linear-gradient(90deg, ${primary}, ${secondary})`,
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          textShadow: '0 3px 10px rgba(0, 0, 0, 0.5)', // Darker shadow for more contrast
+        }}
+      >
+        Growth Flow Tracker
+      </motion.h2>
+      <p className={`text-lg sm:text-2xl ${MUTED_TEXT_COLOR} mb-12 max-w-lg font-normal leading-relaxed`}>
+        Set, visualize, and achieve your personal **growth milestones**. Every step is elegantly tracked and celebrated.
+      </p>
+      <ContentLinkButton
+        href="/dashboard/recovery/goal-tracker"
+        text="Start Tracking Goals"
+        primaryColor={primary}
+        secondaryColor={secondary}
+        shadowColor={shadowColor} 
+      />
+    </DarkContentWrapper>
+  );
+};
+
+const VideosTabContent = () => {
+  const { primary, secondary } = tabColors['videos'];
+  const shadowColor = tabColors['videos'].secondary;
+
+  return (
+    <DarkContentWrapper primary={primary} secondary={secondary}>
+      <motion.h2
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="text-5xl sm:text-7xl font-black mb-6 font-display tracking-tighter"
+        // BOLD GRADIENT TEXT EFFECT
+        style={{
+          backgroundImage: `linear-gradient(90deg, ${primary}, ${secondary})`,
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          textShadow: '0 3px 10px rgba(0, 0, 0, 0.5)',
+        }}
+      >
+        Mindful Viewing Library
+      </motion.h2>
+      <p className={`text-lg sm:text-2xl ${MUTED_TEXT_COLOR} mb-12 max-w-lg font-normal leading-relaxed`}>
+        Discover curated videos for deep **meditation**, positive **affirmation**, and strong **motivation**.
+      </p>
+      <ContentLinkButton
+        href="/dashboard/recovery/videos"
+        text="Watch Now"
+        primaryColor={primary}
+        secondaryColor={secondary}
+        shadowColor={shadowColor}
+      />
+    </DarkContentWrapper>
+  );
+};
+
+const MusicTabContent = ({ title, link, primaryColor, secondaryColor, playClickSound }) => (
+  <DarkContentWrapper primary={primaryColor} secondary={secondaryColor}>
+    {/* KINETIC: Subtle, animated 'Breathing' glow effect - Enhanced for visual appeal */}
+    <motion.div
+      className="absolute inset-0 z-0 opacity-50 mix-blend-color-dodge pointer-events-none rounded-[2.5rem]"
+      animate={{
+        scale: [1, 1.03, 1],
+        opacity: [0.1, 0.3, 0.1]
+      }}
+      transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+      style={{
+        // Enhanced radial glow
+        background: `radial-gradient(circle at 50% 50%, ${primaryColor}60, transparent 70%)`
+      }}
+    />
+
+    <motion.h2
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 0.2 }}
+      className="text-5xl sm:text-7xl font-black mb-6 font-display tracking-tighter"
+      // BOLD GRADIENT TEXT EFFECT
+      style={{
+        backgroundImage: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})`,
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        textShadow: '0 3px 10px rgba(0, 0, 0, 0.5)',
+      }}
+    >
+      {title}
+    </motion.h2>
+    <p className={`text-lg sm:text-2xl ${MUTED_TEXT_COLOR} mb-12 max-w-lg font-normal leading-relaxed`}>
+      Immerse yourself in **calming melodies** and nature sounds designed for deep focus and **relaxation**.
+    </p>
+    <ContentLinkButton
+      href={link}
+      text="Explore Library"
+      primaryColor={primaryColor}
+      secondaryColor={secondaryColor}
+      shadowColor={`${primaryColor}60`}
+      onClick={playClickSound}
+    />
+  </DarkContentWrapper>
+);
+
+// ===================================================================
+// IV. MAIN COMPONENT
+// ===================================================================
+
 export default function RecoveryGameSelectionPage() {
   const [activeTab, setActiveTab] = useState('goal-tracker');
+  const [isScrolling, setIsScrolling] = useState(false);
   const backgroundAudioRef = useRef(null);
   const clickAudioRef = useRef(null);
 
+  // --- AUDIO EFFECTS (Retained) ---
   useEffect(() => {
     backgroundAudioRef.current = new Audio('/meditation.mp3');
     backgroundAudioRef.current.loop = true;
@@ -94,160 +320,27 @@ export default function RecoveryGameSelectionPage() {
     setActiveTab(tabName);
   };
 
-  const handleGameClick = () => {
-    playClickSound();
-  };
-  
-  // Refined Button Styles
-  const ContentLinkButton = ({ href, text, bgColor, shadowColor }) => (
-    <Link href={href}>
-        <motion.button
-            whileHover={{ scale: 1.05, rotate: 0.5, boxShadow: `0 14px 40px ${shadowColor}` }}
-            whileTap={{ scale: 0.95 }}
-            onClick={playClickSound}
-            className="text-white font-bold py-3 px-10 sm:py-4 sm:px-12 rounded-full shadow-xl focus:outline-none focus-visible:ring-2 flex items-center gap-2 transition-all duration-300"
-            style={{
-                background: bgColor,
-                boxShadow: `0 8px 20px ${shadowColor}`,
-            }}
-        >
-            {text}
-        </motion.button>
-    </Link>
-  );
+  // --- SCROLL REFINEMENT (Sticky header shadow) ---
+  useEffect(() => {
+    let scrollTimeout;
+    const handleScroll = () => {
+      // Check if scrolled down past a small threshold
+      setIsScrolling(window.scrollY > 10);
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        // Re-check when scroll stops
+        setIsScrolling(window.scrollY > 10);
+      }, 150);
+    };
 
-  // --- Goal Tracker Tab Content ---
-  const GoalTrackerTabContent = () => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-        className="relative overflow-hidden rounded-3xl min-h-[400px] flex flex-col items-center justify-center text-[#111827] p-6 sm:p-8 mt-6 sm:mt-10 shadow-xl border border-[#E5E7EB] transform hover:scale-[1.01] transition-transform duration-500"
-        style={{
-            // Softer, more elegant inner background
-            backgroundImage: `
-                radial-gradient(80% 50% at 20% 100%, rgba(16,185,129,0.15), transparent 70%),
-                radial-gradient(70% 40% at 80% 0%, rgba(59,130,246,0.15), transparent 70%),
-                linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 50%, #F5F7F9 100%)
-            `,
-            boxShadow: '0 12px 40px rgba(17,24,39,0.08), inset 0 0 1px #FFFFFF',
-        }}
-    >
-      <div className="relative z-10 flex flex-col items-center text-center">
-        <motion.h2
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-4xl sm:text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text"
-          style={{ backgroundImage: 'linear-gradient(90deg, #10B981, #3B82F6)' }}
-        >
-          Growth Flow Tracker
-        </motion.h2>
-        <p className="text-lg sm:text-xl text-[#111827]/70 mb-8 sm:mb-10 max-w-lg font-light">
-          Set, visualize, and achieve your personal growth milestones. Every step is elegantly tracked.
-        </p>
-        <ContentLinkButton 
-            href="/dashboard/recovery/goal-tracker" 
-            text="Start Tracking Goals" 
-            bgColor="linear-gradient(135deg, #10B981, #059669)" 
-            shadowColor="rgba(16, 185, 129, 0.4)" 
-        />
-      </div>
-    </motion.div>
-  );
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
 
-  // --- Videos Tab Content ---
-  const VideosTabContent = () => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-      className="relative overflow-hidden rounded-3xl min-h-[400px] flex flex-col items-center justify-center text-[#111827] p-6 sm:p-8 mt-6 sm:mt-10 shadow-xl border border-[#E5E7EB] transform hover:scale-[1.01] transition-transform duration-500"
-      style={{
-        backgroundImage: `
-          radial-gradient(60% 40% at 20% 0%, rgba(251,191,36,0.15), transparent 70%),
-          radial-gradient(50% 30% at 80% 15%, rgba(249,115,22,0.15), transparent 70%),
-          linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 50%, #F5F7F9 100%)
-        `,
-        boxShadow: '0 12px 40px rgba(17,24,39,0.08), inset 0 0 1px #FFFFFF',
-      }}
-    >
-      <div className="relative z-10 flex flex-col items-center text-center">
-        <motion.h2
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-4xl sm:text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text"
-          style={{ backgroundImage: 'linear-gradient(90deg, #F59E0B, #F97316)' }}
-        >
-          Mindful Viewing Library
-        </motion.h2>
-        <p className="text-lg sm:text-xl text-[#111827]/70 mb-8 sm:mb-10 max-w-lg font-light">
-          Discover curated videos for deep meditation, positive affirmation, and strong motivation.
-        </p>
-        <ContentLinkButton 
-            href="/dashboard/recovery/videos" 
-            text="Watch Now" 
-            bgColor="linear-gradient(135deg, #F59E0B, #F97316)" 
-            shadowColor="rgba(245, 158, 11, 0.4)" 
-        />
-      </div>
-    </motion.div>
-  );
-
-  // --- Music Tab Content (Used for Therapy Music & Healing Sounds) ---
-  const MusicTabContent = ({ title, link, primaryColor, secondaryColor, icon }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-        className="relative overflow-hidden rounded-3xl min-h-[400px] flex flex-col items-center justify-center text-[#111827] p-6 sm:p-8 mt-6 sm:mt-10 shadow-xl border border-[#E5E7EB] transform hover:scale-[1.01] transition-transform duration-500"
-        style={{
-            backgroundImage: `
-                radial-gradient(60% 40% at 20% 0%, ${primaryColor}1A, transparent 70%),
-                radial-gradient(50% 30% at 80% 15%, ${secondaryColor}1A, transparent 70%),
-                linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 50%, #F5F7F9 100%)
-            `,
-            boxShadow: '0 12px 40px rgba(17,24,39,0.08), inset 0 0 1px #FFFFFF',
-        }}
-    >
-      {/* Subtle, animated glow effect for Music/Sound tabs */}
-      <motion.div
-        className="absolute inset-0 z-0 opacity-40 mix-blend-multiply"
-        animate={{ 
-            scale: [1, 1.05, 1], 
-            rotate: [0, 1, 0],
-            opacity: [0.1, 0.3, 0.1]
-        }}
-        transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ 
-            background: `radial-gradient(circle at 50% 50%, ${primaryColor}30, transparent 70%)` 
-        }}
-      />
-      
-      <div className="relative z-10 flex flex-col items-center text-center">
-        <motion.h2
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-4xl sm:text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text"
-          style={{ backgroundImage: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})` }}
-        >
-          {title}
-        </motion.h2>
-        <p className="text-lg sm:text-xl text-[#111827]/70 mb-8 max-w-lg font-light">
-          Immerse yourself in calming melodies and nature sounds designed for deep focus and relaxation.
-        </p>
-        <ContentLinkButton 
-            href={link} 
-            text="Explore Library" 
-            bgColor={`linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`} 
-            shadowColor={`${primaryColor}50`}
-        />
-      </div>
-    </motion.div>
-  );
-
+  // --- RENDER CURRENT TAB CONTENT ---
   const renderContent = () => {
     switch (activeTab) {
       case 'goal-tracker':
@@ -255,64 +348,84 @@ export default function RecoveryGameSelectionPage() {
       case 'videos':
         return <VideosTabContent />;
       case 'therapy-music':
-        return <MusicTabContent 
-                    title="Therapy Music" 
-                    link="/dashboard/recovery/therapymusic" 
-                    primaryColor="#3B82F6" // Blue
-                    secondaryColor="#A78BFA" // Violet
-                />;
+        return (
+          <MusicTabContent
+            title="Therapy Music"
+            link="/dashboard/recovery/therapymusic"
+            primaryColor={tabColors['therapy-music'].primary}
+            secondaryColor={tabColors['therapy-music'].secondary}
+            playClickSound={playClickSound}
+          />
+        );
       case 'healing-sounds':
-        return <MusicTabContent 
-                    title="Healing Sounds" 
-                    link="/dashboard/recovery/healingsounds"
-                    primaryColor="#06B6D4" // Cyan
-                    secondaryColor="#10B981" // Green
-                />;
+        return (
+          <MusicTabContent
+            title="Healing Sounds"
+            link="/dashboard/recovery/healingsounds"
+            primaryColor={tabColors['healing-sounds'].primary}
+            secondaryColor={tabColors['healing-sounds'].secondary}
+            playClickSound={playClickSound}
+          />
+        );
       case 'games':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto mt-6 sm:mt-10">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto mt-6 sm:mt-12"
+          >
             {games.map((game, index) => (
-              <Link href={game.link} key={index}>
+              <Link href={game.link} key={index} passHref>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ 
-                    scale: 1.05, 
-                    boxShadow: '0 10px 30px rgba(17,24,39,0.12), 0 0 10px rgba(59,130,246,0.3)' // Added subtle blue glow on hover
+                  whileHover={{
+                    scale: 1.05,
+                    boxShadow: '0 18px 45px rgba(0,0,0,0.5)', // Stronger, appealing hover shadow in dark mode
+                    transition: { duration: 0.3 }
                   }}
-                  onClick={handleGameClick}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={playClickSound}
                   className="group cursor-pointer relative overflow-hidden rounded-3xl transition-all duration-300"
-                  style={{ filter: 'drop-shadow(0 6px 24px rgba(17,24,39,0.06))' }}
                 >
-                  <div 
-                    className="relative p-5 sm:p-6 rounded-3xl border overflow-hidden"
+                  <div
+                    className="relative p-5 sm:p-6 rounded-3xl border overflow-hidden min-h-[350px] flex flex-col justify-start"
                     style={{
-                      borderColor: '#E5E7EB', // Lighter border
-                      // Softened Game Card Background
+                      borderColor: DARK_BORDER_COLOR,
+                      // Dark Card Background with subtle gradients
                       backgroundImage: `
-                        radial-gradient(35% 60% at 15% 0%, rgba(59,130,246,0.06), transparent 70%),
-                        radial-gradient(30% 50% at 85% 10%, rgba(20,184,166,0.06), transparent 70%),
-                        linear-gradient(160deg, #FFFFFF, #FAFBFD 45%, #F5F7F9 100%)
+                        radial-gradient(35% 60% at 15% 0%, ${tabColors['games'].primary}10, transparent 70%),
+                        radial-gradient(30% 50% at 85% 10%, ${tabColors['games'].secondary}10, transparent 70%),
+                        linear-gradient(160deg, ${DARK_CARD_COLOR}, ${DARK_CARD_COLOR} 45%, ${DARK_CARD_COLOR} 100%)
                       `,
-                      boxShadow: 'inset 0 0 1px rgba(255,255,255,0.8)',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.4), inset 0 0 1px rgba(255,255,255,0.05)',
                     }}
                   >
-                    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl mb-4 aspect-w-16 aspect-h-9">
+                    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl mb-4 aspect-video">
                       <Image
                         src={game.imageUrl}
                         alt={game.name}
                         width={500}
                         height={300}
-                        className="rounded-xl sm:rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                        className="rounded-xl sm:rounded-2xl transform group-hover:scale-105 transition-transform duration-700 ease-out object-cover"
                       />
                     </div>
 
-                    <div className="relative z-10 flex flex-col items-center text-center">
-                      <h2 className="text-xl sm:text-2xl font-bold mb-2 text-[#111827]">
+                    <div className="relative z-10 flex flex-col items-start text-left">
+                      <h2
+                        className={`text-2xl sm:text-3xl font-extrabold mb-1 ${LIGHT_TEXT_COLOR} leading-tight`}
+                        style={{
+                          // Using a subtle text gradient for title color
+                          backgroundImage: `linear-gradient(90deg, ${tabColors['games'].primary}, ${tabColors['games'].secondary})`,
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                        }}
+                      >
                         {game.name}
                       </h2>
-                      <p className="text-sm sm:text-base font-light text-[#111827]/70">
+                      <p className={`text-base sm:text-lg font-light ${MUTED_TEXT_COLOR}`}>
                         {game.description}
                       </p>
                     </div>
@@ -320,136 +433,115 @@ export default function RecoveryGameSelectionPage() {
                 </motion.div>
               </Link>
             ))}
-          </div>
+          </motion.div>
         );
       default:
         return null;
     }
   };
 
-  // Function to determine the text color of the inactive tabs
-  const getTabTextColor = (tabName) => {
-    switch (tabName) {
-      case 'goal-tracker':
-        return 'text-[#10B981]'; // Green
-      case 'videos':
-        return 'text-[#F59E0B]'; // Amber/Orange
-      case 'therapy-music':
-        return 'text-[#3B82F6]'; // Blue
-      case 'games':
-        return 'text-[#A78BFA]'; // Violet
-      case 'healing-sounds':
-        return 'text-[#06B6D4]'; // Cyan
-      default:
-        return 'text-[#111827]/70'; 
-    }
+  // Function to render the correct button class based on active state
+  const getButtonClass = (tabName) => {
+    const isActive = activeTab === tabName;
+    const tabColor = tabColors[tabName]?.primary || LIGHT_TEXT_COLOR; // Use primary color for inactive text glow
+    return `
+      relative px-4 md:px-6 py-2 md:py-3 font-bold text-sm rounded-full transition-all duration-300 z-10
+      focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-opacity-70 flex items-center flex-shrink-0 whitespace-nowrap
+      ${isActive
+        // Active text is light against the dark glass pill
+        ? 'text-white bg-transparent' 
+        // Inactive text has a subtle glow from its primary color
+        : `text-white/80 hover:text-white/95 hover:bg-white/5` 
+      }
+      ${!isActive ? `text-shadow-glow-${tabName}` : ''}
+    `;
   };
-
-  // Enhanced beautiful tab button class
-  const getButtonClass = (tabName) => `
-    relative px-3 md:px-5 py-2 md:py-3 font-semibold text-xs md:text-sm rounded-full transition-all duration-300 z-10
-    focus:outline-none focus-visible:ring-2 flex items-center flex-shrink-0
-    ${activeTab === tabName
-      ? 'text-[#111827] bg-white shadow-lg'
-      : `${getTabTextColor(tabName)} hover:text-[#111827] hover:bg-white/70`}
-  `;
-
-  // Function to render the Motion Pill inside the active tab
-  const ActivePill = ({ color = '#3B82F6' }) => (
-    <motion.div
-      layoutId="underline-pill"
-      className="absolute inset-0 rounded-full"
-      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-      style={{
-        // Sharper, premium shadow for the active pill
-        boxShadow: `0 2px 10px ${color}33, 0 4px 18px rgba(17, 24, 39, 0.08)`, 
-        background: 'rgba(255, 255, 255, 0.98)', // Nearly opaque white for a crisp look
-      }}
-    />
-  );
 
   return (
     <div
       className="py-0 px-0 font-sans min-h-screen"
       style={{
-        // 1. GLOBAL BACKGROUND ENHANCEMENT: Softer, more complex, beautiful background
+        // ULTIMATE DARK BACKGROUND: Deep background with colorful radial glows
         backgroundImage: `
-          radial-gradient(60% 40% at 20% 0%, rgba(59,130,246,0.12), transparent 60%),
-          radial-gradient(50% 30% at 80% 12%, rgba(20,184,166,0.12), transparent 60%),
-          radial-gradient(40% 30% at 50% 100%, rgba(167,139,250,0.12), transparent 60%),
-          linear-gradient(to bottom, #FEFEFE, #F7F9FC 40%, #EFF2F5 100%)
+          radial-gradient(90% 60% at 50% 10%, rgba(59,130,246,0.1), transparent 70%),
+          radial-gradient(80% 50% at 80% 80%, rgba(167,139,250,0.08), transparent 70%),
+          radial-gradient(70% 40% at 20% 90%, rgba(20,184,166,0.1), transparent 70%),
+          linear-gradient(to bottom, ${DARK_BG_COLOR} 0%, #000000 100%)
         `,
-        color: '#111827',
+        color: LIGHT_TEXT_COLOR,
       }}
     >
-      {/* STICKY HEADER WRAPPER */}
-      <div 
-        className="sticky top-0 z-50 py-4 sm:py-6 border-b border-[#E5E7EB]/50"
+      {/* STICKY HEADER WRAPPER (Tabs) */}
+      <div
+        className={`sticky top-0 z-50 py-4 sm:py-6 border-b transition-all duration-300 ${isScrolling ? 'shadow-2xl' : 'shadow-none'}`}
         style={{
-          // 2. STICKY BAR POLISH: Glass-morphism with a distinct floating shadow
-          background: 'rgba(255, 255, 255, 0.75)', // More transparent for better background blend
-          backdropFilter: 'blur(12px)',
-          boxShadow: '0 4px 16px rgba(17, 24, 39, 0.04)', // Subtle drop shadow
+          // DARK GLASSPHORISM (Enhanced Blur)
+          background: 'rgba(10, 10, 10, 0.9)',
+          backdropFilter: 'blur(20px)',
+          borderColor: DARK_BORDER_COLOR,
+          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
         }}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
-            className="flex items-center gap-2 md:gap-4 overflow-x-auto whitespace-nowrap rounded-full border p-1 w-full" 
-            style={{ 
-                borderColor: '#E5E7EB', 
-                backgroundColor: 'rgba(255, 255, 255, 0.95)' // Make the track slightly brighter
-            }} 
+            className="flex items-center gap-2 md:gap-3 overflow-x-auto whitespace-nowrap rounded-full border p-1 w-full"
+            style={{
+              // Dark, subtle inner shadow on the tab container
+              borderColor: DARK_BORDER_COLOR,
+              backgroundColor: DARK_CARD_COLOR,
+              boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.3)'
+            }}
           >
             {/* Tab 1: Goal Tracker */}
             <motion.div className="relative flex-shrink-0">
+              {activeTab === 'goal-tracker' && <ActivePill />}
               <button onClick={() => handleTabClick('goal-tracker')} className={getButtonClass('goal-tracker')}>
                 <TabIcon tabName="goal-tracker" />
                 Tracker
               </button>
-              {activeTab === 'goal-tracker' && <ActivePill color="#10B981" />}
             </motion.div>
-
 
             {/* Tab 2: Videos */}
             <motion.div className="relative flex-shrink-0">
+              {activeTab === 'videos' && <ActivePill />}
               <button onClick={() => handleTabClick('videos')} className={getButtonClass('videos')}>
                 <TabIcon tabName="videos" />
                 Videos
               </button>
-              {activeTab === 'videos' && <ActivePill color="#F59E0B" />}
             </motion.div>
 
             {/* Tab 3: Therapy Music */}
             <motion.div className="relative flex-shrink-0">
+              {activeTab === 'therapy-music' && <ActivePill />}
               <button onClick={() => handleTabClick('therapy-music')} className={getButtonClass('therapy-music')}>
                 <TabIcon tabName="therapy-music" />
                 Music
               </button>
-              {activeTab === 'therapy-music' && <ActivePill color="#3B82F6" />}
             </motion.div>
 
             {/* Tab 4: Games */}
             <motion.div className="relative flex-shrink-0">
+              {activeTab === 'games' && <ActivePill />}
               <button onClick={() => handleTabClick('games')} className={getButtonClass('games')}>
                 <TabIcon tabName="games" />
                 Games
               </button>
-              {activeTab === 'games' && <ActivePill color="#A78BFA" />}
             </motion.div>
 
             {/* Tab 5: Healing Sounds */}
             <motion.div className="relative flex-shrink-0">
+              {activeTab === 'healing-sounds' && <ActivePill />}
               <button onClick={() => handleTabClick('healing-sounds')} className={getButtonClass('healing-sounds')}>
                 <TabIcon tabName="healing-sounds" />
                 Sounds
               </button>
-              {activeTab === 'healing-sounds' && <ActivePill color="#06B6D4" />}
             </motion.div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">{renderContent()}</div>
+      {/* MAIN CONTENT AREA */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">{renderContent()}</div>
     </div>
   );
 }
