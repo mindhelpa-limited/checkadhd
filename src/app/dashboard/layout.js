@@ -1,14 +1,31 @@
 'use client';
-import { auth, db } from "@/lib/firebase";
+
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+
+// Firebase Imports
+import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { Home, Activity, BarChart2, User, LogOut } from "lucide-react";
+
+// Icon Imports (Lucide React)
+import {
+  Activity,
+  User,
+  LogOut,
+  ClipboardList,
+  MessageCircle,
+  Award,
+} from "lucide-react";
+
+// Third-party Libraries
 import * as Tone from 'tone';
-import { ClipboardList, ClipboardCheck, Award, MessageCircle, FileText } from "lucide-react";
-/* ---------------- Auth hook (unchanged logic) ---------------- */
+
+// --- Auth Hook ---
+/**
+ * Custom hook to manage Firebase authentication state and fetch user data from Firestore.
+ */
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -19,7 +36,13 @@ const useAuth = () => {
       if (currentUser) {
         const userDocRef = doc(db, "users", currentUser.uid);
         const docSnap = await getDoc(userDocRef);
-        if (docSnap.exists()) setUserData(docSnap.data());
+        
+        let fetchedUserData = null;
+        if (docSnap.exists()) {
+          fetchedUserData = docSnap.data();
+        }
+        
+        setUserData(fetchedUserData);
         setUser(currentUser);
       } else {
         setUser(null);
@@ -27,57 +50,96 @@ const useAuth = () => {
       }
       setLoading(false);
     });
+    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
   return { user, userData, loading };
 };
 
+// --- Dashboard Layout Component ---
+/**
+ * Layout component for the dashboard, including sidebar/bottom dock navigation,
+ * authentication checks, and a click sound effect.
+ */
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, userData, loading } = useAuth();
+  
+  // Special handling for recovery path (full screen content)
   const isRecoveryPath = pathname.startsWith("/dashboard/recovery/");
+  
+  // Tone.js player reference for click sound
   const clickSoundPlayer = useRef(null);
 
-  /* ---------------- Tiny sound (unchanged) ---------------- */
+  /* * Initialize Tone.js and load the sound file once. */
   useEffect(() => {
     const initTone = async () => {
       await Tone.start();
       clickSoundPlayer.current = new Tone.Player("/sounds/click.mp3").toDestination();
+      // Ensure the audio is loaded
+      await new Promise(resolve => {
+        if (clickSoundPlayer.current.loaded) {
+          resolve();
+        } else {
+          clickSoundPlayer.current.onload = resolve;
+        }
+      });
     };
-    initTone();
+    if (typeof window !== 'undefined') {
+        initTone();
+    }
   }, []);
 
+  /**
+   * Plays the pre-loaded click sound.
+   */
   const playClickSound = async () => {
     if (clickSoundPlayer.current?.loaded) {
-      await Tone.start();
-      clickSoundPlayer.current.start();
+      if (Tone.context.state !== 'running') {
+         await Tone.start();
+      }
+      clickSoundPlayer.current.start(0); 
     }
   };
 
+  /**
+   * Handles user logout via Firebase and redirects to the login page.
+   */
   const handleLogout = async () => {
     await signOut(auth);
     router.push("/login");
   };
 
+  /**
+   * Extracts the first name from displayName or email.
+   */
   const getFirstName = () => {
-    if (userData?.displayName) return userData.displayName.split(" ")[0];
-    if (userData?.email) return userData.email.split("@")[0];
+    if (userData?.displayName) {
+      return userData.displayName.split(" ")[0];
+    }
+    if (userData?.email) {
+      return userData.email.split("@")[0];
+    }
     return "User";
   };
 
+  // Define the navigation tabs
   const tabs = [
     { name: "Assessment", href: "/dashboard", icon: ClipboardList },
     { name: "Recovery", href: "/dashboard/recovery", icon: Activity },
     { name: "Coach", href: "/dashboard/coachee", icon: MessageCircle },
     { name: "Institute", href: "/dashboard/institute", icon: Award },
+    { name: "Profile", href: "/dashboard/profile", icon: User },
   ];
 
+  // Render children directly for full-screen content (e.g., specific recovery steps)
   if (isRecoveryPath) return <>{children}</>;
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row font-sans text-[#111827] bg-[#F3F4F6] relative">
+      
       {/* ===== Premium background ===== */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(900px_500px_at_8%_0%,#93C5FD_0%,transparent_40%),radial-gradient(900px_500px_at_100%_12%,#5EEAD4_0%,transparent_45%)] opacity-25" />
@@ -87,23 +149,26 @@ export default function DashboardLayout({ children }) {
 
       {/* ================= Sidebar (Desktop) ================= */}
       <aside className="hidden md:flex w-72 bg-white/70 backdrop-blur-xl border-r border-[#E5E7EB] shadow-[0_20px_80px_rgba(2,6,23,0.08)] flex-col">
-        {/* Brand header with gradient cap + brand name */}
+        
+        {/* Brand Header */}
         <div className="relative">
+          {/* Gradient Cap */}
           <div className="h-1.5 bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#14B8A6]" />
+          
           <div className="px-6 py-6">
             <h2 className="text-[20px] leading-tight font-semibold tracking-tight">
               <span className="text-[#1D4ED8]">ADHD</span> Check
             </h2>
             <p className="text-sm text-[#6B7280] mt-1">Hi, {getFirstName()}</p>
-            {/* Branded pill */}
-            <div className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs
-                            bg-[#EFF6FF] text-[#1E3A8A] ring-1 ring-[#DBEAFE]">
+            
+            {/* Branded Pill */}
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs bg-[#EFF6FF] text-[#1E3A8A] ring-1 ring-[#DBEAFE]">
               Healing is Possible
             </div>
           </div>
         </div>
 
-        {/* Nav */}
+        {/* Navigation Links */}
         <nav className="px-3 pb-4 space-y-1.5 flex-1">
           {tabs.map((tab) => {
             const active = pathname === tab.href;
@@ -118,9 +183,12 @@ export default function DashboardLayout({ children }) {
                     : "text-[#475569] hover:text-[#0F172A] hover:bg-white/60 hover:shadow-[0_6px_24px_rgba(2,6,23,0.06)]"
                   }`}
               >
+                {/* Active Indicator Bar */}
                 <span className={`absolute left-0 top-2 bottom-2 w-1 rounded-full transition-all
                   ${active ? "bg-gradient-to-b from-[#3B82F6] to-[#14B8A6] opacity-100"
-                              : "opacity-0 group-hover:opacity-50 bg-[#93C5FD]"}`} />
+                            : "opacity-0 group-hover:opacity-50 bg-[#93C5FD]"}`} 
+                />
+                
                 <tab.icon size={20} className={active ? "text-[#2563EB]" : "text-[#64748B] group-hover:text-[#2563EB]"} />
                 <span className="text-sm font-medium">{tab.name}</span>
               </Link>
@@ -128,13 +196,11 @@ export default function DashboardLayout({ children }) {
           })}
         </nav>
 
-        {/* Logout */}
+        {/* Logout Button */}
         <div className="px-4 pb-6">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold
-                           bg-white/80 hover:bg-[#FEF2F2] text-[#B91C1C] border border-[#E5E7EB]
-                           shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold bg-white/80 hover:bg-[#FEF2F2] text-[#B91C1C] border border-[#E5E7EB] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all"
           >
             <LogOut size={18} />
             Logout
@@ -142,20 +208,12 @@ export default function DashboardLayout({ children }) {
         </div>
       </aside>
 
-      {/* ================= Main Area ================= */}
+      {/* ================= Main Content Area ================= */}
       <div className="flex-1 flex flex-col">
-        {/* Topbar (Mobile) */}
-        <header className="md:hidden sticky top-0 z-30 flex items-center justify-between bg-white/70 backdrop-blur-xl border-b border-[#E5E7EB] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-[2px] before:bg-gradient-to-r before:from-[#3B82F6] before:via-[#60A5FA] before:to-[#14B8A6] px-4 py-3">
-          <div>
-            <h1 className="text-base font-semibold">Hi, {getFirstName()}</h1>
-            <p className="text-xs text-[#6B7280]">Your calm focus space</p>
-          </div>
-          <button onClick={() => { playClickSound(); router.push("/dashboard/profile"); }} className="p-2 text-[#6B7280] hover:text-[#EF4444]">
-            <User size={20} />
-          </button>
-        </header>
-
-        {/* Content */}
+        
+        {/* Topbar (Mobile) - REMOVED */}
+        
+        {/* Content View */}
         <main className="flex-1 p-0 md:p-0 overflow-y-auto">
           <div className="w-full h-full">
             <div className="p-0 md:p-0">
@@ -166,9 +224,7 @@ export default function DashboardLayout({ children }) {
       </div>
 
       {/* ================= Bottom Dock (Mobile) ================= */}
-      <nav className="md:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-md
-                     bg-white/70 backdrop-blur-2xl border border-[#E5E7EB]
-                     shadow-[0_12px_50px_rgba(2,6,23,0.18)] rounded-2xl flex justify-around py-2.5">
+      <nav className="md:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-md bg-white/70 backdrop-blur-2xl border border-[#E5E7EB] shadow-[0_12px_50px_rgba(2,6,23,0.18)] rounded-2xl flex justify-around py-2.5">
         {tabs.map((tab) => {
           const active = pathname === tab.href;
           return (
@@ -178,7 +234,7 @@ export default function DashboardLayout({ children }) {
               onClick={playClickSound}
               className={`flex flex-col items-center text-[11px] px-3 py-1.5 rounded-xl transition-all
                 ${active ? "text-[#2563EB] bg-[#EFF6FF] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
-                            : "text-[#6B7280] hover:text-[#2563EB] hover:bg-white/50"}`}
+                          : "text-[#6B7280] hover:text-[#2563EB] hover:bg-white/50"}`}
             >
               <tab.icon size={18} className="mb-0.5" />
               <span className="font-medium">{tab.name}</span>
