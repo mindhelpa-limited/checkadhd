@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
+import { Target, Video, Music, Volume2, Gamepad } from 'lucide-react'; // Added Gamepad icon
 
 const games = [
   {
@@ -27,7 +28,6 @@ const games = [
 ];
 
 export default function RecoveryGameSelectionPage() {
-  // 1. Updated initial activeTab to the new first tab
   const [activeTab, setActiveTab] = useState('goal-tracker');
   const backgroundAudioRef = useRef(null);
   const clickAudioRef = useRef(null);
@@ -79,12 +79,11 @@ export default function RecoveryGameSelectionPage() {
     playClickSound();
   };
 
-  // 2. New Content Component for Goal Tracker Tab
+  // --- Goal Tracker Tab Content ---
   const GoalTrackerTabContent = () => (
     <div
       className="relative overflow-hidden rounded-3xl h-[450px] flex flex-col items-center justify-center text-[#111827] p-8 mt-10 shadow-xl border border-[#F3F4F6]"
       style={{
-        // Beautiful, inviting background
         backgroundImage: `
           radial-gradient(60% 40% at 20% 0%, rgba(16,185,129,0.10), transparent 60%),
           radial-gradient(50% 30% at 80% 15%, rgba(59,130,246,0.10), transparent 60%),
@@ -99,38 +98,38 @@ export default function RecoveryGameSelectionPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text"
-          style={{ backgroundImage: 'linear-gradient(90deg, #10B981, #3B82F6)' }} // Green-Blue gradient
+          style={{ backgroundImage: 'linear-gradient(90deg, #10B981, #3B82F6)' }}
         >
-          Your Growth Path
+          General Growth Tracker
         </motion.h2>
+        {/* Removed asterisks */}
         <p className="text-xl text-[#111827]/70 mb-10 max-w-lg font-light">
-          Set, monitor, and achieve your recovery and personal growth milestones.
+          Set, monitor, and achieve your personal growth milestones. Maintain your streaks for continued progress.
         </p>
-        <Link href="/goal-tracker">
+        <Link href="/dashboard/recovery/goal-tracker">
           <motion.button
             whileHover={{ scale: 1.06, rotate: 1 }}
             whileTap={{ scale: 0.97 }}
             onClick={playClickSound}
-            className="text-white font-bold py-4 px-12 rounded-full shadow-xl focus:outline-none focus-visible:ring-2"
+            className="text-white font-bold py-4 px-12 rounded-full shadow-xl focus:outline-none focus-visible:ring-2 flex items-center gap-2"
             style={{
-              // Very beautiful button: vibrant gradient and deep shadow
-              background: 'linear-gradient(135deg, #10B981, #059669)', // Emerald Green
+              background: 'linear-gradient(135deg, #10B981, #059669)',
               boxShadow: '0 12px 30px rgba(16, 185, 129, 0.45)',
             }}
           >
-            Start Tracking Goals 🚀
+            <Target size={24} />
+            Start Tracking Goals
           </motion.button>
         </Link>
       </div>
     </div>
   );
 
-  // 3. New Content Component for Videos Tab
+  // --- Videos Tab Content ---
   const VideosTabContent = () => (
     <div
       className="relative overflow-hidden rounded-3xl h-[450px] flex flex-col items-center justify-center text-[#111827] p-8 mt-10 shadow-xl border border-[#F3F4F6]"
       style={{
-        // Calm, focused background
         backgroundImage: `
           radial-gradient(60% 40% at 20% 0%, rgba(251,191,36,0.10), transparent 60%),
           radial-gradient(50% 30% at 80% 15%, rgba(249,115,22,0.10), transparent 60%),
@@ -145,37 +144,38 @@ export default function RecoveryGameSelectionPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text"
-          style={{ backgroundImage: 'linear-gradient(90deg, #F59E0B, #F97316)' }} // Amber-Orange gradient
+          style={{ backgroundImage: 'linear-gradient(90deg, #F59E0B, #F97316)' }}
         >
           Inspirational Videos
         </motion.h2>
+        {/* Removed asterisks */}
         <p className="text-xl text-[#111827]/70 mb-10 max-w-lg font-light">
-          Watch curated videos to guide your journey and keep you motivated.
+          Watch curated videos on Meditation, Affirmation, and Motivation to guide your journey.
         </p>
         <Link href="/dashboard/recovery/videos">
           <motion.button
             whileHover={{ scale: 1.06, rotate: -1 }}
             whileTap={{ scale: 0.97 }}
             onClick={playClickSound}
-            className="text-white font-bold py-4 px-12 rounded-full shadow-xl focus:outline-none focus-visible:ring-2"
+            className="text-white font-bold py-4 px-12 rounded-full shadow-xl focus:outline-none focus-visible:ring-2 flex items-center gap-2"
             style={{
-              // Beautiful button: warm gradient and deep shadow
-              background: 'linear-gradient(135deg, #F59E0B, #F97316)', // Amber-Orange
+              background: 'linear-gradient(135deg, #F59E0B, #F97316)',
               boxShadow: '0 12px 30px rgba(245, 158, 11, 0.45)',
             }}
           >
-            Watch Now ▶️
+            <Video size={24} />
+            Watch Now
           </motion.button>
         </Link>
       </div>
     </div>
   );
 
+  // --- Music Tab Content ---
   const MusicTabContent = ({ title, link }) => (
     <div
       className="relative overflow-hidden rounded-3xl h-[450px] flex flex-col items-center justify-center text-[#111827] p-8 mt-10 shadow-xl border border-[#F3F4F6]"
       style={{
-        // Layered, ADHD-safe glow + light neutral base
         backgroundImage: `
           radial-gradient(60% 40% at 20% 0%, rgba(59,130,246,0.10), transparent 60%),
           radial-gradient(50% 30% at 80% 15%, rgba(20,184,166,0.10), transparent 60%),
@@ -191,7 +191,6 @@ export default function RecoveryGameSelectionPage() {
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        {/* slow ambient shimmer (very subtle to avoid overstimulation) */}
         <motion.div
           className="w-full h-full"
           animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
@@ -222,6 +221,7 @@ export default function RecoveryGameSelectionPage() {
         >
           {title}
         </motion.h2>
+        {/* Removed asterisks */}
         <p className="text-xl text-[#111827]/70 mb-8 max-w-lg font-light">
           Immerse yourself in calming melodies and nature sounds designed for deep focus and relaxation.
         </p>
@@ -230,13 +230,14 @@ export default function RecoveryGameSelectionPage() {
             whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.97 }}
             onClick={playClickSound}
-            className="text-white font-bold py-4 px-10 rounded-full shadow-lg focus:outline-none focus-visible:ring-2"
+            className="text-white font-bold py-4 px-10 rounded-full shadow-lg focus:outline-none focus-visible:ring-2 flex items-center gap-2"
             style={{
-              background: 'linear-gradient(135deg, #FB923C, #F87171)', // warm CTA
+              background: 'linear-gradient(135deg, #FB923C, #F87171)',
               boxShadow: '0 8px 24px rgba(248,113,113,0.35)',
             }}
           >
-            Explore Library 🎵
+            {title === "Therapy Music" ? <Music size={24} /> : <Volume2 size={24} />}
+            Explore Library
           </motion.button>
         </Link>
       </div>
@@ -245,11 +246,14 @@ export default function RecoveryGameSelectionPage() {
 
   const renderContent = () => {
     switch (activeTab) {
-      // 4. Added new cases for goal tracker and videos
       case 'goal-tracker':
         return <GoalTrackerTabContent />;
       case 'videos':
         return <VideosTabContent />;
+      case 'therapy-music':
+        return <MusicTabContent title="Therapy Music" link="/dashboard/recovery/therapymusic" />;
+      case 'healing-sounds':
+        return <MusicTabContent title="Healing Sounds" link="/dashboard/recovery/healingsounds" />;
       case 'games':
         return (
           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mt-10">
@@ -264,7 +268,6 @@ export default function RecoveryGameSelectionPage() {
                   className="group cursor-pointer relative overflow-hidden rounded-3xl transition-all duration-300"
                   style={{ filter: 'drop-shadow(0 6px 24px rgba(17,24,39,0.06))' }}
                 >
-                  {/* soft glow on hover */}
                   <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition duration-500 blur-xl"
                     style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.12), rgba(167,139,250,0.12))' }} />
                   <div
@@ -306,28 +309,37 @@ export default function RecoveryGameSelectionPage() {
             ))}
           </div>
         );
-      case 'therapy-music':
-        return <MusicTabContent title="Therapy Music" link="/dashboard/recovery/therapymusic" />;
-      case 'healing-sounds':
-        return <MusicTabContent title="Healing Sounds" link="/dashboard/recovery/healingsounds" />;
       default:
         return null;
     }
   };
 
+  // Enhanced beautiful tab button class
   const getButtonClass = (tabName) => `
-    relative px-6 md:px-8 py-3 md:py-4 font-semibold text-base md:text-lg rounded-full transition-all duration-200
+    relative px-6 md:px-8 py-3 md:py-4 font-semibold text-base md:text-lg rounded-full transition-all duration-300 z-10
     focus:outline-none focus-visible:ring-2
     ${activeTab === tabName
-      ? 'text-[#111827] bg-white shadow'
+      ? 'text-[#111827] bg-white shadow-md'
       : 'text-[#111827]/60 hover:text-[#111827] hover:bg-white/70'}
   `;
+
+  // Function to render the Motion Pill inside the active tab
+  const ActivePill = ({ color = '#3B82F6' }) => (
+    <motion.div
+      layoutId="underline-pill"
+      className="absolute inset-0 rounded-full"
+      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      style={{
+        boxShadow: `0 0 0 2px ${color}1A, 0 4px 12px rgba(17, 24, 39, 0.05)`, // Subtle shadow for lift
+        background: 'rgba(255, 255, 255, 0.8)', // Ensures the active pill is solid white
+      }}
+    />
+  );
 
   return (
     <div
       className="py-8 px-0 font-sans min-h-screen"
       style={{
-        // Page background: calm glows + neutral base
         backgroundImage: `
           radial-gradient(60% 40% at 20% 0%, rgba(59,130,246,0.10), transparent 60%),
           radial-gradient(50% 30% at 80% 12%, rgba(20,184,166,0.10), transparent 60%),
@@ -337,92 +349,61 @@ export default function RecoveryGameSelectionPage() {
         color: '#111827',
       }}
     >
-      <div className="max-w-4xl mx-auto text-center mb-10 px-4">
-        {/* 5. Reduced font size and beautified heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          // Reduced from text-5xl md:text-6xl to text-4xl md:text-5xl
-          className="text-4xl md:text-5xl font-extrabold mb-4 font-display text-transparent bg-clip-text"
-          style={{
-            backgroundImage: 'linear-gradient(90deg, #3B82F6, #A78BFA)',
-            textShadow: '0 2px 4px rgba(59, 130, 246, 0.2), 0 0 1px rgba(17, 24, 39, 0.1)', // subtle shadow
-          }}
-        >
-          Recovery & Growth
-        </motion.h1>
+      {/* 1. REMOVED THE HEADING AND DESCRIPTION BLOCK */}
+      {/* <div className="max-w-4xl mx-auto text-center mb-10 px-4">
+        <motion.h1 ... > Recovery & Growth </motion.h1>
         <p className="text-lg md:text-xl max-w-lg mx-auto font-light" style={{ color: 'rgba(17,24,39,0.70)' }}>
           Choose a path to enhance your focus, control, and relaxation.
         </p>
-      </div>
+      </div> 
+      */}
 
       {/* Tabs bar */}
-      <div className="max-w-6xl mx-auto mb-10 px-4">
+      <div className="max-w-6xl mx-auto mb-10 px-4 pt-10">
         <div
-          className="flex items-center gap-3 md:gap-4 overflow-x-auto whitespace-nowrap rounded-full border backdrop-blur supports-[backdrop-filter]:bg-white/60 bg-white/70"
-          style={{ borderColor: '#F3F4F6' }}
+          className="flex items-center gap-3 md:gap-4 overflow-x-auto whitespace-nowrap rounded-full border backdrop-blur supports-[backdrop-filter]:bg-white/60 bg-white/70 p-1" // Added padding for better look
+          style={{ borderColor: '#E5E7EB' }} // Lighter border
         >
-          {/* 6. Tabs in new order: Goal Tracker, Videos, Therapy Music, Games, Healing Sounds */}
-          <button onClick={() => handleTabClick('goal-tracker')} className={getButtonClass('goal-tracker')}>
-            Goal Tracker
-            {activeTab === 'goal-tracker' && (
-              <motion.div
-                layoutId="underline-pill"
-                className="absolute inset-0 rounded-full"
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                style={{ boxShadow: 'inset 0 0 0 2px rgba(16, 185, 129, 0.3)' }} // New color for tracker
-              />
-            )}
-          </button>
+          {/* Tab 1: Goal Tracker */}
+          <motion.div className="relative">
+            <button onClick={() => handleTabClick('goal-tracker')} className={getButtonClass('goal-tracker')}>
+              Goal Tracker
+            </button>
+            {activeTab === 'goal-tracker' && <ActivePill color="#10B981" />}
+          </motion.div>
 
-          <button onClick={() => handleTabClick('videos')} className={getButtonClass('videos')}>
-            Videos
-            {activeTab === 'videos' && (
-              <motion.div
-                layoutId="underline-pill"
-                className="absolute inset-0 rounded-full"
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                style={{ boxShadow: 'inset 0 0 0 2px rgba(245, 158, 11, 0.3)' }} // New color for videos
-              />
-            )}
-          </button>
 
-          <button onClick={() => handleTabClick('therapy-music')} className={getButtonClass('therapy-music')}>
-            Therapy Music
-            {activeTab === 'therapy-music' && (
-              <motion.div
-                layoutId="underline-pill"
-                className="absolute inset-0 rounded-full"
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                style={{ boxShadow: 'inset 0 0 0 2px rgba(59,130,246,0.15)' }}
-              />
-            )}
-          </button>
+          {/* Tab 2: Videos */}
+          <motion.div className="relative">
+            <button onClick={() => handleTabClick('videos')} className={getButtonClass('videos')}>
+              Videos
+            </button>
+            {activeTab === 'videos' && <ActivePill color="#F59E0B" />}
+          </motion.div>
 
-          <button onClick={() => handleTabClick('games')} className={getButtonClass('games')}>
-            Games
-            {activeTab === 'games' && (
-              <motion.div
-                layoutId="underline-pill"
-                className="absolute inset-0 rounded-full"
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                style={{ boxShadow: 'inset 0 0 0 2px rgba(59,130,246,0.15)' }}
-              />
-            )}
-          </button>
+          {/* Tab 3: Therapy Music */}
+          <motion.div className="relative">
+            <button onClick={() => handleTabClick('therapy-music')} className={getButtonClass('therapy-music')}>
+              Therapy Music
+            </button>
+            {activeTab === 'therapy-music' && <ActivePill color="#3B82F6" />}
+          </motion.div>
 
-          <button onClick={() => handleTabClick('healing-sounds')} className={getButtonClass('healing-sounds')}>
-            Healing Sounds
-            {activeTab === 'healing-sounds' && (
-              <motion.div
-                layoutId="underline-pill"
-                className="absolute inset-0 rounded-full"
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                style={{ boxShadow: 'inset 0 0 0 2px rgba(59,130,246,0.15)' }}
-              />
-            )}
-          </button>
+          {/* Tab 4: Games */}
+          <motion.div className="relative">
+            <button onClick={() => handleTabClick('games')} className={getButtonClass('games')}>
+              Games
+            </button>
+            {activeTab === 'games' && <ActivePill color="#A78BFA" />}
+          </motion.div>
+
+          {/* Tab 5: Healing Sounds */}
+          <motion.div className="relative">
+            <button onClick={() => handleTabClick('healing-sounds')} className={getButtonClass('healing-sounds')}>
+              Healing Sounds
+            </button>
+            {activeTab === 'healing-sounds' && <ActivePill color="#20B8A6" />}
+          </motion.div>
         </div>
       </div>
 

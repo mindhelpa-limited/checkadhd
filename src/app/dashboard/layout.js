@@ -7,7 +7,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { Home, Activity, BarChart2, User, LogOut } from "lucide-react";
 import * as Tone from 'tone';
-
+import { ClipboardList, ClipboardCheck, Award, MessageCircle, FileText } from "lucide-react";
 /* ---------------- Auth hook (unchanged logic) ---------------- */
 const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -68,10 +68,10 @@ export default function DashboardLayout({ children }) {
   };
 
   const tabs = [
-    { name: "Home", href: "/dashboard", icon: Home },
+    { name: "Assessment", href: "/dashboard", icon: ClipboardList },
     { name: "Recovery", href: "/dashboard/recovery", icon: Activity },
-    { name: "Coach", href: "/dashboard/progress", icon: BarChart2 },
-    { name: "Profile", href: "/dashboard/profile", icon: User },
+    { name: "Coach", href: "/dashboard/coachee", icon: MessageCircle },
+    { name: "Institute", href: "/dashboard/institute", icon: Award },
   ];
 
   if (isRecoveryPath) return <>{children}</>;
@@ -150,8 +150,8 @@ export default function DashboardLayout({ children }) {
             <h1 className="text-base font-semibold">Hi, {getFirstName()}</h1>
             <p className="text-xs text-[#6B7280]">Your calm focus space</p>
           </div>
-          <button onClick={handleLogout} className="p-2 text-[#6B7280] hover:text-[#EF4444]">
-            <LogOut size={20} />
+          <button onClick={() => { playClickSound(); router.push("/dashboard/profile"); }} className="p-2 text-[#6B7280] hover:text-[#EF4444]">
+            <User size={20} />
           </button>
         </header>
 

@@ -1,15 +1,17 @@
 'use client';
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
-import { onAuthStateChanged, updateProfile, getAuth } from "firebase/auth";
+import { onAuthStateChanged, updateProfile, getAuth, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { motion } from 'framer-motion';
 import {
   CreditCardIcon,
   CheckCircleIcon,
   XCircleIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  ArrowLeftStartOnRectangleIcon
 } from "@heroicons/react/24/outline";
 
 export default function ProfilePage() {
@@ -43,6 +45,16 @@ export default function ProfilePage() {
     });
     return () => unsubscribe();
   }, [router]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      setMessage("❌ Failed to log out. Please try refreshing.");
+    }
+  };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -98,8 +110,24 @@ export default function ProfilePage() {
     }
   };
 
+  // While loading, you might want to render a spinner or skeleton screen
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-[#3B82F6] font-semibold">Loading profile...</p>
+      </div>
+    );
+  }
+
+  // If user is null after loading finishes (shouldn't happen due to redirect),
+  // but good for safety. The useEffect should handle the redirect.
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className="relative min-h-screen p-6 md:p-10 bg-[#F3F4F6] text-[#111827] overflow-hidden font-sans">
+    // CORRECTED: Removed 'pb-40' to fix excessive space at the bottom
+    <div className="relative min-h-screen p-6 md:p-10 bg-[#F3F4F6] text-[#111827] overflow-y-auto font-sans">
       {/* Subtle background blobs */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
         <div className="absolute -top-24 -left-20 w-80 h-80 bg-[#3B82F6] rounded-full blur-3xl opacity-10" />
@@ -189,7 +217,7 @@ export default function ProfilePage() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white border border-[#E5E7EB] rounded-2xl shadow-[0_8px_30px_rgba(2,6,23,0.06)] p-6 md:p-8"
+          className="bg-white border border-[#E5E7EB] rounded-2xl shadow-[0_8px_30px_rgba(2,6,23,0.06)] p-6 md:p-8 mb-8"
         >
           <h2 className="text-xl md:text-2xl font-semibold mb-6 flex items-center">
             <CreditCardIcon className="h-6 w-6 mr-2 text-[#14B8A6]" />
@@ -210,8 +238,8 @@ export default function ProfilePage() {
               whileTap={{ scale: 0.98 }}
               disabled={isManagingSubscription || userData?.tier !== 'premium'}
               className={`inline-flex items-center justify-center px-5 py-3 rounded-xl font-semibold
-                               focus:outline-none focus:ring-4
-                               ${isManagingSubscription || userData?.tier !== 'premium'
+                                focus:outline-none focus:ring-4
+                                ${isManagingSubscription || userData?.tier !== 'premium'
                   ? 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
                   : 'bg-[#14B8A6] text-white hover:bg-[#129a8e] focus:ring-[#14B8A6]/25'
                 }`}
@@ -220,6 +248,23 @@ export default function ProfilePage() {
             </motion.button>
           </div>
         </motion.div>
+        
+        {/* BEAUTIFUL LOGOUT BUTTON */}
+        <motion.button
+          onClick={handleLogout}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-semibold text-lg
+bg-white border-2 border-[#FECACA] text-[#B91C1C] 
+shadow-[0_4px_15px_rgba(239,68,68,0.1)] transition-all
+hover:bg-[#FEF2F2] hover:shadow-[0_4px_20px_rgba(239,68,68,0.2)]"
+        >
+          <ArrowLeftStartOnRectangleIcon className="h-6 w-6" />
+          Log Out
+        </motion.button>
       </div>
     </div>
   );
