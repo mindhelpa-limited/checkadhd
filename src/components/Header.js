@@ -5,15 +5,28 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Menu, X, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+// ADDED NEW ICONS for Pricing Submenu to the import list
+import { 
+    Menu, 
+    X, 
+    ArrowRight, 
+    ChevronDown, 
+    ChevronUp,
+    ClipboardList, // ADHD Assessment
+    Stethoscope, // ADHD Clinical Assessment
+    GraduationCap, // Mindhelpa Institute
+    HeartHandshake, // Mental Health Recovery
+    Users // Psychiatrist Coaching
+} from "lucide-react";
 
-// MobileMenuItem now uses Link component
-const MobileMenuItem = ({ href, children, onClick }) => (
+// Updated MobileMenuItem to accept an optional 'icon' prop and adjust styling for it
+const MobileMenuItem = ({ href, children, onClick, icon: Icon }) => (
     <Link
         href={href}
         onClick={onClick}
         className="flex items-center w-full px-4 py-3 border-b border-gray-700 last:border-b-0 hover:bg-[#1f294c] transition-colors duration-200 group"
     >
+        {Icon && <Icon size={20} className="mr-3 text-blue-400" />} {/* Icon added here */}
         <span className="font-sans text-white text-lg font-light flex-grow">{children}</span>
         <ArrowRight size={20} className="text-gray-400 group-hover:translate-x-1 transition-transform duration-200" />
     </Link>
@@ -62,19 +75,49 @@ export default function Header() {
                 {pricingDropdownOpen ? <ChevronUp size={20} className="text-gray-400 transition-transform duration-200" /> : <ChevronDown size={20} className="text-gray-400 transition-transform duration-200" />}
             </div>
 
-            {/* Mobile Pricing Dropdown Menu (using MobileMenuItem/Link) */}
+            {/* Mobile Pricing Dropdown Menu (using MobileMenuItem/Link) - NOW WITH ICONS */}
             {pricingDropdownOpen && (
                 <div className="flex flex-col pl-6">
-                    <MobileMenuItem href="/pricing-adhd-assessment" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>ADHD Assessment</MobileMenuItem>
+                    <MobileMenuItem 
+                        href="/pricing-adhd-assessment" 
+                        onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
+                        icon={ClipboardList} // ICON ADDED
+                    >
+                        ADHD Assessment
+                    </MobileMenuItem>
                     
                     {/* NEW ITEM 1: ADHD Clinical Assessment */}
-                    <MobileMenuItem href="/pricing-adhd-clinical-assessment" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>ADHD Clinical Assessment</MobileMenuItem>
+                    <MobileMenuItem 
+                        href="/pricing-adhd-clinical-assessment" 
+                        onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
+                        icon={Stethoscope} // ICON ADDED
+                    >
+                        ADHD Clinical Assessment
+                    </MobileMenuItem>
                     
                     {/* NEW ITEM 2: Mindhelpa Institute */}
-                    <MobileMenuItem href="/pricing-mindhelpa-institute" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>Mindhelpa Institute</MobileMenuItem>
+                    <MobileMenuItem 
+                        href="/pricing-mindhelpa-institute" 
+                        onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
+                        icon={GraduationCap} // ICON ADDED
+                    >
+                        Mindhelpa Institute
+                    </MobileMenuItem>
                     
-                    <MobileMenuItem href="/pricing-mental-health-recovery-tools" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>Mental Health Recovery</MobileMenuItem>
-                    <MobileMenuItem href="/book-a-coach" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>Psychiatrist Coaching</MobileMenuItem>
+                    <MobileMenuItem 
+                        href="/pricing-mental-health-recovery-tools" 
+                        onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
+                        icon={HeartHandshake} // ICON ADDED
+                    >
+                        Mental Health Recovery
+                    </MobileMenuItem>
+                    <MobileMenuItem 
+                        href="/book-a-coach" 
+                        onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
+                        icon={Users} // ICON ADDED
+                    >
+                        Psychiatrist Coaching
+                    </MobileMenuItem>
                 </div>
             )}
             
@@ -112,17 +155,53 @@ export default function Header() {
                             ${pricingDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}
                         `}>
                             {/* 💡 CENTERING APPLIED HERE 💡 */}
-                            <div className="text-center"> 
-                                <Link href="/pricing-adhd-assessment" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">ADHD Assessment</Link>
+                            <div className="text-left"> {/* Changed text-center back to text-left for better icon alignment */}
+                                {/* Desktop dropdown items - NOW WITH ICONS */}
+                                <Link 
+                                    href="/pricing-adhd-assessment" 
+                                    onClick={() => setPricingDropdownOpen(false)} 
+                                    className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+                                >
+                                    <ClipboardList size={18} className="mr-3 text-blue-400" /> {/* ICON ADDED */}
+                                    ADHD Assessment
+                                </Link>
                                 
                                 {/* NEW ITEM 1: ADHD Clinical Assessment */}
-                                <Link href="/pricing-adhd-clinical-assessment" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">ADHD Clinical Assessment</Link>
+                                <Link 
+                                    href="/pricing-adhd-clinical-assessment" 
+                                    onClick={() => setPricingDropdownOpen(false)} 
+                                    className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+                                >
+                                    <Stethoscope size={18} className="mr-3 text-blue-400" /> {/* ICON ADDED */}
+                                    ADHD Clinical Assessment
+                                </Link>
                                 
                                 {/* NEW ITEM 2: Mindhelpa Institute */}
-                                <Link href="/pricing-mindhelpa-institute" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">Mindhelpa Institute</Link>
+                                <Link 
+                                    href="/pricing-mindhelpa-institute" 
+                                    onClick={() => setPricingDropdownOpen(false)} 
+                                    className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+                                >
+                                    <GraduationCap size={18} className="mr-3 text-blue-400" /> {/* ICON ADDED */}
+                                    Mindhelpa Institute
+                                </Link>
                                 
-                                <Link href="/pricing-mental-health-recovery-tools" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">Mental Health Recovery</Link>
-                                <Link href="/book-a-coach" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">Psychiatrist Coaching</Link>
+                                <Link 
+                                    href="/pricing-mental-health-recovery-tools" 
+                                    onClick={() => setPricingDropdownOpen(false)} 
+                                    className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+                                >
+                                    <HeartHandshake size={18} className="mr-3 text-blue-400" /> {/* ICON ADDED */}
+                                    Mental Health Recovery
+                                </Link>
+                                <Link 
+                                    href="/book-a-coach" 
+                                    onClick={() => setPricingDropdownOpen(false)} 
+                                    className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+                                >
+                                    <Users size={18} className="mr-3 text-blue-400" /> {/* ICON ADDED */}
+                                    Psychiatrist Coaching
+                                </Link>
                             </div>
                         </div>
                     </div>
