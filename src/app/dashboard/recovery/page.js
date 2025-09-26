@@ -4,10 +4,10 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
-import { Target, Video, Music, Volume2, Gamepad } from 'lucide-react';
+import { Target, Video, Music, Volume2, Gamepad, ChevronRight } from 'lucide-react'; // ⬅️ NEW: Import ChevronRight
 
 // ===================================================================
-// I. UTILITY & CONSTANTS (Content is Retained)
+// I. UTILITY & CONSTANTS
 // ===================================================================
 
 const games = [
@@ -31,10 +31,13 @@ const games = [
   },
 ];
 
+// Array defining the tab order
+const TAB_ORDER = ['goal-tracker', 'videos', 'therapy-music', 'games', 'healing-sounds'];
+
 // Helper component to render the icon for a given tab
 const TabIcon = ({ tabName, size = 18 }) => {
   // All icons are white/light gray by default in dark mode
-  const colorClass = 'text-white/80'; 
+  const colorClass = 'text-white/80';
   switch (tabName) {
     case 'goal-tracker':
       return <Target size={size} className={`mr-2 ${colorClass}`} />;
@@ -51,30 +54,62 @@ const TabIcon = ({ tabName, size = 18 }) => {
   }
 };
 
-// UTILITY: Color Mapping 
-// Note: Colors remain the same but will contrast more sharply with the dark background
+// UTILITY: Color Mapping
 const tabColors = {
-  'goal-tracker': { primary: '#059669', secondary: '#3B82F6', text: '#059669' }, // Emerald/Blue
-  'videos': { primary: '#D97706', secondary: '#F97316', text: '#D97706' }, // Amber/Orange
-  'therapy-music': { primary: '#1D4ED8', secondary: '#A78BFA', text: '#1D4ED8' }, // Blue/Violet
-  'games': { primary: '#9333EA', secondary: '#EC4899', text: '#9333EA' }, // Violet/Pink
-  'healing-sounds': { primary: '#0891B2', secondary: '#059669', text: '#0891B2' }, // Cyan/Emerald
+  'goal-tracker': { primary: '#059669', secondary: '#3B82F6', text: '#059669' },
+  'videos': { primary: '#D97706', secondary: '#F97316', text: '#D97706' },
+  'therapy-music': { primary: '#1D4ED8', secondary: '#A78BFA', text: '#1D4ED8' },
+  'games': { primary: '#9333EA', secondary: '#EC4899', text: '#9333EA' },
+  'healing-sounds': { primary: '#0891B2', secondary: '#059669', text: '#0891B2' },
 };
 
 // Dark Mode base colors
-const DARK_BG_COLOR = '#0A0A0A'; // Deepest background
-const DARK_CARD_COLOR = '#1A1A1A'; // Card background
-const DARK_BORDER_COLOR = '#2A2A2A'; // Subtle border/divider color
-const LIGHT_TEXT_COLOR = '#F5F5F5'; // Primary text color
-const MUTED_TEXT_COLOR = '#A3A3A3'; // Secondary/muted text color
+const DARK_BG_COLOR = '#0A0A0A';
+const DARK_CARD_COLOR = '#1A1A1A';
+const DARK_BORDER_COLOR = '#2A2A2A';
+const LIGHT_TEXT_COLOR = '#F5F5F5';
+const MUTED_TEXT_COLOR = '#A3A3A3';
+
+// ⬅️ NEW UTILITY FUNCTION: Get the next tab in the sequence
+const getNextTab = (currentTab) => {
+    const currentIndex = TAB_ORDER.indexOf(currentTab);
+    // Cycle back to the first tab if currently on the last tab
+    const nextIndex = (currentIndex + 1) % TAB_ORDER.length;
+    return TAB_ORDER[nextIndex];
+};
+
 
 // ===================================================================
 // II. SHARED UI COMPONENTS (Adapted for Beautiful Dark Mode)
 // ===================================================================
 
+// ⬅️ NEW COMPONENT: Mobile-only button to navigate to the next tab
+const NextTabButton = ({ currentTab, onNextClick }) => {
+    // Determine the descriptive name of the next tab for accessibility/label
+    const nextTabName = getNextTab(currentTab).replace('-', ' ').toUpperCase();
+
+    return (
+        <motion.button
+            onClick={onNextClick}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 rounded-full z-20 sm:hidden" // ⬅️ sm:hidden ensures it only appears on mobile
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            aria-label={`Go to next section: ${nextTabName}`}
+            style={{
+                background: 'rgba(255, 255, 255, 0.1)', // Light overlay for visibility
+                backdropFilter: 'blur(5px)',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5)',
+                border: `1px solid ${DARK_BORDER_COLOR}`,
+            }}
+        >
+            <ChevronRight size={30} className="text-white" />
+        </motion.button>
+    );
+};
+
+
 /**
  * Component: Call-to-Action Link Button with Gradient and Hover Effects
- * (Vibrant Gradient, Strong Shadow against Dark BG)
  */
 const ContentLinkButton = ({ href, text, primaryColor, secondaryColor, shadowColor, onClick }) => (
   <Link href={href} passHref>
@@ -84,9 +119,9 @@ const ContentLinkButton = ({ href, text, primaryColor, secondaryColor, shadowCol
       onClick={onClick}
       className="text-white font-extrabold py-3 px-10 sm:py-4 sm:px-14 rounded-full shadow-2xl focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-opacity-70 flex items-center gap-2 transition-all duration-300 transform hover:z-20"
       style={{
-        background: `linear-gradient(145deg, ${primaryColor}, ${secondaryColor})`, // Deeper 145deg gradient
-        boxShadow: `0 8px 25px ${shadowColor}80`, // Stronger initial shadow
-        textShadow: '0 1px 2px rgba(0,0,0,0.4)', // Subtle text shadow for pop
+        background: `linear-gradient(145deg, ${primaryColor}, ${secondaryColor})`,
+        boxShadow: `0 8px 25px ${shadowColor}80`,
+        textShadow: '0 1px 2px rgba(0,0,0,0.4)',
       }}
     >
       {text}
@@ -96,34 +131,34 @@ const ContentLinkButton = ({ href, text, primaryColor, secondaryColor, shadowCol
 
 /**
  * Component: Motion Pill for Active Tab Indicator
- * (Dark Glassmorphism effect for the active tab)
  */
 const ActivePill = () => (
   <motion.div
     layoutId="underline-pill"
     className="absolute inset-0 rounded-full"
-    transition={{ type: 'spring', stiffness: 400, damping: 30 }} // Smoother, tighter spring
+    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
     style={{
       // Dark Glassmorphism Pill
       boxShadow: `
-        0 4px 15px rgba(0, 0, 0, 0.4), 
+        0 4px 15px rgba(0, 0, 0, 0.4),
         inset 0 0 0 1px ${DARK_BORDER_COLOR},
         inset 0 2px 4px rgba(255, 255, 255, 0.05)
       `,
-      background: 'rgba(35, 35, 35, 0.7)', // Slightly transparent dark color
-      backdropFilter: 'blur(10px)', // Glass effect
+      background: 'rgba(35, 35, 35, 0.7)',
+      backdropFilter: 'blur(10px)',
     }}
   />
 );
 
 // ===================================================================
-// III. TAB CONTENT COMPONENTS (Adapted for Beautiful Dark Mode)
+// III. TAB CONTENT COMPONENTS (Incorporating NextTabButton)
 // ===================================================================
 
 /**
  * Content Wrapper with Dark Theme styling (Enhanced Dark Card Design)
+ * NOTE: Added nextTab property to enable the mobile navigation button
  */
-const DarkContentWrapper = ({ children, primary, secondary }) => (
+const DarkContentWrapper = ({ children, primary, secondary, nextTab }) => (
   <motion.div
     key={primary}
     initial={{ opacity: 0, y: 30, scale: 0.98 }}
@@ -146,28 +181,37 @@ const DarkContentWrapper = ({ children, primary, secondary }) => (
     <div className="relative z-10 flex flex-col items-center text-center max-w-2xl">
       {children}
     </div>
+    {/* ⬅️ NEW: Conditionally render the mobile navigation button */}
+    {nextTab && (
+        <NextTabButton
+            currentTab={nextTab.currentTab}
+            onNextClick={nextTab.onNextClick}
+        />
+    )}
   </motion.div>
 );
 
 
-const GoalTrackerTabContent = () => {
+const GoalTrackerTabContent = ({ onNextClick }) => {
   const { primary, secondary } = tabColors['goal-tracker'];
-  // Using secondary color for CTA shadow for contrast
-  const shadowColor = tabColors['goal-tracker'].secondary; 
+  const shadowColor = tabColors['goal-tracker'].secondary;
 
   return (
-    <DarkContentWrapper primary={primary} secondary={secondary}>
+    <DarkContentWrapper
+        primary={primary}
+        secondary={secondary}
+        nextTab={{ currentTab: 'goal-tracker', onNextClick }} // ⬅️ Pass handler
+    >
       <motion.h2
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
         className="text-5xl sm:text-7xl font-black mb-6 font-display tracking-tighter"
-        // BOLD GRADIENT TEXT EFFECT
         style={{
           backgroundImage: `linear-gradient(90deg, ${primary}, ${secondary})`,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          textShadow: '0 3px 10px rgba(0, 0, 0, 0.5)', // Darker shadow for more contrast
+          textShadow: '0 3px 10px rgba(0, 0, 0, 0.5)',
         }}
       >
         Growth Flow Tracker
@@ -180,24 +224,27 @@ const GoalTrackerTabContent = () => {
         text="Start Tracking Goals"
         primaryColor={primary}
         secondaryColor={secondary}
-        shadowColor={shadowColor} 
+        shadowColor={shadowColor}
       />
     </DarkContentWrapper>
   );
 };
 
-const VideosTabContent = () => {
+const VideosTabContent = ({ onNextClick }) => {
   const { primary, secondary } = tabColors['videos'];
   const shadowColor = tabColors['videos'].secondary;
 
   return (
-    <DarkContentWrapper primary={primary} secondary={secondary}>
+    <DarkContentWrapper
+        primary={primary}
+        secondary={secondary}
+        nextTab={{ currentTab: 'videos', onNextClick }} // ⬅️ Pass handler
+    >
       <motion.h2
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
         className="text-5xl sm:text-7xl font-black mb-6 font-display tracking-tighter"
-        // BOLD GRADIENT TEXT EFFECT
         style={{
           backgroundImage: `linear-gradient(90deg, ${primary}, ${secondary})`,
           WebkitBackgroundClip: 'text',
@@ -221,9 +268,12 @@ const VideosTabContent = () => {
   );
 };
 
-const MusicTabContent = ({ title, link, primaryColor, secondaryColor, playClickSound }) => (
-  <DarkContentWrapper primary={primaryColor} secondary={secondaryColor}>
-    {/* KINETIC: Subtle, animated 'Breathing' glow effect - Enhanced for visual appeal */}
+const MusicTabContent = ({ title, link, primaryColor, secondaryColor, playClickSound, currentTab, onNextClick }) => (
+  <DarkContentWrapper
+        primary={primaryColor}
+        secondary={secondaryColor}
+        nextTab={{ currentTab, onNextClick }} // ⬅️ Pass handler
+    >
     <motion.div
       className="absolute inset-0 z-0 opacity-50 mix-blend-color-dodge pointer-events-none rounded-[2.5rem]"
       animate={{
@@ -232,7 +282,6 @@ const MusicTabContent = ({ title, link, primaryColor, secondaryColor, playClickS
       }}
       transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
       style={{
-        // Enhanced radial glow
         background: `radial-gradient(circle at 50% 50%, ${primaryColor}60, transparent 70%)`
       }}
     />
@@ -242,7 +291,6 @@ const MusicTabContent = ({ title, link, primaryColor, secondaryColor, playClickS
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.2 }}
       className="text-5xl sm:text-7xl font-black mb-6 font-display tracking-tighter"
-      // BOLD GRADIENT TEXT EFFECT
       style={{
         backgroundImage: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})`,
         WebkitBackgroundClip: 'text',
@@ -265,6 +313,94 @@ const MusicTabContent = ({ title, link, primaryColor, secondaryColor, playClickS
     />
   </DarkContentWrapper>
 );
+
+
+const GamesTabContent = ({ onNextClick }) => {
+    // This is the only component that doesn't use DarkContentWrapper as its root,
+    // so we wrap it in a motion.div to contain the mobile-only arrow functionality.
+    const currentTab = 'games';
+
+    // Function to handle the click and move to the next tab (Healing Sounds)
+    const handleNextClick = () => {
+        const nextTab = getNextTab(currentTab);
+        onNextClick(nextTab);
+    };
+
+    return (
+      <motion.div
+        // ⬅️ WRAPPER FOR MOBILE ARROW on the games grid
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative" // Relative position for the arrow
+      >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto mt-6 sm:mt-12">
+              {games.map((game, index) => (
+                  <Link href={game.link} key={index} passHref>
+                      <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, delay: index * 0.1 }}
+                          whileHover={{
+                              scale: 1.05,
+                              boxShadow: '0 18px 45px rgba(0,0,0,0.5)',
+                              transition: { duration: 0.3 }
+                          }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleNextClick} // This will just play sound and navigate on mobile
+                          className="group cursor-pointer relative overflow-hidden rounded-3xl transition-all duration-300"
+                      >
+                          <div
+                              className="relative p-5 sm:p-6 rounded-3xl border overflow-hidden min-h-[350px] flex flex-col justify-start"
+                              style={{
+                                  borderColor: DARK_BORDER_COLOR,
+                                  backgroundImage: `
+                                      radial-gradient(35% 60% at 15% 0%, ${tabColors['games'].primary}10, transparent 70%),
+                                      radial-gradient(30% 50% at 85% 10%, ${tabColors['games'].secondary}10, transparent 70%),
+                                      linear-gradient(160deg, ${DARK_CARD_COLOR}, ${DARK_CARD_COLOR} 45%, ${DARK_CARD_COLOR} 100%)
+                                  `,
+                                  boxShadow: '0 8px 20px rgba(0,0,0,0.4), inset 0 0 1px rgba(255,255,255,0.05)',
+                              }}
+                          >
+                              <div className="relative overflow-hidden rounded-xl sm:rounded-2xl mb-4 aspect-video">
+                                  <Image
+                                      src={game.imageUrl}
+                                      alt={game.name}
+                                      width={500}
+                                      height={300}
+                                      className="rounded-xl sm:rounded-2xl transform group-hover:scale-105 transition-transform duration-700 ease-out object-cover"
+                                  />
+                              </div>
+
+                              <div className="relative z-10 flex flex-col items-start text-left">
+                                  <h2
+                                      className={`text-2xl sm:text-3xl font-extrabold mb-1 ${LIGHT_TEXT_COLOR} leading-tight`}
+                                      style={{
+                                          backgroundImage: `linear-gradient(90deg, ${tabColors['games'].primary}, ${tabColors['games'].secondary})`,
+                                          WebkitBackgroundClip: 'text',
+                                          WebkitTextFillColor: 'transparent',
+                                      }}
+                                  >
+                                      {game.name}
+                                  </h2>
+                                  <p className={`text-base sm:text-lg font-light ${MUTED_TEXT_COLOR}`}>
+                                      {game.description}
+                                  </p>
+                              </div>
+                          </div>
+                      </motion.div>
+                  </Link>
+              ))}
+          </div>
+          {/* ⬅️ NEW: Mobile navigation button for the games grid */}
+          <NextTabButton
+              currentTab={currentTab}
+              onNextClick={handleNextClick}
+          />
+      </motion.div>
+    );
+};
+
 
 // ===================================================================
 // IV. MAIN COMPONENT
@@ -320,6 +456,13 @@ export default function RecoveryGameSelectionPage() {
     setActiveTab(tabName);
   };
 
+  // ⬅️ NEW: Unified Mobile Navigation Handler
+  const handleNextTab = (currentTab) => {
+    const nextTab = getNextTab(currentTab);
+    handleTabClick(nextTab); // Use existing handler for sound/state update
+  };
+
+
   // --- SCROLL REFINEMENT (Sticky header shadow) ---
   useEffect(() => {
     let scrollTimeout;
@@ -344,9 +487,9 @@ export default function RecoveryGameSelectionPage() {
   const renderContent = () => {
     switch (activeTab) {
       case 'goal-tracker':
-        return <GoalTrackerTabContent />;
+        return <GoalTrackerTabContent onNextClick={() => handleNextTab('goal-tracker')} />;
       case 'videos':
-        return <VideosTabContent />;
+        return <VideosTabContent onNextClick={() => handleNextTab('videos')} />;
       case 'therapy-music':
         return (
           <MusicTabContent
@@ -355,6 +498,8 @@ export default function RecoveryGameSelectionPage() {
             primaryColor={tabColors['therapy-music'].primary}
             secondaryColor={tabColors['therapy-music'].secondary}
             playClickSound={playClickSound}
+            currentTab="therapy-music" // ⬅️ Pass current tab
+            onNextClick={() => handleNextTab('therapy-music')} // ⬅️ Pass handler
           />
         );
       case 'healing-sounds':
@@ -365,75 +510,13 @@ export default function RecoveryGameSelectionPage() {
             primaryColor={tabColors['healing-sounds'].primary}
             secondaryColor={tabColors['healing-sounds'].secondary}
             playClickSound={playClickSound}
+            currentTab="healing-sounds" // ⬅️ Pass current tab
+            onNextClick={() => handleNextTab('healing-sounds')} // ⬅️ Pass handler
           />
         );
       case 'games':
         return (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto mt-6 sm:mt-12"
-          >
-            {games.map((game, index) => (
-              <Link href={game.link} key={index} passHref>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{
-                    scale: 1.05,
-                    boxShadow: '0 18px 45px rgba(0,0,0,0.5)', // Stronger, appealing hover shadow in dark mode
-                    transition: { duration: 0.3 }
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={playClickSound}
-                  className="group cursor-pointer relative overflow-hidden rounded-3xl transition-all duration-300"
-                >
-                  <div
-                    className="relative p-5 sm:p-6 rounded-3xl border overflow-hidden min-h-[350px] flex flex-col justify-start"
-                    style={{
-                      borderColor: DARK_BORDER_COLOR,
-                      // Dark Card Background with subtle gradients
-                      backgroundImage: `
-                        radial-gradient(35% 60% at 15% 0%, ${tabColors['games'].primary}10, transparent 70%),
-                        radial-gradient(30% 50% at 85% 10%, ${tabColors['games'].secondary}10, transparent 70%),
-                        linear-gradient(160deg, ${DARK_CARD_COLOR}, ${DARK_CARD_COLOR} 45%, ${DARK_CARD_COLOR} 100%)
-                      `,
-                      boxShadow: '0 8px 20px rgba(0,0,0,0.4), inset 0 0 1px rgba(255,255,255,0.05)',
-                    }}
-                  >
-                    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl mb-4 aspect-video">
-                      <Image
-                        src={game.imageUrl}
-                        alt={game.name}
-                        width={500}
-                        height={300}
-                        className="rounded-xl sm:rounded-2xl transform group-hover:scale-105 transition-transform duration-700 ease-out object-cover"
-                      />
-                    </div>
-
-                    <div className="relative z-10 flex flex-col items-start text-left">
-                      <h2
-                        className={`text-2xl sm:text-3xl font-extrabold mb-1 ${LIGHT_TEXT_COLOR} leading-tight`}
-                        style={{
-                          // Using a subtle text gradient for title color
-                          backgroundImage: `linear-gradient(90deg, ${tabColors['games'].primary}, ${tabColors['games'].secondary})`,
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                        }}
-                      >
-                        {game.name}
-                      </h2>
-                      <p className={`text-base sm:text-lg font-light ${MUTED_TEXT_COLOR}`}>
-                        {game.description}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              </Link>
-            ))}
-          </motion.div>
+          <GamesTabContent onNextClick={handleNextTab} /> // ⬅️ Pass handler
         );
       default:
         return null;
@@ -443,15 +526,13 @@ export default function RecoveryGameSelectionPage() {
   // Function to render the correct button class based on active state
   const getButtonClass = (tabName) => {
     const isActive = activeTab === tabName;
-    const tabColor = tabColors[tabName]?.primary || LIGHT_TEXT_COLOR; // Use primary color for inactive text glow
+    // const tabColor = tabColors[tabName]?.primary || LIGHT_TEXT_COLOR; // tabColor unused
     return `
       relative px-4 md:px-6 py-2 md:py-3 font-bold text-sm rounded-full transition-all duration-300 z-10
       focus:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:ring-opacity-70 flex items-center flex-shrink-0 whitespace-nowrap
       ${isActive
-        // Active text is light against the dark glass pill
-        ? 'text-white bg-transparent' 
-        // Inactive text has a subtle glow from its primary color
-        : `text-white/80 hover:text-white/95 hover:bg-white/5` 
+        ? 'text-white bg-transparent'
+        : `text-white/80 hover:text-white/95 hover:bg-white/5`
       }
       ${!isActive ? `text-shadow-glow-${tabName}` : ''}
     `;
@@ -461,7 +542,6 @@ export default function RecoveryGameSelectionPage() {
     <div
       className="py-0 px-0 font-sans min-h-screen"
       style={{
-        // ULTIMATE DARK BACKGROUND: Deep background with colorful radial glows
         backgroundImage: `
           radial-gradient(90% 60% at 50% 10%, rgba(59,130,246,0.1), transparent 70%),
           radial-gradient(80% 50% at 80% 80%, rgba(167,139,250,0.08), transparent 70%),
@@ -475,7 +555,6 @@ export default function RecoveryGameSelectionPage() {
       <div
         className={`sticky top-0 z-50 py-4 sm:py-6 border-b transition-all duration-300 ${isScrolling ? 'shadow-2xl' : 'shadow-none'}`}
         style={{
-          // DARK GLASSPHORISM (Enhanced Blur)
           background: 'rgba(10, 10, 10, 0.9)',
           backdropFilter: 'blur(20px)',
           borderColor: DARK_BORDER_COLOR,
@@ -486,7 +565,6 @@ export default function RecoveryGameSelectionPage() {
           <div
             className="flex items-center gap-2 md:gap-3 overflow-x-auto whitespace-nowrap rounded-full border p-1 w-full"
             style={{
-              // Dark, subtle inner shadow on the tab container
               borderColor: DARK_BORDER_COLOR,
               backgroundColor: DARK_CARD_COLOR,
               boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.3)'

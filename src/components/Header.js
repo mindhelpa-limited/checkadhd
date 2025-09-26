@@ -1,11 +1,13 @@
 "use client";
+import React, { useState, useEffect } from "react";
+// Merged imports: added auth, onAuthStateChanged, signOut, Link, useRouter
 import { auth } from "@/lib/firebase";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Menu, X, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 
+// MobileMenuItem now uses Link component
 const MobileMenuItem = ({ href, children, onClick }) => (
     <Link
         href={href}
@@ -19,9 +21,13 @@ const MobileMenuItem = ({ href, children, onClick }) => (
 
 export default function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
-    const [user, setUser] = useState(null);
-    const router = useRouter();
+    const [user, setUser] = useState(null); // User state from new logic
+    const [pricingDropdownOpen, setPricingDropdownOpen] = useState(false);
+    
+    // useRouter and its import are now included
+    const router = useRouter(); 
 
+    // useEffect hook with Firebase logic
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
@@ -29,19 +35,42 @@ export default function Header() {
         return () => unsubscribe();
     }, []);
 
+    // handleLogout function with Firebase logic
     const handleLogout = async () => {
         await signOut(auth);
         setMenuOpen(false);
         router.push("/login");
     };
+    
+    const togglePricingDropdown = () => {
+        setPricingDropdownOpen(!pricingDropdownOpen);
+    };
 
+    // "Assessment" item is removed here
     const navLinks = (
         <>
             <MobileMenuItem href="/" onClick={() => setMenuOpen(false)}>Home</MobileMenuItem>
             <MobileMenuItem href="/features" onClick={() => setMenuOpen(false)}>Services</MobileMenuItem>
             <MobileMenuItem href="/how-it-works" onClick={() => setMenuOpen(false)}>How It Works</MobileMenuItem>
-            <MobileMenuItem href="/assessment" onClick={() => setMenuOpen(false)}>Assessment</MobileMenuItem>
-            <MobileMenuItem href="/pricing" onClick={() => setMenuOpen(false)}>Pricing</MobileMenuItem>
+            
+            {/* Mobile Pricing Dropdown Trigger */}
+            <div 
+                onClick={togglePricingDropdown}
+                className="flex items-center w-full px-4 py-3 border-b border-gray-700 last:border-b-0 hover:bg-[#1f294c] transition-colors duration-200 cursor-pointer"
+            >
+                <span className="font-sans text-white text-lg font-light flex-grow">Pricing</span>
+                {pricingDropdownOpen ? <ChevronUp size={20} className="text-gray-400 transition-transform duration-200" /> : <ChevronDown size={20} className="text-gray-400 transition-transform duration-200" />}
+            </div>
+
+            {/* Mobile Pricing Dropdown Menu (using MobileMenuItem/Link) */}
+            {pricingDropdownOpen && (
+                <div className="flex flex-col pl-6">
+                    <MobileMenuItem href="/pricing" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>ADHD Assessment</MobileMenuItem>
+                    <MobileMenuItem href="/pricing-mental-health-recovery-tools" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>Mental Health Recovery</MobileMenuItem>
+                    <MobileMenuItem href="/book-a-coach" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>Psychiatrist Coaching</MobileMenuItem>
+                </div>
+            )}
+            
             <MobileMenuItem href="/resources" onClick={() => setMenuOpen(false)}>Resources</MobileMenuItem>
         </>
     );
@@ -49,19 +78,40 @@ export default function Header() {
     return (
         <header className="bg-black/40 backdrop-blur-md text-white fixed top-0 left-0 right-0 z-50 shadow-lg">
             <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                {/* Logo */}
+                {/* Logo (using Link) */}
                 <Link href="/" className="flex items-center">
                     <img src="/logo.png" alt="ADHD Check Logo" className="h-14" />
                 </Link>
 
-                {/* Desktop Menu */}
+                {/* Desktop Menu (using Link, "Assessment" removed) */}
                 <nav className="hidden md:flex space-x-8 font-sans font-medium text-white items-center">
                     <Link href="/" className="hover:text-blue-400 transition-all duration-200">Home</Link>
                     <Link href="/features" className="hover:text-blue-400 transition-all duration-200">Services</Link>
                     <Link href="/how-it-works" className="hover:text-blue-400 transition-all duration-200">How It Works</Link>
-                    <Link href="/assessment" className="hover:text-blue-400 transition-all duration-200">Assessment</Link>
-                    <Link href="/pricing" className="hover:text-blue-400 transition-all duration-200">Pricing</Link>
+                    {/* <Link href="/assessment" className="hover:text-blue-400 transition-all duration-200">Assessment</Link> -> REMOVED */}
+                    
+                    {/* Desktop Pricing Dropdown */}
+                    <div className="relative group">
+                        <button
+                            onClick={togglePricingDropdown}
+                            className="hover:text-blue-400 transition-all duration-200 flex items-center"
+                        >
+                            Pricing
+                            {pricingDropdownOpen ? <ChevronUp size={16} className="ml-1" /> : <ChevronDown size={16} className="ml-1" />}
+                        </button>
+                        <div className={`
+                            absolute left-1/2 -translate-x-1/2 mt-2 py-2 w-48 bg-[#101b3d] border border-white/10 rounded-xl shadow-xl z-50
+                            transform transition-all duration-300 ease-in-out
+                            ${pricingDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}
+                        `}>
+                            <Link href="/pricing" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">ADHD Assessment</Link>
+                            <Link href="/pricing-mental-health-recovery-tools" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">Mental Health Recovery</Link>
+                            <Link href="/book-a-coach" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">Psychiatrist Coaching</Link>
+                        </div>
+                    </div>
+
                     <Link href="/resources" className="hover:text-blue-400 transition-all duration-200">Resources</Link>
+                    {/* User Login/Logout Logic from new code (using Link) */}
                     {user ? (
                         <>
                             <Link href="/dashboard" className="hover:text-blue-400 transition-all duration-200">Dashboard</Link>
@@ -110,6 +160,7 @@ export default function Header() {
             `}>
                 <nav className="flex flex-col py-4 font-sans font-light text-white">
                     {navLinks}
+                    {/* User Login/Logout Logic from new code (using MobileMenuItem/Link) */}
                     {user ? (
                         <>
                             <MobileMenuItem href="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</MobileMenuItem>

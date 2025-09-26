@@ -17,6 +17,7 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   XMarkIcon,
+  PrinterIcon, // ⬅️ NEW: Import PrinterIcon
 } from "@heroicons/react/24/outline";
 import { motion } from 'framer-motion';
 
@@ -25,14 +26,13 @@ import { motion } from 'framer-motion';
 const ScoreRing = ({ score }) => {
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
-  // Adjusted for Dark Mode: Base color is a dark gray, progress bar is a light blue
   const offset = circumference - (Number(score) / 100) * circumference;
 
   return (
     <div className="relative w-32 h-32 flex items-center justify-center">
       <svg className="w-full h-full transform -rotate-90 animate-spin-slow">
         <circle
-          className="text-[#374151]" // Dark gray base ring
+          className="text-[#374151]"
           strokeWidth="8"
           stroke="currentColor"
           fill="transparent"
@@ -41,7 +41,7 @@ const ScoreRing = ({ score }) => {
           cy="64"
         />
         <circle
-          className="text-[#60A5FA] transition-all duration-1000 ease-in-out" // Lighter blue progress
+          className="text-[#60A5FA] transition-all duration-1000 ease-in-out"
           strokeWidth="8"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
@@ -67,8 +67,7 @@ const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) =
       exit={{ opacity: 0, scale: 0.9 }}
       className="relative p-8 rounded-3xl shadow-2xl border max-w-sm w-full"
       style={{
-        borderColor: '#1F2937', // Dark border
-        // Dark, glowing background for the modal
+        borderColor: '#1F2937',
         backgroundImage: `
           radial-gradient(60% 40% at 20% 0%, rgba(59,130,246,0.15), transparent 60%),
           radial-gradient(50% 30% at 80% 10%, rgba(20,184,166,0.15), transparent 60%),
@@ -98,7 +97,7 @@ const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) =
           onClick={() => { playClickSound(); onViewResults(); }}
           className="w-full px-8 py-3 text-sm font-semibold text-white rounded-2xl transition-colors"
           style={{
-            background: 'linear-gradient(135deg, #FB923C, #F87171)', // Kept the warm button style
+            background: 'linear-gradient(135deg, #FB923C, #F87171)',
             boxShadow: '0 8px 20px rgba(248,113,113,0.35)'
           }}
         >
@@ -113,7 +112,6 @@ const FullScreenLoader = ({ message }) => (
   <div
     className="fixed inset-0 flex items-center justify-center z-50"
     style={{
-      // Dark mode background for the loader
       backgroundImage: `
         radial-gradient(60% 40% at 20% 0%, rgba(59,130,246,0.15), transparent 60%),
         radial-gradient(50% 30% at 80% 12%, rgba(20,184,166,0.15), transparent 60%),
@@ -134,7 +132,7 @@ const getAdhdStatus = (score) => {
   return "Low Likelihood";
 };
 
-// --- Dashboard Component (styling only) ---
+// --- Dashboard Component ---
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -238,10 +236,17 @@ export default function DashboardPage() {
     router.push("/dashboard/adhd-test");
   };
 
-  // FIX: Use window.location.href for absolute, external URL
+  // 1. Existing handler for 'View Results' (Absolute URL/External Link)
   const handleViewResultsClick = () => {
     playClickSound();
     window.location.href = "https://mindhelpa.com/dashboard/adhd-history"; 
+  };
+  
+  // 2. NEW handler for 'Print Result' (Internal Next.js Link)
+  const handlePrintResultClick = () => {
+      playClickSound();
+      // Use router.push for the specified internal route
+      router.push("/dashboard/adhd-history");
   };
 
   if (loading) {
@@ -252,8 +257,7 @@ export default function DashboardPage() {
     <main
       className="relative min-h-screen p-6 md:p-10 overflow-x-hidden font-sans" 
       style={{
-        color: '#D1D5DB', // Light gray text for dark mode
-        // Dark, rich background gradient with soft glows
+        color: '#D1D5DB',
         backgroundImage: `
           radial-gradient(60% 40% at 20% 0%, rgba(59,130,246,0.15), transparent 60%),
           radial-gradient(50% 30% at 80% 12%, rgba(20,184,166,0.15), transparent 60%),
@@ -286,14 +290,12 @@ export default function DashboardPage() {
             transition={{ duration: 0.5 }}
             whileHover={{
               scale: 1.02,
-              // Dark mode shadow effect
               boxShadow: "0 20px 40px rgba(0,0,0,0.5), 0 0 10px rgba(59,130,246,0.15)", 
               rotate: 0.2,
             }}
             className="group relative overflow-hidden p-6 md:p-8 rounded-3xl border md:col-span-2 order-2 md:order-1 transition-all duration-300" 
             style={{
-              borderColor: '#374151', // Dark border
-              // Dark card background with subtle shine
+              borderColor: '#374151',
               backgroundImage: `
                 radial-gradient(35% 60% at 15% 0%, rgba(59,130,246,0.1), transparent 70%),
                 radial-gradient(30% 50% at 85% 10%, rgba(20,184,166,0.1), transparent 70%),
@@ -312,9 +314,9 @@ export default function DashboardPage() {
                 
                 {/* ADHD Status Item */}
                 <motion.li
-                  whileHover={{ scale: 1.02, backgroundColor: '#111827' }} // Darker hover state
+                  whileHover={{ scale: 1.02, backgroundColor: '#111827' }}
                   className="flex items-center p-4 rounded-xl border transition-all duration-300"
-                  style={{ borderColor: '#374151', background: '#1F2937' }} // Dark item background
+                  style={{ borderColor: '#374151', background: '#1F2937' }}
                 >
                   <ChatBubbleBottomCenterTextIcon className="h-6 w-6 text-[#A78BFA] mr-4 flex-shrink-0" />
                   <div>
@@ -328,12 +330,12 @@ export default function DashboardPage() {
                   </div>
                 </motion.li>
 
-                {/* View Results Item (Clickable) */}
+                {/* View Results Item (Clickable - External Link) */}
                 <motion.li
                   onClick={handleViewResultsClick}
-                  whileHover={{ scale: 1.02, backgroundColor: '#111827', cursor: 'pointer' }} // Darker hover state
+                  whileHover={{ scale: 1.02, backgroundColor: '#111827', cursor: 'pointer' }}
                   className="flex items-center p-4 rounded-xl border transition-all duration-300 cursor-pointer"
-                  style={{ borderColor: '#374151', background: '#1F2937' }} // Dark item background
+                  style={{ borderColor: '#374151', background: '#1F2937' }}
                 >
                   <CalendarDaysIcon className="h-6 w-6 text-[#FB923C] mr-4 flex-shrink-0" />
                   <div>
@@ -342,6 +344,22 @@ export default function DashboardPage() {
                       {hasTakenTest && lastTestDate
                         ? `Last test taken: ${lastTestDate.toLocaleDateString()}`
                         : "No test history yet"}
+                    </p>
+                  </div>
+                </motion.li>
+                
+                {/* 3. NEW: Print Result Item (Clickable - Internal Link) */}
+                <motion.li
+                  onClick={handlePrintResultClick}
+                  whileHover={{ scale: 1.02, backgroundColor: '#111827', cursor: 'pointer' }}
+                  className="flex items-center p-4 rounded-xl border transition-all duration-300 cursor-pointer"
+                  style={{ borderColor: '#374151', background: '#1F2937' }}
+                >
+                  <PrinterIcon className="h-6 w-6 text-[#10B981] mr-4 flex-shrink-0" /> {/* Green/Emerald icon */}
+                  <div>
+                    <strong className="text-white">Print Result:</strong>
+                    <p className="text-[#9CA3AF]">
+                      {hasTakenTest ? "Download or print your full assessment." : "Print not available yet"}
                     </p>
                   </div>
                 </motion.li>
@@ -357,14 +375,12 @@ export default function DashboardPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             whileHover={{
               scale: 1.02,
-              // Dark mode shadow effect
               boxShadow: "0 20px 40px rgba(0,0,0,0.5), 0 0 10px rgba(248,113,113,0.15)",
               rotate: -0.2,
             }}
             className="relative overflow-hidden p-6 md:p-8 rounded-3xl border flex flex-col justify-between transition-all duration-300 order-1 md:order-2" 
             style={{
-              borderColor: '#374151', // Dark border
-              // Dark card background with subtle shine
+              borderColor: '#374151',
               backgroundImage: `
                 radial-gradient(35% 60% at 15% 0%, rgba(59,130,246,0.1), transparent 70%),
                 radial-gradient(30% 50% at 85% 10%, rgba(20,184,166,0.1), transparent 70%),
@@ -414,7 +430,6 @@ export default function DashboardPage() {
                 whileTap={{ scale: 0.98 }}
                 className="w-full px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-opacity-40 text-white"
                 style={{
-                  // Kept the warm button style for contrast
                   background: 'linear-gradient(135deg, #FB923C, #F87171)',
                   boxShadow: '0 10px 28px rgba(248,113,113,0.55)'
                 }}

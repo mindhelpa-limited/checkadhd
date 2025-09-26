@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Target,
   Globe2,
@@ -9,12 +12,15 @@ import {
   BrainCircuit,
   X,
 } from "lucide-react";
-import Footer from "../../components/home/Footer";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { useState } from "react";
 
-/* ----------------- Services ----------------- */
+import Footer from "../../components/home/Footer";
+
+// ----------------- Data Constants -----------------
+
+/**
+ * Services Data
+ * Defines the main offerings with navigation details.
+ */
 const services = [
   {
     name: "ADHD Assessment",
@@ -29,7 +35,7 @@ const services = [
     description:
       "Daily trackers and science-based exercises for resilience, focus, and calm.",
     imageUrl: "/images/trailmuncher.png",
-    dest: "#",
+    dest: "/pricing-mental-health-recovery-tools", // ⬅️ UPDATED DESTINATION
     isAdhd: false,
   },
   {
@@ -37,12 +43,15 @@ const services = [
     description:
       "Work directly with licensed professionals for personalized guidance and strategies.",
     imageUrl: "/images/neuralbounds.png",
-    dest: "#",
+    dest: "/book-a-coach", // ⬅️ UPDATED DESTINATION
     isAdhd: false,
   },
 ];
 
-/* ----------------- Music ----------------- */
+/**
+ * Music/Sound Tiles Data
+ * Defines the sound-related features.
+ */
 const musicTiles = [
   {
     name: "Therapy Music",
@@ -60,7 +69,12 @@ const musicTiles = [
   },
 ];
 
-/* ----------------- Reusable Feature Card ----------------- */
+// ----------------- Reusable Components -----------------
+
+/**
+ * FeatureCard Component
+ * Displays a single feature/mission point with an icon, title, and description.
+ */
 const FeatureCard = ({ icon, title, description }) => (
   <div className="bg-[#0a122a] border border-white/10 rounded-xl p-8 shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-blue-400/20 group">
     <div className="w-16 h-16 flex items-center justify-center bg-blue-500/10 text-blue-400 rounded-full mx-auto transition-transform duration-300 group-hover:scale-110 group-hover:text-white">
@@ -73,9 +87,13 @@ const FeatureCard = ({ icon, title, description }) => (
   </div>
 );
 
-/* ----------------- Coming Soon Modal ----------------- */
+/**
+ * ComingSoonModal Component
+ * A modal that informs the user that a feature is under development.
+ */
 function ComingSoonModal({ open, onClose }) {
   if (!open) return null;
+
   return (
     <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
       <div className="bg-[#101b3d] border border-white/10 rounded-2xl p-8 w-full max-w-md shadow-2xl relative text-center">
@@ -101,24 +119,38 @@ function ComingSoonModal({ open, onClose }) {
   );
 }
 
-/* ----------------- Main Page ----------------- */
+// ----------------- Main Page Component -----------------
+
+/**
+ * FeaturesPage Component
+ * The main component for displaying all features and services.
+ */
 export default function FeaturesPage() {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
 
-  const handleExploreClick = (isAdhd, dest) => {
-    if (isAdhd) {
-      // ✅ ADHD Assessment goes directly
+  /**
+   * Handles the click event for exploring a service or feature.
+   * Directs to the destination if it's a primary service, otherwise opens the 'Coming Soon' modal.
+   * @param {string} serviceName - The name of the service tile clicked.
+   * @param {string} dest - The destination URL.
+   */
+  const handleExploreClick = (serviceName, dest) => {
+    if (
+      serviceName === "ADHD Assessment" ||
+      serviceName === "Mental Health Recovery Tools" ||
+      serviceName === "Psychiatrist-Led Coaching"
+    ) {
       router.push(dest);
     } else {
-      // ✅ All others open Coming Soon modal
+      // All others (like Music) open Coming Soon modal
       setModalOpen(true);
     }
   };
 
   return (
     <div className="bg-[#0a122a] text-white overflow-hidden">
-      {/* HERO */}
+      {/* HERO SECTION */}
       <div className="relative min-h-[80vh] flex items-center justify-center text-center px-4 sm:px-8">
         <div className="absolute inset-0 z-0 opacity-10">
           <Image
@@ -134,8 +166,22 @@ export default function FeaturesPage() {
             viewBox="0 0 200 200"
             className="w-[80vw] max-w-md h-auto text-blue-500/20 animate-spin-slow"
           >
-            <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="1" />
-            <circle cx="100" cy="100" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" />
+            <circle
+              cx="100"
+              cy="100"
+              r="80"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1"
+            />
+            <circle
+              cx="100"
+              cy="100"
+              r="40"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="0.5"
+            />
             <path
               d="M100 100 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40 A60 60 0 1 1 40 100 A60 60 0 1 0 100 160 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40"
               fill="none"
@@ -150,12 +196,15 @@ export default function FeaturesPage() {
             Built for Every Mind
           </h1>
           <p className="text-lg sm:text-xl text-gray-300">
-            Discover mental health solutions that meet you where you are — and guide you forward with clarity.
+            Discover mental health solutions that meet you where you are — and
+            guide you forward with clarity.
           </p>
         </div>
       </div>
 
-      {/* FEATURES GRID */}
+      {/* --- */}
+
+      {/* FEATURES GRID (Mission/Vision/Motto) */}
       <div className="bg-[#0a122a] py-24 px-4">
         <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-12">
           <FeatureCard
@@ -176,13 +225,18 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* SERVICES */}
+      {/* --- */}
+
+      {/* SERVICES SECTION */}
       <div className="bg-[#0a122a] py-24 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <BrainCircuit className="w-10 h-10 text-cyan-400 mx-auto" />
-          <h2 className="mt-3 text-4xl font-serif font-bold text-white">Our Services</h2>
+          <h2 className="mt-3 text-4xl font-serif font-bold text-white">
+            Our Services
+          </h2>
           <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-            Explore assessments, recovery tools, and coaching programs designed to support your growth.
+            Explore assessments, recovery tools, and coaching programs designed
+            to support your growth.
           </p>
         </div>
 
@@ -206,7 +260,7 @@ export default function FeaturesPage() {
                 <h3 className="text-xl font-semibold text-white">{s.name}</h3>
                 <p className="mt-2 text-gray-400">{s.description}</p>
                 <button
-                  onClick={() => handleExploreClick(s.isAdhd, s.dest)}
+                  onClick={() => handleExploreClick(s.name, s.dest)}
                   className="mt-4 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 transition-colors"
                 >
                   Explore
@@ -217,13 +271,18 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* MUSIC */}
+      {/* --- */}
+
+      {/* MUSIC/SOUNDS SECTION */}
       <div className="bg-[#0a122a] py-16 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <Music2 className="w-10 h-10 text-purple-300 mx-auto" />
-          <h2 className="mt-3 text-4xl font-serif font-bold text-white">Therapy Music & Healing Sounds</h2>
+          <h2 className="mt-3 text-4xl font-serif font-bold text-white">
+            Therapy Music & Healing Sounds
+          </h2>
           <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-            Immerse yourself in calming tracks and soundscapes for deep focus and relaxation.
+            Immerse yourself in calming tracks and soundscapes for deep focus and
+            relaxation.
           </p>
         </div>
 
@@ -247,7 +306,7 @@ export default function FeaturesPage() {
                 <h3 className="text-xl font-semibold text-white">{m.name}</h3>
                 <p className="mt-2 text-gray-400">{m.description}</p>
                 <button
-                  onClick={() => handleExploreClick(false, m.dest)}
+                  onClick={() => handleExploreClick(m.name, m.dest)}
                   className="mt-4 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 transition-colors"
                 >
                   Explore Library
@@ -258,16 +317,21 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* DAILY PLAN */}
+      {/* --- */}
+
+      {/* DAILY PLAN SECTION */}
       <div className="bg-gray-50 py-20 text-gray-900">
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-16 items-center">
           <div>
             <p className="text-blue-600 font-bold uppercase tracking-widest">
               The Core Experience
             </p>
-            <h2 className="mt-4 text-4xl font-serif font-bold">Your Daily Recovery Plan</h2>
+            <h2 className="mt-4 text-4xl font-serif font-bold">
+              Your Daily Recovery Plan
+            </h2>
             <p className="mt-6 text-lg text-gray-700">
-              A five-part daily plan that blends meditation, mindful habits, cognitive care, and real mental health recovery science.
+              A five-part daily plan that blends meditation, mindful habits,
+              cognitive care, and real mental health recovery science.
             </p>
             <button
               onClick={() => router.push("/how-it-works")}
@@ -288,11 +352,16 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* CTA */}
+      {/* --- */}
+
+      {/* CALL TO ACTION (CTA) SECTION */}
       <div className="bg-[#0a122a] py-24 text-center px-4">
-        <h2 className="text-3xl md:text-4xl font-extrabold font-serif">Ready to Build the Life You Deserve?</h2>
+        <h2 className="text-3xl md:text-4xl font-extrabold font-serif">
+          Ready to Build the Life You Deserve?
+        </h2>
         <p className="mt-4 text-lg text-gray-300">
-          Your mental health journey doesn’t have to be chaotic. Recovery is possible — and we’ll guide you globally.
+          Your mental health journey doesn’t have to be chaotic. Recovery is
+          possible — and we’ll guide you globally.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
           <button
@@ -310,9 +379,11 @@ export default function FeaturesPage() {
         </div>
       </div>
 
+      {/* --- */}
+
       <Footer />
 
-      {/* Animations */}
+      {/* Animations (Global Styles) */}
       <style jsx global>{`
         .animate-hero-title-fade {
           animation: hero-title-fade 1.5s ease-out forwards;
