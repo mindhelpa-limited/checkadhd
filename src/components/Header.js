@@ -26,11 +26,25 @@ const MobileMenuItem = ({ href, children, onClick, icon: Icon }) => (
         onClick={onClick}
         className="flex items-center w-full px-4 py-3 border-b border-gray-700 last:border-b-0 hover:bg-[#1f294c] transition-colors duration-200 group"
     >
-        {Icon && <Icon size={20} className="mr-3 text-blue-400" />} {/* Icon added here */}
-        <span className="font-sans text-white text-lg font-light flex-grow">{children}</span>
+        {Icon && <Icon size={20} className="mr-3 text-blue-400" />}
+        {/* ADDED 'truncate' CLASS HERE to keep text on one line */}
+        <span className="font-sans text-white text-lg font-light flex-grow truncate">{children}</span> 
         <ArrowRight size={20} className="text-gray-400 group-hover:translate-x-1 transition-transform duration-200" />
     </Link>
 );
+
+// New component for Desktop Dropdown Item to include the icon
+const DropdownMenuItem = ({ href, children, onClick, icon: Icon }) => (
+    <Link 
+        href={href} 
+        onClick={onClick} 
+        className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+    >
+        {Icon && <Icon size={18} className="mr-3 text-blue-400" />}
+        <span className="text-left flex-grow">{children}</span>
+    </Link>
+);
+
 
 export default function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -75,13 +89,13 @@ export default function Header() {
                 {pricingDropdownOpen ? <ChevronUp size={20} className="text-gray-400 transition-transform duration-200" /> : <ChevronDown size={20} className="text-gray-400 transition-transform duration-200" />}
             </div>
 
-            {/* Mobile Pricing Dropdown Menu (using MobileMenuItem/Link) - NOW WITH ICONS */}
+            {/* Mobile Pricing Dropdown Menu (using MobileMenuItem/Link) - REMOVED pl-6 for alignment */}
             {pricingDropdownOpen && (
-                <div className="flex flex-col pl-6">
+                <div className="flex flex-col"> 
                     <MobileMenuItem 
                         href="/pricing-adhd-assessment" 
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
-                        icon={ClipboardList} // ICON ADDED
+                        icon={ClipboardList}
                     >
                         ADHD Assessment
                     </MobileMenuItem>
@@ -90,7 +104,7 @@ export default function Header() {
                     <MobileMenuItem 
                         href="/pricing-adhd-clinical-assessment" 
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
-                        icon={Stethoscope} // ICON ADDED
+                        icon={Stethoscope}
                     >
                         ADHD Clinical Assessment
                     </MobileMenuItem>
@@ -99,7 +113,7 @@ export default function Header() {
                     <MobileMenuItem 
                         href="/pricing-mindhelpa-institute" 
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
-                        icon={GraduationCap} // ICON ADDED
+                        icon={GraduationCap}
                     >
                         Mindhelpa Institute
                     </MobileMenuItem>
@@ -107,14 +121,14 @@ export default function Header() {
                     <MobileMenuItem 
                         href="/pricing-mental-health-recovery-tools" 
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
-                        icon={HeartHandshake} // ICON ADDED
+                        icon={HeartHandshake}
                     >
                         Mental Health Recovery
                     </MobileMenuItem>
                     <MobileMenuItem 
                         href="/book-a-coach" 
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
-                        icon={Users} // ICON ADDED
+                        icon={Users}
                     >
                         Psychiatrist Coaching
                     </MobileMenuItem>
@@ -154,54 +168,49 @@ export default function Header() {
                             transform transition-all duration-300 ease-in-out
                             ${pricingDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}
                         `}>
-                            {/* 💡 CENTERING APPLIED HERE 💡 */}
-                            <div className="text-left"> {/* Changed text-center back to text-left for better icon alignment */}
+                            {/* 💡 text-left ensures content isn't centered, which works better with icons 💡 */}
+                            <div className="text-left"> 
                                 {/* Desktop dropdown items - NOW WITH ICONS */}
-                                <Link 
+                                <DropdownMenuItem 
                                     href="/pricing-adhd-assessment" 
-                                    onClick={() => setPricingDropdownOpen(false)} 
-                                    className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+                                    onClick={() => setPricingDropdownOpen(false)}
+                                    icon={ClipboardList}
                                 >
-                                    <ClipboardList size={18} className="mr-3 text-blue-400" /> {/* ICON ADDED */}
                                     ADHD Assessment
-                                </Link>
+                                </DropdownMenuItem>
                                 
                                 {/* NEW ITEM 1: ADHD Clinical Assessment */}
-                                <Link 
+                                <DropdownMenuItem 
                                     href="/pricing-adhd-clinical-assessment" 
                                     onClick={() => setPricingDropdownOpen(false)} 
-                                    className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+                                    icon={Stethoscope}
                                 >
-                                    <Stethoscope size={18} className="mr-3 text-blue-400" /> {/* ICON ADDED */}
                                     ADHD Clinical Assessment
-                                </Link>
+                                </DropdownMenuItem>
                                 
                                 {/* NEW ITEM 2: Mindhelpa Institute */}
-                                <Link 
+                                <DropdownMenuItem 
                                     href="/pricing-mindhelpa-institute" 
                                     onClick={() => setPricingDropdownOpen(false)} 
-                                    className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+                                    icon={GraduationCap}
                                 >
-                                    <GraduationCap size={18} className="mr-3 text-blue-400" /> {/* ICON ADDED */}
                                     Mindhelpa Institute
-                                </Link>
+                                </DropdownMenuItem>
                                 
-                                <Link 
+                                <DropdownMenuItem 
                                     href="/pricing-mental-health-recovery-tools" 
                                     onClick={() => setPricingDropdownOpen(false)} 
-                                    className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+                                    icon={HeartHandshake}
                                 >
-                                    <HeartHandshake size={18} className="mr-3 text-blue-400" /> {/* ICON ADDED */}
                                     Mental Health Recovery
-                                </Link>
-                                <Link 
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
                                     href="/book-a-coach" 
                                     onClick={() => setPricingDropdownOpen(false)} 
-                                    className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
+                                    icon={Users}
                                 >
-                                    <Users size={18} className="mr-3 text-blue-400" /> {/* ICON ADDED */}
                                     Psychiatrist Coaching
-                                </Link>
+                                </DropdownMenuItem>
                             </div>
                         </div>
                     </div>
