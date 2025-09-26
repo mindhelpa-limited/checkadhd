@@ -13,9 +13,6 @@ import {
   limit,
 } from "firebase/firestore";
 import {
-  SparklesIcon,
-  TrophyIcon,
-  UserCircleIcon,
   ChatBubbleBottomCenterTextIcon,
   CalendarDaysIcon,
   ClockIcon,
@@ -179,7 +176,7 @@ export default function DashboardPage() {
         return;
       }
 
-      setUserData({ email: data.email, tier: data.tier });
+      setUserData({ tier: data.tier }); 
       setLoadingMessage("Loading your latest result...");
 
       const colRef = collection(db, "users", currentUser.uid, "results");
@@ -232,16 +229,15 @@ export default function DashboardPage() {
     return () => unsub();
   }, [router]);
 
-  // ✅ UPDATED: Removed the if/else check to always allow test retake
   const handleTestButtonClick = () => {
     playClickSound();
     router.push("/dashboard/adhd-test");
   };
 
+  // ✅ CONFIRMED: This uses the correct route for Next.js routing.
   const handleViewResultsClick = () => {
     playClickSound();
-    router.push("/dashboard/adhd-history");
-    setShowModal(false);
+    router.push("/dashboard/adhd-history"); 
   };
 
   if (loading) {
@@ -250,7 +246,7 @@ export default function DashboardPage() {
 
   return (
     <main
-      className="relative min-h-screen p-6 md:p-10 overflow-hidden font-sans"
+      className="relative min-h-screen p-6 md:p-10 overflow-x-hidden font-sans" 
       style={{
         color: '#111827',
         backgroundImage: `
@@ -263,7 +259,7 @@ export default function DashboardPage() {
     >
       <audio ref={audioRef} src="/sounds/click.mp3" preload="auto" />
 
-      {/* Subtle ambient glows (keeps your structure, softer colors) */}
+      {/* Subtle ambient glows */}
       <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
         <div
           className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full filter blur-3xl opacity-30 animate-blob"
@@ -277,66 +273,8 @@ export default function DashboardPage() {
 
       <div className="relative max-w-6xl mx-auto z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          {/* Actions card (visual-only) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            whileHover={{
-              scale: 1.02,
-              boxShadow: "0 20px 40px rgba(17,24,39,0.10)",
-              rotate: -0.2,
-            }}
-            className="relative overflow-hidden p-6 md:p-8 rounded-3xl border flex flex-col justify-between transition-all duration-300"
-            style={{
-              borderColor: '#F3F4F6',
-              backgroundImage: `
-                radial-gradient(35% 60% at 15% 0%, rgba(59,130,246,0.08), transparent 70%),
-                radial-gradient(30% 50% at 85% 10%, rgba(20,184,166,0.08), transparent 70%),
-                linear-gradient(160deg, #FFFFFF, #F9FAFB 45%, #F3F4F6 100%)
-              `,
-              boxShadow: 'inset 0 0 1px rgba(255,255,255,0.6)'
-            }}
-          >
-            <div className="absolute inset-0 opacity-20 transition-opacity duration-300"
-                 style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.08), rgba(167,139,250,0.08))' }} />
-            <div className="flex flex-col items-center relative z-10">
-              <h3 className="text-xl font-bold mb-4 text-[#111827] text-center">
-                Ready for your test?
-              </h3>
-              <p className="text-[#6B7280] mb-6 text-sm md:text-base text-center">
-                Take the ADHD test to get an up-to-date assessment.
-              </p>
-
-              {hasTakenTest && scoreOutOf100 != null && (
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.3 }}
-                  className="mb-4"
-                >
-                  <ScoreRing score={scoreOutOf100} />
-                </motion.div>
-              )}
-            </div>
-
-            <div className="relative z-10">
-              <motion.button
-                onClick={handleTestButtonClick}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-opacity-40 text-white"
-                style={{
-                  background: 'linear-gradient(135deg, #FB923C, #F87171)',
-                  boxShadow: '0 10px 28px rgba(248,113,113,0.35)'
-                }}
-              >
-                {hasTakenTest ? "Retake the Test" : "Take the ADHD Test"}
-              </motion.button>
-            </div>
-          </motion.div>
-
-          {/* Premium Account card (visual-only) */}
+          
+          {/* Dashboard Info Card (Slot 2) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -346,7 +284,7 @@ export default function DashboardPage() {
               boxShadow: "0 20px 40px rgba(17,24,39,0.10)",
               rotate: 0.2,
             }}
-            className="group relative overflow-hidden p-6 md:p-8 rounded-3xl border md:col-span-2 transition-all duration-300"
+            className="group relative overflow-hidden p-6 md:p-8 rounded-3xl border md:col-span-2 order-2 md:order-1 transition-all duration-300" 
             style={{
               borderColor: '#F3F4F6',
               backgroundImage: `
@@ -358,41 +296,13 @@ export default function DashboardPage() {
             }}
           >
             <div className="absolute inset-0 opacity-15 group-hover:opacity-25 transition-opacity duration-300"
-                 style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.08), rgba(167,139,250,0.08))' }} />
+                style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.08), rgba(167,139,250,0.08))' }} />
 
-            <h2 className="text-xl md:text-2xl font-bold mb-6 flex items-center text-[#111827]">
-              <SparklesIcon className="h-6 w-6 md:h-8 md:w-8 mr-3 flex-shrink-0 text-[#3B82F6]" />
-              Your Premium Account
-            </h2>
+            <div className="mb-6"></div> 
 
             {userData && (
               <ul className="space-y-4 md:space-y-6">
-                <motion.li
-                  whileHover={{ scale: 1.02, backgroundColor: '#F3F4F6' }}
-                  className="flex items-center p-4 bg-white rounded-xl border transition-all duration-300"
-                  style={{ borderColor: '#F3F4F6' }}
-                >
-                  <UserCircleIcon className="h-6 w-6 text-[#3B82F6] mr-4 flex-shrink-0" />
-                  <div>
-                    <strong className="text-[#111827]">Email:</strong>
-                    <p className="text-[#6B7280]">{userData.email}</p>
-                  </div>
-                </motion.li>
-
-                <motion.li
-                  whileHover={{ scale: 1.02, backgroundColor: '#F3F4F6' }}
-                  className="flex items-center p-4 bg-white rounded-xl border transition-all duration-300"
-                  style={{ borderColor: '#F3F4F6' }}
-                >
-                  <TrophyIcon className="h-6 w-6 text-[#10B981] mr-4 flex-shrink-0 animate-shine" />
-                  <div>
-                    <strong className="text-[#111827]">Score:</strong>
-                    <p className="text-[#6B7280]">
-                      {hasTakenTest && scoreOutOf100 != null ? `${scoreOutOf100} / 100` : "N/A"}
-                    </p>
-                  </div>
-                </motion.li>
-
+                
                 <motion.li
                   whileHover={{ scale: 1.02, backgroundColor: '#F3F4F6' }}
                   className="flex items-center p-4 bg-white rounded-xl border transition-all duration-300"
@@ -410,23 +320,97 @@ export default function DashboardPage() {
                   </div>
                 </motion.li>
 
+                {/* Navigation via router.push is here */}
                 <motion.li
-                  whileHover={{ scale: 1.02, backgroundColor: '#F3F4F6' }}
-                  className="flex items-center p-4 bg-white rounded-xl border transition-all duration-300"
+                  onClick={handleViewResultsClick}
+                  whileHover={{ scale: 1.02, backgroundColor: '#F3F4F6', cursor: 'pointer' }}
+                  className="flex items-center p-4 bg-white rounded-xl border transition-all duration-300 cursor-pointer"
                   style={{ borderColor: '#F3F4F6' }}
                 >
                   <CalendarDaysIcon className="h-6 w-6 text-[#FB923C] mr-4 flex-shrink-0" />
                   <div>
-                    <strong className="text-[#111827]">Last Test:</strong>
+                    <strong className="text-[#111827]">View Results:</strong>
                     <p className="text-[#6B7280]">
                       {hasTakenTest && lastTestDate
-                        ? lastTestDate.toLocaleDateString()
-                        : "Not taken yet"}
+                        ? `Last test taken: ${lastTestDate.toLocaleDateString()}`
+                        : "No test history yet"}
                     </p>
                   </div>
                 </motion.li>
               </ul>
             )}
+          </motion.div>
+
+
+          {/* Actions card (Slot 1) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            whileHover={{
+              scale: 1.02,
+              boxShadow: "0 20px 40px rgba(17,24,39,0.10)",
+              rotate: -0.2,
+            }}
+            className="relative overflow-hidden p-6 md:p-8 rounded-3xl border flex flex-col justify-between transition-all duration-300 order-1 md:order-2" 
+            style={{
+              borderColor: '#F3F4F6',
+              backgroundImage: `
+                radial-gradient(35% 60% at 15% 0%, rgba(59,130,246,0.08), transparent 70%),
+                radial-gradient(30% 50% at 85% 10%, rgba(20,184,166,0.08), transparent 70%),
+                linear-gradient(160deg, #FFFFFF, #F9FAFB 45%, #F3F4F6 100%)
+              `,
+              boxShadow: 'inset 0 0 1px rgba(255,255,255,0.6)'
+            }}
+          >
+            <div className="absolute inset-0 opacity-20 transition-opacity duration-300"
+                style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.08), rgba(167,139,250,0.08))' }} />
+            
+            <div className="flex flex-col items-center relative z-10">
+              <h3 className="text-xl font-bold mb-4 text-[#111827] text-center">
+                Ready for your test?
+              </h3>
+              
+              {hasTakenTest && scoreOutOf100 != null && (
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 150, damping: 20, delay: 0.3 }}
+                  className="mb-4"
+                >
+                  <ScoreRing score={scoreOutOf100} />
+                </motion.div>
+              )}
+
+              {/* Last Test Date displayed before the button */}
+              {hasTakenTest && lastTestDate && (
+                <div className="text-center mb-6 p-3 bg-white/50 rounded-lg border border-gray-100 w-full">
+                  <p className="text-[#6B7280] text-sm">Last Test Taken:</p>
+                  <strong className="text-[#111827] text-md font-semibold block">
+                    {lastTestDate.toLocaleDateString()}
+                  </strong>
+                </div>
+              )}
+
+              <p className="text-[#6B7280] mb-6 text-sm md:text-base text-center">
+                Take the ADHD test to get an up-to-date assessment.
+              </p>
+            </div>
+
+            <div className="relative z-10">
+              <motion.button
+                onClick={handleTestButtonClick}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-opacity-40 text-white"
+                style={{
+                  background: 'linear-gradient(135deg, #FB923C, #F87171)',
+                  boxShadow: '0 10px 28px rgba(248,113,113,0.35)'
+                }}
+              >
+                {hasTakenTest ? "Retake the Test" : "Take the ADHD Test"}
+              </motion.button>
+            </div>
           </motion.div>
         </div>
       </div>
