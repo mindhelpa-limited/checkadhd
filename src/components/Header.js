@@ -50,7 +50,7 @@ export default function Header() {
     const navLinks = (
         <>
             <MobileMenuItem href="/" onClick={() => setMenuOpen(false)}>Home</MobileMenuItem>
-            <MobileMenuItem href="/features" onClick={() => setMenuOpen(false)}>Services</MobileMenuItem>
+            <MobileMenuItem href="/services" onClick={() => setMenuOpen(false)}>Services</MobileMenuItem>
             <MobileMenuItem href="/how-it-works" onClick={() => setMenuOpen(false)}>How It Works</MobileMenuItem>
             
             {/* Mobile Pricing Dropdown Trigger */}
@@ -65,7 +65,14 @@ export default function Header() {
             {/* Mobile Pricing Dropdown Menu (using MobileMenuItem/Link) */}
             {pricingDropdownOpen && (
                 <div className="flex flex-col pl-6">
-                    <MobileMenuItem href="/pricing" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>ADHD Assessment</MobileMenuItem>
+                    <MobileMenuItem href="/pricing-adhd-assessment" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>ADHD Assessment</MobileMenuItem>
+                    
+                    {/* NEW ITEM 1: ADHD Clinical Assessment */}
+                    <MobileMenuItem href="/pricing-adhd-clinical-assessment" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>ADHD Clinical Assessment</MobileMenuItem>
+                    
+                    {/* NEW ITEM 2: Mindhelpa Institute */}
+                    <MobileMenuItem href="/pricing-mindhelpa-institute" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>Mindhelpa Institute</MobileMenuItem>
+                    
                     <MobileMenuItem href="/pricing-mental-health-recovery-tools" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>Mental Health Recovery</MobileMenuItem>
                     <MobileMenuItem href="/book-a-coach" onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}>Psychiatrist Coaching</MobileMenuItem>
                 </div>
@@ -80,15 +87,15 @@ export default function Header() {
             <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                 {/* Logo (using Link) */}
                 <Link href="/" className="flex items-center">
-                    <img src="/logo.png" alt="ADHD Check Logo" className="h-14" />
+                    {/* Assuming your logo path is correct, or update it if needed */}
+                    <img src="/logo.png" alt="ADHD Check Logo" className="h-14" /> 
                 </Link>
 
                 {/* Desktop Menu (using Link, "Assessment" removed) */}
                 <nav className="hidden md:flex space-x-8 font-sans font-medium text-white items-center">
                     <Link href="/" className="hover:text-blue-400 transition-all duration-200">Home</Link>
-                    <Link href="/features" className="hover:text-blue-400 transition-all duration-200">Services</Link>
+                    <Link href="/services" className="hover:text-blue-400 transition-all duration-200">Services</Link>
                     <Link href="/how-it-works" className="hover:text-blue-400 transition-all duration-200">How It Works</Link>
-                    {/* <Link href="/assessment" className="hover:text-blue-400 transition-all duration-200">Assessment</Link> -> REMOVED */}
                     
                     {/* Desktop Pricing Dropdown */}
                     <div className="relative group">
@@ -100,13 +107,23 @@ export default function Header() {
                             {pricingDropdownOpen ? <ChevronUp size={16} className="ml-1" /> : <ChevronDown size={16} className="ml-1" />}
                         </button>
                         <div className={`
-                            absolute left-1/2 -translate-x-1/2 mt-2 py-2 w-48 bg-[#101b3d] border border-white/10 rounded-xl shadow-xl z-50
+                            absolute left-1/2 -translate-x-1/2 mt-2 py-2 w-72 bg-[#101b3d] border border-white/10 rounded-xl shadow-xl z-50
                             transform transition-all duration-300 ease-in-out
                             ${pricingDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}
                         `}>
-                            <Link href="/pricing" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">ADHD Assessment</Link>
-                            <Link href="/pricing-mental-health-recovery-tools" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">Mental Health Recovery</Link>
-                            <Link href="/book-a-coach" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">Psychiatrist Coaching</Link>
+                            {/* 💡 CENTERING APPLIED HERE 💡 */}
+                            <div className="text-center"> 
+                                <Link href="/pricing-adhd-assessment" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">ADHD Assessment</Link>
+                                
+                                {/* NEW ITEM 1: ADHD Clinical Assessment */}
+                                <Link href="/pricing-adhd-clinical-assessment" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">ADHD Clinical Assessment</Link>
+                                
+                                {/* NEW ITEM 2: Mindhelpa Institute */}
+                                <Link href="/pricing-mindhelpa-institute" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">Mindhelpa Institute</Link>
+                                
+                                <Link href="/pricing-mental-health-recovery-tools" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">Mental Health Recovery</Link>
+                                <Link href="/book-a-coach" onClick={() => setPricingDropdownOpen(false)} className="block px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg">Psychiatrist Coaching</Link>
+                            </div>
                         </div>
                     </div>
 

@@ -8,12 +8,41 @@ import {
   Globe2,
   Quote,
   ArrowRight,
-  Music2,
   BrainCircuit,
   X,
 } from "lucide-react";
 
 import Footer from "../../components/home/Footer";
+
+// ----------------- New Animated Icon Component -----------------
+
+/**
+ * AnimatedSpiralCircle Component
+ * Renders a simple, rotating spiral circle icon.
+ */
+const AnimatedSpiralCircle = ({ className }) => (
+  <div
+    className={`w-10 h-10 flex items-center justify-center ${className}`}
+  >
+    {/* The SVG for the spiral effect */}
+    <svg
+      viewBox="0 0 100 100"
+      className="w-full h-full text-purple-300 animate-spiral-spin"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M50 10 C69.88 10 86 26.12 86 46 M50 10 C30.12 10 14 26.12 14 46 M14 46 C14 65.88 30.12 82 50 82 M86 46 C86 65.88 69.88 82 50 82 M50 82 C40 82 32 74 32 64 M50 10 C60 10 68 18 68 28"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+        className="opacity-70"
+      />
+    </svg>
+
+    {/* Custom CSS for the spiral spin animation is added at the bottom */}
+  </div>
+);
 
 // ----------------- Data Constants -----------------
 
@@ -27,7 +56,7 @@ const services = [
     description:
       "A complete ADHD test built on DSM-5 standards to help you understand your mind better.",
     imageUrl: "/images/blockstack.png",
-    dest: "/pricing", // ✅ goes straight to pricing page
+    dest: "/pricing-adhd-assessment", // ✅ goes straight to pricing page
     isAdhd: true,
   },
   {
@@ -54,17 +83,21 @@ const services = [
  */
 const musicTiles = [
   {
-    name: "Therapy Music",
-    description: "A curated library of guided, calming tracks to help you reset.",
+    name: "ADHD CLINICAL ASSESSMENT",
+    description:
+      "DSM-5 aligned, comprehensive clinical assessment for a clear ADHD diagnosis.",
     imageUrl: "/images/music.png",
-    dest: "#",
-    isAdhd: false,
+    // ⬅️ UPDATED LINK: Use relative path for Next.js navigation
+    dest: "/pricing-adhd-clinical-assessment",
+    isAdhd: true,
   },
   {
-    name: "Healing Sounds",
-    description: "Ambient sounds and soundscapes for deep relaxation and focus.",
+    name: "Mindhelpa institute",
+    description:
+      "Explore our specialized programs and professional training for mental health practitioners.",
     imageUrl: "/images/healing.png",
-    dest: "#",
+    // ⬅️ UPDATED LINK: Use relative path for Next.js navigation
+    dest: "/pricing-mindhelpa-institute",
     isAdhd: false,
   },
 ];
@@ -136,14 +169,18 @@ export default function FeaturesPage() {
    * @param {string} dest - The destination URL.
    */
   const handleExploreClick = (serviceName, dest) => {
+    // NOTE: The logic here is simplified to assume all these names are valid,
+    // which is appropriate since you only wanted to update the links.
     if (
       serviceName === "ADHD Assessment" ||
       serviceName === "Mental Health Recovery Tools" ||
-      serviceName === "Psychiatrist-Led Coaching"
+      serviceName === "Psychiatrist-Led Coaching" ||
+      serviceName === "ADHD CLINICAL ASSESSMENT" || // New service name
+      serviceName === "Mindhelpa institute" // New service name
     ) {
       router.push(dest);
     } else {
-      // All others (like Music) open Coming Soon modal
+      // All others (if any are added later that shouldn't navigate) open Coming Soon modal
       setModalOpen(true);
     }
   };
@@ -276,13 +313,16 @@ export default function FeaturesPage() {
       {/* MUSIC/SOUNDS SECTION */}
       <div className="bg-[#0a122a] py-16 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <Music2 className="w-10 h-10 text-purple-300 mx-auto" />
+          {/* ❌ REPLACED Music2 ICON WITH ANIMATED SPIRAL CIRCLE COMPONENT ➡️ */}
+          <AnimatedSpiralCircle className="mx-auto" />
+          {/* ⬅️ END REPLACEMENT */}
+
           <h2 className="mt-3 text-4xl font-serif font-bold text-white">
-            Therapy Music & Healing Sounds
+            Specialized Assessments & Professional Training
           </h2>
           <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-            Immerse yourself in calming tracks and soundscapes for deep focus and
-            relaxation.
+            Access our in-depth ADHD clinical assessment and explore professional
+            programs from the Mindhelpa Institute.
           </p>
         </div>
 
@@ -309,7 +349,7 @@ export default function FeaturesPage() {
                   onClick={() => handleExploreClick(m.name, m.dest)}
                   className="mt-4 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 transition-colors"
                 >
-                  Explore Library
+                  Explore
                 </button>
               </div>
             </div>
@@ -383,7 +423,7 @@ export default function FeaturesPage() {
 
       <Footer />
 
-      {/* Animations (Global Styles) */}
+      {/* Animations (Global Styles) - ADDED 'spiral-spin' KEYFRAME ➡️ */}
       <style jsx global>{`
         .animate-hero-title-fade {
           animation: hero-title-fade 1.5s ease-out forwards;
@@ -410,7 +450,20 @@ export default function FeaturesPage() {
             transform: rotate(360deg);
           }
         }
+        /* New custom animation for the spiral icon */
+        .animate-spiral-spin {
+          animation: spiral-spin 4s linear infinite;
+        }
+        @keyframes spiral-spin {
+          from {
+            transform: rotate(0deg) scale(1);
+          }
+          to {
+            transform: rotate(360deg) scale(1);
+          }
+        }
       `}</style>
+      {/* ⬅️ END ADDITION */}
 
       <ComingSoonModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
