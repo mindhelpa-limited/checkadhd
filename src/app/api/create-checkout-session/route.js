@@ -20,14 +20,12 @@ export async function POST(request) {
     }
     const {
       couponCode = "",
-      billingCycle = "monthly",
       email = "", // optional prefill for guests
       successRedirect = "/signup", // 👈 default fallback
     } = body;
 
-    // ---- Price lookup (monthly/yearly) ----
-    const lookupKey =
-      billingCycle === "yearly" ? "premium_yearly_gbp" : "premium_monthly_gbp";
+    // ---- Price lookup (one-time) ----
+    const lookupKey = "premium_onetime_gbp"; // 👈 your new Stripe lookup key
     const prices = await stripe.prices.list({
       lookup_keys: [lookupKey],
       active: true,
@@ -78,27 +76,24 @@ export async function POST(request) {
       }
     }
 
-    // ---- Build session options (SUBSCRIPTION MODE) ----
+    // ---- Build session options (ONE-TIME PAYMENT) ----
     const sessionOptions = {
-      mode: "subscription",
+      mode: "payment", // 👈 one-time, not subscription
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}${successRedirect}?session_id={CHECKOUT_SESSION_ID}`, // 👈 dynamic redirect
+      success_url: `${origin}${successRedirect}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
       client_reference_id: uid || `guest-${crypto.randomUUID()}`,
-      metadata: { firebase_uid: uid || "" },
-      // allow_promotion_codes: true,
-      // automatic_tax: { enabled: true },
+      metadata: { firebase_uid: uid || "", product: "premium" },
     };
 
     // If authenticated, attach the existing Stripe customer
     if (customerId) {
       sessionOptions.customer = customerId;
     } else {
-      // Guest checkout: DO NOT use customer_creation in subscription mode
       if (email) sessionOptions.customer_email = email; // optional prefill
     }
 
-    // Optional hard-coded coupon example
+    // Optional hard-coded coupon
     if (couponCode === "DRKELVIN100") {
       sessionOptions.discounts = [{ coupon: "sQc5dFTN" }];
     }

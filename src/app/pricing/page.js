@@ -31,8 +31,12 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [couponCode, setCouponCode] = useState("");
+  const [discountApplied, setDiscountApplied] = useState(false);
 
-  const displayPrice = 50;
+  const basePrice = 50;
+  const discountedPrice = 0; // if coupon = 100% off
+
+  const displayPrice = discountApplied ? discountedPrice : basePrice;
 
   const handleCheckout = async () => {
     setLoading(true);
@@ -43,8 +47,8 @@ export default function PricingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           couponCode: couponCode.trim().toUpperCase(),
-          product: "premium", // 👈 define product as premium
-          mode: "payment", // 👈 one-time payment (not subscription)
+          product: "premium",
+          mode: "payment",
         }),
       });
 
@@ -59,6 +63,17 @@ export default function PricingPage() {
       console.error(err);
       setError(err.message || "Could not connect to payment provider.");
       setLoading(false);
+    }
+  };
+
+  const handleCouponChange = (value) => {
+    setCouponCode(value);
+
+    // 🔑 Frontend preview logic
+    if (value.trim().toUpperCase() === "DRKELVIN100") {
+      setDiscountApplied(true);
+    } else {
+      setDiscountApplied(false);
     }
   };
 
@@ -139,6 +154,12 @@ export default function PricingPage() {
               </span>
             </p>
 
+            {discountApplied && (
+              <p className="text-green-400 mt-2">
+                🎉 Coupon applied! You get free access.
+              </p>
+            )}
+
             <p className="font-sans mt-4 text-gray-300">
               Pay once. Unlock everything. Keep access forever.
             </p>
@@ -148,7 +169,7 @@ export default function PricingPage() {
                 type="text"
                 placeholder="Enter coupon code"
                 value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
+                onChange={(e) => handleCouponChange(e.target.value)}
                 className="font-sans w-full p-3 border border-gray-600 rounded-lg text-white bg-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -158,7 +179,9 @@ export default function PricingPage() {
               disabled={loading}
               className="font-sans mt-4 w-full bg-blue-600 text-white font-semibold py-4 rounded-lg text-lg shadow-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400"
             >
-              {loading ? "Redirecting..." : `Unlock Premium — £${displayPrice}`}
+              {loading
+                ? "Redirecting..."
+                : `Unlock Premium — £${displayPrice}`}
             </button>
             {error && (
               <p className="font-sans text-red-400 text-center mt-4">{error}</p>
