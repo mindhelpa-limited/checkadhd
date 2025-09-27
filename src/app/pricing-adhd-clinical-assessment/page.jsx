@@ -9,6 +9,7 @@ import {
     DollarSign,
     Lightbulb, // New icon for the Hero
 } from "lucide-react";
+// The import for your Footer component
 import Footer from "../../components/home/Footer"; // Adjust path if necessary
 
 // ----------------- New Animated Hero Component -----------------
@@ -184,6 +185,7 @@ export default function ADHDClinicalAssessmentPricing() {
             
             {/* --- */}
             
+            {/* ⬇️ This is the correct placement for the Footer ⬇️ */}
             <Footer />
 
             {/* Animations (Global Styles) */}

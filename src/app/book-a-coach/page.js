@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Footer from "../../components/home/Footer";
 import { CheckCircle, Users, User, ChevronDown, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 // NOTE: You must import your authentication context here to check auth.currentUser
@@ -334,6 +335,8 @@ export default function PricingPage() {
                     )}
                 </motion.div>
             </div>
+            <Footer />
+
         </div>
     );
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+// Removed the Next.js specific 'useRouter' import which caused the compilation error.
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+// Removed unused Image import
+// import Image from "next/image";
 
 export default function CTA() {
-  const router = useRouter();
+  // Removed const router = useRouter(); which depended on the Next.js import.
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -36,6 +37,12 @@ export default function CTA() {
     };
   }, []);
 
+  // Function to handle navigation using standard browser redirect
+  const navigateToServices = () => {
+    // Using window.location.href for environment-agnostic navigation, maintaining the '/services' path.
+    window.location.href = '/services';
+  };
+
   return (
     <section ref={sectionRef} className="relative py-24 sm:py-32 bg-[#0a122a] overflow-hidden">
       {/* Floating Glow Effects (consistent with other sections) */}
@@ -60,16 +67,18 @@ export default function CTA() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-10">
               <button
-                onClick={() => router.push('/pricing')}
+                // Updated to use the environment-agnostic navigation function.
+                onClick={navigateToServices}
                 className="glow-on-hover w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-4 px-10 rounded-full transition-all duration-300 shadow-xl"
               >
                 View Plans →
               </button>
               <button
-                onClick={() => router.push('/assessment')}
+                // Updated text to 'Explore Tools' and uses the environment-agnostic navigation function.
+                onClick={navigateToServices}
                 className="border border-blue-400/30 text-blue-300 hover:bg-blue-400/10 text-lg font-semibold py-4 px-10 rounded-full transition-all duration-300"
               >
-                Take the ADHD Test
+                Explore Tools
               </button>
             </div>
           </div>

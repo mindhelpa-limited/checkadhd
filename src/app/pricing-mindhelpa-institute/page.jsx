@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { BookOpen, Calendar, DollarSign, Users, Zap, Briefcase, ChevronDown, ChevronUp, Star, Lightbulb, GraduationCap } from 'lucide-react';
+import Footer from "../../components/home/Footer";
 
 // Curriculum data structured by week
 const curriculumData = [
@@ -226,10 +227,10 @@ export default function MindhelpaInstitutePricing() {
                             <li>{'**Digital Coach Toolkit:** Access to templates for client contracts, intake forms, and $\\text{GDPR-compliant}$ note-taking systems.'}</li>
                         </ul>
                     </div>
-
+                 
                 </div>
             </div>
-
+              
             {/* Animations (Global Styles) */}
             <style jsx global>{`
                 .animate-hero-title-fade {
@@ -267,6 +268,8 @@ export default function MindhelpaInstitutePricing() {
                     }
                 }
             `}</style>
+            <Footer />
+
         </div>
     );
 }

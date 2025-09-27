@@ -52,6 +52,9 @@ export default function PricingHighlight() {
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  // Define the target path based on the file location
+  const assessmentLink = "/pricing-adhd-assessment"; 
+
   // Final 8 items — assessment-only package
   const features = [
     {
@@ -170,7 +173,7 @@ export default function PricingHighlight() {
 
             {/* CTA */}
             <button
-              onClick={() => router.push("/pricing")}
+              onClick={() => router.push(assessmentLink)} // <-- MODIFIED LINK
               className="mt-8 w-full text-white font-bold py-4 rounded-full text-lg shadow-lg transition-all transform hover:scale-105 pulsing-button"
             >
               Get Lifetime Access

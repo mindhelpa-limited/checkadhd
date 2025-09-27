@@ -6,6 +6,9 @@ import { ArrowRight } from "lucide-react";
 export default function HowItWorks() {
   const router = useRouter();
 
+  // The target URL path for the pricing page, derived from the file path
+  const pricingAssessmentPath = "/pricing-adhd-assessment"; 
+
   return (
     <section className="relative py-28 sm:py-36 text-white overflow-hidden bg-[#0a122a]">
       {/* Floating Glow Effects */}
@@ -70,7 +73,7 @@ export default function HowItWorks() {
               Take our clinically-informed ADHD assessment to get your personalized insights and a powerful baseline.
             </p>
             <button
-              onClick={() => router.push("/assessment")}
+              onClick={() => router.push(pricingAssessmentPath)} 
               className="mt-6 text-blue-300 hover:text-blue-200 border border-blue-400/30 hover:bg-blue-400/10 text-lg font-medium py-3 px-8 rounded-full transition-all duration-300"
             >
               Learn More
@@ -102,7 +105,7 @@ export default function HowItWorks() {
         {/* Get Started Button */}
         <div className="text-center mt-20">
           <button
-            onClick={() => router.push("/pricing")}
+            onClick={() => router.push(pricingAssessmentPath)}
             className="relative group inline-flex items-center justify-center w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg py-4 px-10 rounded-full shadow-xl transition-all duration-300"
           >
             <span className="mr-2">Get Started</span>

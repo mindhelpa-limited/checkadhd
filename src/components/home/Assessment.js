@@ -48,6 +48,9 @@ export default function Assessment() {
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  // Define the target path based on the file location
+  const assessmentLink = "/pricing-adhd-assessment"; 
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -122,10 +125,10 @@ export default function Assessment() {
             </ul>
 
             <button
-              onClick={() => router.push("/assessment")}
+              onClick={() => router.push(assessmentLink)} 
               className="mt-10 inline-block text-white font-semibold text-lg py-4 px-10 rounded-full shadow-lg transition-all transform hover:scale-105 button-gradient"
             >
-              Take the Free Snippet
+              Take the ADHD Assessment 
             </button>
           </div>
         </div>

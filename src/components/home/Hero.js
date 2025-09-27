@@ -1,23 +1,31 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+// Removed 'next/navigation' and 'next/image' imports to resolve compilation errors
+// using standard browser/React functionality instead.
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 
 export default function Hero() {
-  const router = useRouter();
+  // Removed useRouter hook
+  
+  // The target route remains "/services" as per the user's file path mapping.
+  const startJourneyRoute = "/services"; 
+
+  // Function to handle navigation using standard browser method
+  const handleNavigation = (route) => {
+    // In a production Next.js environment, this would be router.push(route)
+    // For this environment, we simulate navigation with window.location.href
+    window.location.href = route;
+  };
 
   return (
     <section className="relative min-h-[calc(100vh-72px)] bg-[#0a122a] text-white flex items-center justify-center px-6 sm:px-10 overflow-hidden">
-      {/* Background Image Container */}
+      {/* Background Image Container - Replaced Next.js <Image> with standard <img> */}
       <div className="absolute inset-0 z-0">
-        <Image
+        <img
           src="/hero-new.png"
           alt="A person meditating, symbolizing focus and calm"
-          fill
-          className="object-cover object-center opacity-30"
-          sizes="100vw"
-          priority
+          // Using Tailwind classes (w-full, h-full, object-cover) to achieve the 'fill' and styling effect
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-30"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a122a] to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a122a] to-transparent" />
@@ -39,7 +47,8 @@ export default function Hero() {
 
         <div className="flex flex-col sm:flex-row gap-4 mt-6 justify-center">
           <button
-            onClick={() => router.push("/assessment")}
+            // UPDATED: Used handleNavigation function
+            onClick={() => handleNavigation(startJourneyRoute)}
             className="relative group inline-flex items-center justify-center w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-4 px-10 rounded-full shadow-xl transition-all duration-300"
           >
             <span className="mr-2">Start Your Journey</span>
@@ -48,7 +57,8 @@ export default function Hero() {
           </button>
 
           <button
-            onClick={() => router.push("/features")} 
+            // UPDATED: Changed the target route to /pricing-mental-health-recovery-tools
+            onClick={() => handleNavigation("/pricing-mental-health-recovery-tools")} 
             className="text-blue-300 hover:text-blue-200 border border-blue-400/30 hover:bg-blue-400/10 text-lg font-medium py-4 px-10 rounded-full transition-all duration-300"
           >
             Explore Recovery Tools
