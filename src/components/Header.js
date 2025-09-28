@@ -219,7 +219,8 @@ export default function Header() {
                     {/* User Login/Logout Logic from new code (using Link) */}
                     {user ? (
                         <>
-                            <Link href="/dashboard" className="hover:text-blue-400 transition-all duration-200">Dashboard</Link>
+                            {/* CHANGED LINK: from "/dashboard" to "/dashboard/home" */}
+                            <Link href="/dashboard/home" className="hover:text-blue-400 transition-all duration-200">Dashboard</Link>
                             <button
                                 onClick={handleLogout}
                                 className="text-red-400 font-semibold hover:underline"
@@ -268,7 +269,8 @@ export default function Header() {
                     {/* User Login/Logout Logic from new code (using MobileMenuItem/Link) */}
                     {user ? (
                         <>
-                            <MobileMenuItem href="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</MobileMenuItem>
+                            {/* CHANGED MOBILEMENUITEM: from "/dashboard" to "/dashboard/home" */}
+                            <MobileMenuItem href="/dashboard/home" onClick={() => setMenuOpen(false)}>Dashboard</MobileMenuItem>
                             <button onClick={handleLogout} className="text-lg w-full text-left px-4 py-3 text-red-400 font-semibold">
                                 Logout
                             </button>

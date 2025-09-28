@@ -17,6 +17,8 @@ import {
   ClipboardList,
   MessageCircle,
   Award,
+  Home, // <-- ADDED
+  Stethoscope, // <-- ADDED (using Stethoscope for Doctor icon)
 } from "lucide-react";
 
 // Third-party Libraries
@@ -85,7 +87,7 @@ export default function DashboardLayout({ children }) {
     // Optionally, you could try to scroll the main content div instead of the window:
     // const mainContent = document.getElementById('main-content-scroll-area');
     // if (mainContent) {
-    //   mainContent.scrollTo(0, 0);
+    // 	mainContent.scrollTo(0, 0);
     // }
   }, [pathname]);
 
@@ -93,7 +95,7 @@ export default function DashboardLayout({ children }) {
   const playClickSound = async () => {
     if (clickSoundPlayer.current?.loaded) {
       if (Tone.context.state !== 'running') {
-         await Tone.start();
+          await Tone.start();
       }
       clickSoundPlayer.current.start(0); 
     }
@@ -114,13 +116,16 @@ export default function DashboardLayout({ children }) {
     return "User";
   };
 
+  // CORRECTED tabs array according to user instructions and original structure
   const tabs = [
-    { name: "Assessment", href: "/dashboard", icon: ClipboardList },
-    { name: "Recovery", href: "/dashboard/recovery", icon: Activity },
-    { name: "Coach", href: "/dashboard/coachee", icon: MessageCircle },
-    { name: "Institute", href: "/dashboard/institute", icon: Award },
-    { name: "Profile", href: "/dashboard/profile", icon: User },
+    { name: "Home", href: "/dashboard/home", icon: Home }, // <-- CHANGED: First item, name, route, icon
+    { name: "Assessment", href: "/dashboard", icon: ClipboardList }, // <-- KEPT
+    { name: "Recovery", href: "/dashboard/recovery", icon: Activity }, // <-- RE-INSERTED the original Recovery tab
+    { name: "Coachee", href: "/dashboard/coachee", icon: Stethoscope }, // <-- CHANGED: name and icon
+    { name: "Institute", href: "/dashboard/institute", icon: Award }, // <-- KEPT
+    // { name: "Profile", href: "/dashboard/profile", icon: User }, // <-- REMOVED
   ];
+
 
   if (isRecoveryPath) return <>{children}</>;
 
@@ -172,7 +177,7 @@ export default function DashboardLayout({ children }) {
                 {/* Active Indicator Bar */}
                 <span className={`absolute left-0 top-2 bottom-2 w-1 rounded-full transition-all
                   ${active ? "bg-gradient-to-b from-[#3B82F6] to-[#14B8A6] opacity-100"
-                            : "opacity-0 group-hover:opacity-50 bg-[#93C5FD]"}`} 
+                              : "opacity-0 group-hover:opacity-50 bg-[#93C5FD]"}`} 
                 />
                 
                 <tab.icon size={20} className={active ? "text-[#2563EB]" : "text-[#64748B] group-hover:text-[#2563EB]"} />
@@ -218,7 +223,7 @@ export default function DashboardLayout({ children }) {
               onClick={playClickSound}
               className={`flex flex-col items-center text-[11px] px-3 py-1.5 rounded-xl transition-all
                 ${active ? "text-[#2563EB] bg-[#EFF6FF] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
-                          : "text-[#6B7280] hover:text-[#2563EB] hover:bg-white/50"}`}
+                            : "text-[#6B7280] hover:text-[#2563EB] hover:bg-white/50"}`}
             >
               <tab.icon size={18} className="mb-0.5" />
               <span className="font-medium">{tab.name}</span>

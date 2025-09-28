@@ -32,10 +32,11 @@ export default function LoginPage() {
             createdAt: serverTimestamp(),
             tier: "free",
           });
-          router.push("/pricing");
+          router.push("/dashboard/home"); // Modified: Redirect to /dashboard/home after initial setup
         } else {
-          const userData = docSnap.data();
-          router.push(userData?.tier === "premium" ? "/dashboard" : "/pricing");
+          // const userData = docSnap.data(); // This line is no longer strictly needed just to determine the redirect path if we always go to /dashboard/home
+          router.push("/dashboard/home"); // Modified: Always redirect to /dashboard/home if user exists
+          // Original: router.push(userData?.tier === "premium" ? "/dashboard" : "/pricing");
         }
       } else {
         setAuthLoading(false);
