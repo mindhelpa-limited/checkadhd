@@ -10,6 +10,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { arrayUnion, serverTimestamp } from "firebase/firestore"; // 👈 add these
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -47,7 +48,7 @@ export async function POST(req) {
           email,
           stripeCustomerId: customerId,
           product: productTag,
-          createdAt: new Date(),
+          createdAt: serverTimestamp(),
         });
         console.log(`✅ Saved ${email} as pending with ${productTag}`);
 
@@ -57,8 +58,14 @@ export async function POST(req) {
 
         if (!usersSnapshot.empty) {
           const userDoc = usersSnapshot.docs[0];
-          await updateDoc(userDoc.ref, { tier: productTag });
-          console.log(`✅ Upgraded ${email} to ${productTag}`);
+
+          // 👇 Instead of overwriting "tier", add to an array "tiers"
+          await updateDoc(userDoc.ref, {
+            tiers: arrayUnion(productTag),
+            updatedAt: serverTimestamp(),
+          });
+
+          console.log(`✅ Added ${productTag} to ${email}'s active tiers`);
         }
       }
     }

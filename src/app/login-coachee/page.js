@@ -8,6 +8,27 @@ import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
+/* * NOTE: Replace this with your actual confetti logic after installing a library 
+ * like 'js-confetti' or 'react-confetti'. This is a placeholder.
+ * A simple implementation for 'js-confetti' would look like:
+ *
+ * const ConfettiEffect = () => {
+ * useEffect(() => {
+ * const confetti = new JSConfetti();
+ * confetti.addConfetti();
+ * }, []);
+ * return null;
+ * };
+ */
+const ConfettiEffect = () => {
+  useEffect(() => {
+    // 💡 Placeholder for confetti logic. 
+    // You'll want to initialize and trigger your confetti library here.
+    console.log("Confetti effect triggered on page load!");
+  }, []);
+  return null;
+};
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,13 +42,8 @@ export default function LoginPage() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // --- MODIFIED REDIRECT LOGIC ---
-        // For existing users, always redirect to /dashboard/coachee upon login
+        // Redirect to /dashboard/coachee upon login
         router.push("/dashboard/coachee"); 
-        
-        // Note: The original logic for checking user tier and sending them to /dashboard or /pricing 
-        // has been overridden here to ensure the user always lands on /dashboard/coachee upon authentication.
-        
       } else {
         setAuthLoading(false);
       }
@@ -35,7 +51,6 @@ export default function LoginPage() {
     return () => unsubscribe();
   }, [router]);
 
-  // ✅ JS-only version (no TypeScript annotation)
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -43,7 +58,7 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       
-      // ✅ MODIFICATION: Redirect to /dashboard/coachee after successful sign-in
+      // Redirect to /dashboard/coachee after successful sign-in
       router.push("/dashboard/coachee"); 
       
     } catch (err) {
@@ -62,6 +77,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full grid grid-cols-1 md:grid-cols-2 bg-[#0a122a] text-white">
+      <ConfettiEffect /> {/* 🥳 ADDED CONFETTI EFFECT */}
+
       {/* LEFT: Icon + copy */}
       <div className="hidden md:flex flex-col justify-center items-center p-10 text-center">
         <div className="flex items-center gap-4 mb-6">
@@ -71,7 +88,8 @@ export default function LoginPage() {
           <span className="text-xl font-semibold">Secure Login</span>
         </div>
 
-        <h1 className="text-3xl font-bold">Take Control of Your ADHD Journey</h1>
+        {/* 📝 UPDATED TEXT */}
+        <h1 className="text-3xl font-bold">Get personalised one-on-one coaching from Psychiatrists with extensive experience</h1>
         <p className="mt-4 text-gray-300 max-w-sm">
           Your personalized program for focus, progress, and lasting change starts here.
         </p>
@@ -82,12 +100,6 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           <div className="text-left mb-10">
             <h2 className="text-3xl font-bold">Welcome Back</h2>
-            <p className="mt-2 text-sm text-gray-400">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="font-semibold text-blue-400 hover:text-blue-300">
-                Sign Up
-              </Link>
-            </p>
           </div>
 
           <form className="space-y-5" onSubmit={handleLogin}>
