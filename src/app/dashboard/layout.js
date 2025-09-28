@@ -122,7 +122,7 @@ export default function DashboardLayout({ children }) {
     { name: "Assessment", href: "/dashboard", icon: ClipboardList }, // <-- KEPT
     { name: "Recovery", href: "/dashboard/recovery", icon: Activity }, // <-- RE-INSERTED the original Recovery tab
     { name: "Coachee", href: "/dashboard/coachee", icon: Stethoscope }, // <-- CHANGED: name and icon
-    { name: "Profile", href: "/dashboard/profile", icon: User }, // <-- KEPT
+    { name: "Institute", href: "/dashboard/institute", icon: Award }, // <-- KEPT
     // { name: "Profile", href: "/dashboard/profile", icon: User }, // <-- REMOVED
   ];
 
