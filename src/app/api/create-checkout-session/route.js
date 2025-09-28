@@ -9,42 +9,72 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2024-06-20",
 });
 
+// ---- Product lookup map ----
+const PRODUCT_LOOKUPS = {
+  premium: { key: "premium_onetime_gbp", mode: "payment", tag: "premium" },
+  adhd_assessment: { key: "adhd_clinical_assessment", mode: "payment", tag: "adhd_assessment" },
+  recovery_monthly: { key: "recovery_monthly", mode: "subscription", tag: "recovery" },
+  recovery_yearly: { key: "recovery_yearly", mode: "subscription", tag: "recovery" },
+  institute: { key: "institute_onetime", mode: "payment", tag: "institute" },
+
+  // ---- Coaching: Small Groups (1-5) ----
+  coaching_smallgroup_monthly: { key: "coaching_smallgroup_monthly", mode: "subscription", tag: "coaching" },
+  coaching_smallgroup_quarterly: { key: "coaching_smallgroup_quarterly", mode: "subscription", tag: "coaching" },
+  coaching_smallgroup_6month: { key: "coaching_smallgroup_6month", mode: "subscription", tag: "coaching" },
+  coaching_smallgroup_yearly: { key: "coaching_smallgroup_yearly", mode: "subscription", tag: "coaching" },
+
+  // ---- Coaching: Individual ----
+  coaching_individual_monthly: { key: "coaching_individual_monthly", mode: "subscription", tag: "coaching" },
+  coaching_individual_quarterly: { key: "coaching_individual_quarterly", mode: "subscription", tag: "coaching" },
+  coaching_individual_6month: { key: "coaching_individual_6month", mode: "subscription", tag: "coaching" },
+  coaching_individual_yearly: { key: "coaching_individual_yearly", mode: "subscription", tag: "coaching" },
+
+  // ---- Coaching: Large Groups (5-10) ----
+  coaching_largegroup_monthly: { key: "coaching_largegroup_monthly", mode: "subscription", tag: "coaching" },
+  coaching_largegroup_quarterly: { key: "coaching_largegroup_quarterly", mode: "subscription", tag: "coaching" },
+  coaching_largegroup_6month: { key: "coaching_largegroup_6month", mode: "subscription", tag: "coaching" },
+  coaching_largegroup_yearly: { key: "coaching_largegroup_yearly", mode: "subscription", tag: "coaching" },
+};
+
 export async function POST(request) {
   try {
-    // ---- Body (works for both auth + guest) ----
+    // ---- Body ----
     let body = {};
     try {
       body = await request.json();
-    } catch {
-      // no body is fine
-    }
+    } catch {}
+
     const {
-      couponCode = "",
-      email = "", // optional prefill for guests
-      successRedirect = "/signup", // 👈 default fallback
+      email = "",
+      successRedirect = "/signup",
+      product = "premium", // 👈 default to premium if not passed
     } = body;
 
-    // ---- Price lookup (one-time) ----
-    const lookupKey = "premium_onetime_gbp"; // 👈 your new Stripe lookup key
+    // ---- Resolve product ----
+    const productConfig = PRODUCT_LOOKUPS[product];
+    if (!productConfig) {
+      throw new Error(`Invalid product: ${product}`);
+    }
+
+    // ---- Fetch Stripe price ----
     const prices = await stripe.prices.list({
-      lookup_keys: [lookupKey],
+      lookup_keys: [productConfig.key],
       active: true,
       limit: 1,
     });
     if (!prices.data.length)
-      throw new Error(`Stripe price not found: ${lookupKey}`);
+      throw new Error(`Stripe price not found: ${productConfig.key}`);
     const priceId = prices.data[0].id;
 
-    // ---- Success/Cancel URLs ----
+    // ---- URLs ----
     const origin =
       process.env.NEXT_PUBLIC_SITE_URL ||
       request.headers.get("origin") ||
       "http://localhost:3000";
 
-    // ---- Try Firebase auth (optional) ----
+    // ---- Firebase Auth ----
     let uid = null;
     let customerId = null;
-
     const authHeader = request.headers.get("authorization") || "";
     const idToken = authHeader.startsWith("Bearer ")
       ? authHeader.slice(7)
@@ -54,8 +84,6 @@ export async function POST(request) {
       try {
         const decoded = await admin.auth().verifyIdToken(idToken);
         uid = decoded.uid;
-
-        // Ensure/use saved Stripe customer for this UID
         const userRef = db.collection("users").doc(uid);
         const snap = await userRef.get();
         customerId = snap.exists ? snap.data()?.stripeCustomerId : null;
@@ -70,32 +98,26 @@ export async function POST(request) {
           await userRef.set({ stripeCustomerId: customerId }, { merge: true });
         }
       } catch {
-        // Invalid/missing token -> proceed as guest
         uid = null;
         customerId = null;
       }
     }
 
-    // ---- Build session options (ONE-TIME PAYMENT) ----
+    // ---- Session Options ----
     const sessionOptions = {
-      mode: "payment", // 👈 one-time, not subscription
+      mode: productConfig.mode,
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}${successRedirect}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
       client_reference_id: uid || `guest-${crypto.randomUUID()}`,
-      metadata: { firebase_uid: uid || "", product: "premium" },
+      metadata: { firebase_uid: uid || "", product, tag: productConfig.tag },
+      discounts: [{ promotion_code: "promo_1RyIYpE8gihyLTCcPLv6UEbV" }],
     };
 
-    // If authenticated, attach the existing Stripe customer
     if (customerId) {
       sessionOptions.customer = customerId;
-    } else {
-      if (email) sessionOptions.customer_email = email; // optional prefill
-    }
-
-    // Optional hard-coded coupon
-    if (couponCode === "DRKELVIN100") {
-      sessionOptions.discounts = [{ coupon: "sQc5dFTN" }];
+    } else if (email) {
+      sessionOptions.customer_email = email;
     }
 
     const session = await stripe.checkout.sessions.create(sessionOptions);
