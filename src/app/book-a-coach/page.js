@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Footer from "../../components/home/Footer";
-import { CheckCircle, Users, User, ChevronDown, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { CheckCircle, Users, User, ChevronDown, Loader2 } from 'lucide-react';
+
+// LOCAL IMPORTS
+import Footer from "../../components/home/Footer";
+import { auth } from "@/lib/firebase";
 
 // ===============================================
 // I. DATA STRUCTURE – Matches backend PRODUCT_LOOKUPS
@@ -43,6 +46,9 @@ const LARGE_GROUP_PRICING = [
 // II. TOGGLE & PRICING CARD COMPONENTS
 // ===============================================
 
+/**
+ * Renders the toggle button for switching between Individual and Group Coaching.
+ */
 const GroupToggle = ({ active, setActive }) => (
   <div className="flex bg-gray-700/50 p-1 rounded-full w-full max-w-sm mx-auto shadow-xl backdrop-blur-sm relative">
     <button
@@ -73,6 +79,9 @@ const GroupToggle = ({ active, setActive }) => (
   </div>
 );
 
+/**
+ * Renders a single pricing card with tier details and an expandable feature list.
+ */
 const PricingCard = ({ tier, sessions, price, persons, savings, product, handleCheckout, loadingPlan }) => {
   const [isOpen, setIsOpen] = useState(false);
   const isLoading = loadingPlan === product;
@@ -145,7 +154,7 @@ const PricingCard = ({ tier, sessions, price, persons, savings, product, handleC
           disabled={isLoading}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
-          className="w-full mt-4 py-3 font-extrabold rounded-xl text-white bg-blue-600 shadow-lg disabled:bg-blue-400"
+          className="w-full mt-4 py-3 font-extrabold rounded-xl text-white bg-blue-600 shadow-lg disabled:bg-blue-400 flex justify-center items-center"
         >
           {isLoading ? (
             <>
@@ -174,18 +183,27 @@ export default function CoachingPricingPage() {
   const pricingData = activeTab === 'individual' ? INDIVIDUAL_PRICING : SMALL_GROUP_PRICING;
   const showLargeGroup = activeTab === 'group';
 
+  /**
+   * Handles the checkout process by calling the API to create a checkout session.
+   * @param {string} productKey - The key of the selected product plan.
+   */
   const handleCheckout = async (productKey) => {
     setLoadingPlan(productKey);
     setError("");
 
     try {
+      // Check if user is logged in
+      const user = auth.currentUser;
+      // Determine the redirect URL based on user login status
+      const successRedirect = user ? "/dashboard/coachee" : "/signup-coachee";
+
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          product: productKey, // ✅ Must match backend PRODUCT_LOOKUPS
+          product: productKey,
           couponCode: couponCode.trim().toUpperCase(),
-          successRedirect: "/dashboard/coaching",
+          successRedirect,
         }),
       });
 
@@ -195,11 +213,12 @@ export default function CoachingPricingPage() {
       }
 
       const { url } = await response.json();
-      window.location.href = url; // redirect
+      // Redirect to the external checkout URL
+      window.location.href = url;
     } catch (err) {
       console.error(err);
       setError(err.message);
-      setLoadingPlan(null);
+      setLoadingPlan(null); // Stop loading animation on error
     }
   };
 
@@ -208,12 +227,13 @@ export default function CoachingPricingPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="text-center mb-16">
           <h1 className="text-6xl font-black mb-4 bg-gradient-to-r from-blue-300 to-blue-600 bg-clip-text text-transparent">
-            Psychiatrist-Led Coaching
+            {COACHING_CONTENT.title}
           </h1>
           <p className="text-lg text-gray-400 max-w-4xl mx-auto">{COACHING_CONTENT.body}</p>
-          {error && <p className="text-red-400 mt-4">{error}</p>}
+          {error && <p className="text-red-400 mt-4 font-medium">{error}</p>}
         </header>
 
+        {/* Group/Individual Toggle */}
         <GroupToggle active={activeTab} setActive={setActiveTab} />
 
         {/* Coupon input */}
@@ -230,17 +250,27 @@ export default function CoachingPricingPage() {
         {/* Pricing cards */}
         <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
           {pricingData.map((plan) => (
-            <PricingCard key={plan.product} {...plan} handleCheckout={handleCheckout} loadingPlan={loadingPlan} />
+            <PricingCard
+              key={plan.product}
+              {...plan}
+              handleCheckout={handleCheckout}
+              loadingPlan={loadingPlan}
+            />
           ))}
         </motion.div>
 
-        {/* Large group */}
+        {/* Large group section (Conditionally rendered) */}
         {showLargeGroup && (
           <div className="lg:col-span-4 mt-16">
-            <h2 className="text-3xl font-bold text-center mb-8">Large Groups (5-10 persons)</h2>
+            <h2 className="text-3xl font-bold text-center mb-8 text-blue-300">Large Groups (5-10 persons)</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {LARGE_GROUP_PRICING.map((plan) => (
-                <PricingCard key={plan.product} {...plan} handleCheckout={handleCheckout} loadingPlan={loadingPlan} />
+                <PricingCard
+                  key={plan.product}
+                  {...plan}
+                  handleCheckout={handleCheckout}
+                  loadingPlan={loadingPlan}
+                />
               ))}
             </div>
           </div>
