@@ -168,13 +168,13 @@ export default function DashboardPage() {
       const userDocRef = doc(db, "users", currentUser.uid);
       const docSnap = await getDoc(userDocRef);
       if (!docSnap.exists()) {
-        router.replace("/pricing");
+        router.replace("/pricing-adhd-assessment");
         return;
       }
 
       const data = docSnap.data();
       if (data?.tier !== "premium") {
-        router.replace("/pricing");
+        router.replace("/pricing-adhd-assessment");
         return;
       }
 
