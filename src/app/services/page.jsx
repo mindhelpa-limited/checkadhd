@@ -405,16 +405,16 @@ export default function FeaturesPage() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
           <button
-            onClick={() => router.push("/pricing")}
+            onClick={() => router.push("/how-it-works")}
             className="glow-on-hover w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-4 px-10 rounded-full transition-all duration-300 shadow-xl"
           >
-            View Plans →
+            The Steps →
           </button>
           <button
-            onClick={() => router.push("/programs")}
+            onClick={() => router.push("/how-it-works")}
             className="border border-blue-400/30 text-blue-300 hover:bg-blue-400/10 text-lg font-semibold py-4 px-10 rounded-full transition-all duration-300"
           >
-            Explore Global Programs
+            Get Started
           </button>
         </div>
       </div>
