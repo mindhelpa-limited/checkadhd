@@ -192,7 +192,7 @@ export default function HowItWorksPage() {
             href="/services"
             className="mt-8 inline-block bg-blue-600 text-white font-bold py-4 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 glow-on-hover"
           >
-            View Our Services & Get Started
+            Get Started
           </a>
         </div>
         <div className="absolute bottom-0 left-0 w-full h-px">
