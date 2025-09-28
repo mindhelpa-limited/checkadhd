@@ -1,4 +1,3 @@
-// /app/api/create-checkout-session/route.js
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { admin, db } from "@/lib/firebase-admin";
@@ -38,7 +37,6 @@ const PRODUCT_LOOKUPS = {
 
 export async function POST(request) {
   try {
-    // ---- Body ----
     let body = {};
     try {
       body = await request.json();
@@ -47,14 +45,12 @@ export async function POST(request) {
     const {
       email = "",
       successRedirect = "/signup",
-      product = "premium", // 👈 default to premium if not passed
+      product = "premium", // 👈 default to premium
+      couponCode = "",     // 👈 optional coupon
     } = body;
 
-    // ---- Resolve product ----
     const productConfig = PRODUCT_LOOKUPS[product];
-    if (!productConfig) {
-      throw new Error(`Invalid product: ${product}`);
-    }
+    if (!productConfig) throw new Error(`Invalid product: ${product}`);
 
     // ---- Fetch Stripe price ----
     const prices = await stripe.prices.list({
@@ -66,7 +62,6 @@ export async function POST(request) {
       throw new Error(`Stripe price not found: ${productConfig.key}`);
     const priceId = prices.data[0].id;
 
-    // ---- URLs ----
     const origin =
       process.env.NEXT_PUBLIC_SITE_URL ||
       request.headers.get("origin") ||
@@ -111,14 +106,22 @@ export async function POST(request) {
       cancel_url: `${origin}/pricing`,
       client_reference_id: uid || `guest-${crypto.randomUUID()}`,
       metadata: { firebase_uid: uid || "", product, tag: productConfig.tag },
-      discounts: [{ promotion_code: "promo_1RyIYpE8gihyLTCcPLv6UEbV" }],
     };
 
-    if (customerId) {
-      sessionOptions.customer = customerId;
-    } else if (email) {
-      sessionOptions.customer_email = email;
+    // ✅ Apply coupon dynamically
+    if (couponCode.trim()) {
+      const promo = await stripe.promotionCodes.list({
+        code: couponCode.trim(),
+        active: true,
+        limit: 1,
+      });
+      if (promo.data.length > 0) {
+        sessionOptions.discounts = [{ promotion_code: promo.data[0].id }];
+      }
     }
+
+    if (customerId) sessionOptions.customer = customerId;
+    else if (email) sessionOptions.customer_email = email;
 
     const session = await stripe.checkout.sessions.create(sessionOptions);
     return NextResponse.json({ url: session.url });
