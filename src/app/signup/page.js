@@ -25,7 +25,7 @@ const PaymentModal = () => (
         Please complete your payment to create an account and unlock your dashboard.
       </p>
       <button
-        onClick={() => (window.location.href = "/pricing")}
+        onClick={() => (window.location.href = "/services")}
         className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-medium shadow hover:scale-105 transition-transform"
       >
         💳 Go to Pricing Page
