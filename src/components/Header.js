@@ -104,13 +104,8 @@ export default function Header() {
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
                         icon={GraduationCap}
                     >
-                        Mindhelpa Institute
-                    </MobileMenuItem>
-                    <MobileMenuItem 
-                        href="/pricing-mental-health-recovery-tools" 
-                        onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
-                        icon={HeartHandshake}
-                    >
+                       
+            
                         Mental Health Recovery
                     </MobileMenuItem>
                     <MobileMenuItem 
@@ -178,13 +173,8 @@ export default function Header() {
                                     onClick={() => setPricingDropdownOpen(false)} 
                                     icon={GraduationCap}
                                 >
-                                    Mindhelpa Institute
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                    href="/pricing-mental-health-recovery-tools" 
-                                    onClick={() => setPricingDropdownOpen(false)} 
-                                    icon={HeartHandshake}
-                                >
+                                   
+            
                                     Mental Health Recovery
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
