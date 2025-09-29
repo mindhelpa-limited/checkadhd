@@ -17,10 +17,115 @@ import Footer from "../components/home/Footer";
 
 
 // =========================================================================
-// HERO COMPONENT (Kept as is for context)
+// 1. REUSABLE COMPONENTS (BEFORE MAIN LOGIC)
 // =========================================================================
 
-export function Hero() {
+/**
+ * AnimatedSpiralCircle Component
+ * Renders a simple, rotating spiral circle icon.
+ */
+const AnimatedSpiralCircle = ({ className }) => (
+  <div
+    className={`w-10 h-10 flex items-center justify-center ${className}`}
+  >
+    {/* The SVG for the spiral effect */}
+    <svg
+      viewBox="0 0 100 100"
+      className="w-full h-full text-purple-300 animate-spiral-spin"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M50 10 C69.88 10 86 26.12 86 46 M50 10 C30.12 10 14 26.12 14 46 M14 46 C14 65.88 30.12 82 50 82 M86 46 C86 65.88 69.88 82 50 82 M50 82 C40 82 32 74 32 64 M50 10 C60 10 68 18 68 28"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+        className="opacity-70"
+      />
+    </svg>
+  </div>
+);
+
+/**
+ * AssessmentAnimation Component
+ * Renders an animated SVG for the specialized assessment section.
+ */
+const AssessmentAnimation = ({ className }) => (
+  <div className={`relative w-full h-full flex items-center justify-center ${className}`}>
+    {/*
+        This SVG recreates the style from the uploaded image.
+        The 'currentColor' is set by the parent's text-color utility class (e.g., text-blue-500)
+    */}
+    <svg viewBox="0 0 500 500" className="w-full h-full max-w-lg text-blue-500/50 animate-spin-assessment-circle" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Outer Circle */}
+      <circle cx="250" cy="250" r="240" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+      {/* Middle Circle */}
+      <circle cx="250" cy="250" r="180" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+      {/* Inner Circle */}
+      <circle cx="250" cy="250" r="120" stroke="currentColor" strokeWidth="1.5" opacity="0.8" />
+      
+      {/* The abstract, overlapping, hand-drawn-like lines (similar to the image) */}
+      <path 
+        d="M 100 250 C 50 150, 450 150, 400 250 C 450 350, 50 350, 100 250" 
+        stroke="currentColor" 
+        strokeWidth="1.2" 
+        opacity="0.8" 
+        className="animate-pulse-slow" 
+      />
+      
+      <path 
+        d="M 250 50 A 150 150 0 1 0 250 450 A 100 100 0 1 1 250 50" 
+        stroke="currentColor" 
+        strokeWidth="0.8" 
+        opacity="0.6" 
+        className="animate-path-dash"
+      />
+
+      {/* A subtle center highlight */}
+      <circle cx="250" cy="250" r="5" fill="currentColor" opacity="0.5" />
+    </svg>
+  </div>
+);
+
+
+/**
+ * ComingSoonModal Component
+ * A modal that informs the user that a feature is under development.
+ */
+function ComingSoonModal({ open, onClose }) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+      <div className="bg-[#101b3d] border border-white/10 rounded-2xl p-8 w-full max-w-md shadow-2xl relative text-center">
+        {/* Close icon */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-400 hover:text-white transition"
+        >
+          <X size={22} />
+        </button>
+
+        {/* Spinner */}
+        <div className="flex justify-center mb-6">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          
+        </div>
+
+        <h3 className="text-2xl font-semibold text-white">Coming Soon</h3>
+        <p className="mt-3 text-gray-300">
+          This feature is under development. Stay tuned!
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// =========================================================================
+// 2. HERO COMPONENT
+// =========================================================================
+
+function Hero() {
   // We use window.location.href for the navigation since Next.js 'useRouter' 
   // is not used in this component, matching your requested code block's logic.
   const startJourneyRoute = "/services"; 
@@ -93,82 +198,9 @@ export function Hero() {
 }
 
 
-// -------------------------------------------------------------------------
-// NEW ANIMATION COMPONENT FOR ASSESSMENT SECTION (Kept for Music/Sounds section)
-// -------------------------------------------------------------------------
-
-const AssessmentAnimation = ({ className }) => (
-    <div className={`relative w-full h-full flex items-center justify-center ${className}`}>
-        {/*
-            This SVG recreates the style from the uploaded image.
-            The 'currentColor' is set by the parent's text-color utility class (e.g., text-blue-500)
-        */}
-        <svg viewBox="0 0 500 500" className="w-full h-full max-w-lg text-blue-500/50 animate-spin-assessment-circle" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Outer Circle */}
-            <circle cx="250" cy="250" r="240" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-            {/* Middle Circle */}
-            <circle cx="250" cy="250" r="180" stroke="currentColor" strokeWidth="1" opacity="0.6" />
-            {/* Inner Circle */}
-            <circle cx="250" cy="250" r="120" stroke="currentColor" strokeWidth="1.5" opacity="0.8" />
-            
-            {/* The abstract, overlapping, hand-drawn-like lines (similar to the image) */}
-            <path 
-                d="M 100 250 C 50 150, 450 150, 400 250 C 450 350, 50 350, 100 250" 
-                stroke="currentColor" 
-                strokeWidth="1.2" 
-                opacity="0.8" 
-                className="animate-pulse-slow" 
-            />
-            
-            <path 
-                d="M 250 50 A 150 150 0 1 0 250 450 A 100 100 0 1 1 250 50" 
-                stroke="currentColor" 
-                strokeWidth="0.8" 
-                opacity="0.6" 
-                className="animate-path-dash"
-            />
-
-            {/* A subtle center highlight */}
-            <circle cx="250" cy="250" r="5" fill="currentColor" opacity="0.5" />
-        </svg>
-    </div>
-);
-
-
-// -------------------------------------------------------------------------
-// REUSABLE COMPONENTS, CONSTANTS, AND MAIN PAGE
-// -------------------------------------------------------------------------
-
-
-/**
- * AnimatedSpiralCircle Component
- * Renders a simple, rotating spiral circle icon.
- */
-const AnimatedSpiralCircle = ({ className }) => (
-  <div
-    className={`w-10 h-10 flex items-center justify-center ${className}`}
-  >
-    {/* The SVG for the spiral effect */}
-    <svg
-      viewBox="0 0 100 100"
-      className="w-full h-full text-purple-300 animate-spiral-spin"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M50 10 C69.88 10 86 26.12 86 46 M50 10 C30.12 10 14 26.12 14 46 M14 46 C14 65.88 30.12 82 50 82 M86 46 C86 65.88 69.88 82 50 82 M50 82 C40 82 32 74 32 64 M50 10 C60 10 68 18 68 28"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
-        className="opacity-70"
-      />
-    </svg>
-
-    {/* Custom CSS for the spiral spin animation is added at the bottom */}
-  </div>
-);
-
-// ----------------- Data Constants -----------------
+// =========================================================================
+// 3. DATA CONSTANTS
+// =========================================================================
 
 /**
  * Services Data
@@ -217,42 +249,10 @@ const musicTiles = [
   // REMOVED: The Mindhelpa institute card was here
 ];
 
-// ----------------- Reusable Components -----------------
 
-
-/**
- * ComingSoonModal Component
- * A modal that informs the user that a feature is under development.
- */
-function ComingSoonModal({ open, onClose }) {
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
-      <div className="bg-[#101b3d] border border-white/10 rounded-2xl p-8 w-full max-w-md shadow-2xl relative text-center">
-        {/* Close icon */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-white transition"
-        >
-          <X size={22} />
-        </button>
-
-        {/* Spinner */}
-        <div className="flex justify-center mb-6">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-
-        <h3 className="text-2xl font-semibold text-white">Coming Soon</h3>
-        <p className="mt-3 text-gray-300">
-          This feature is under development. Stay tuned!
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// ----------------- Main Page Component -----------------
+// =========================================================================
+// 4. MAIN PAGE COMPONENT (DEFAULT EXPORT)
+// =========================================================================
 
 /**
  * FeaturesPage Component
@@ -421,11 +421,8 @@ export default function FeaturesPage() {
             />
           </div>
         </div>
+          
       </div>
-
-      {/* --- */}
-
-      {/* CALL TO ACTION (CTA) SECTION - REMOVED */}
 
       {/* --- */}
 
