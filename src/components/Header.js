@@ -1,20 +1,21 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { 
-    Menu, 
-    X, 
-    ArrowRight, 
-    ChevronDown, 
+import {
+    Menu,
+    X,
+    ArrowRight,
+    ChevronDown,
     ChevronUp,
-    ClipboardList, 
-    Stethoscope, 
-    GraduationCap, 
-    HeartHandshake, 
-    Users 
+    ClipboardList,
+    Stethoscope,
+    GraduationCap,
+    HeartHandshake,
+    Users
 } from "lucide-react";
 
 // Updated MobileMenuItem to accept an optional 'icon' prop and adjust styling for it
@@ -25,16 +26,16 @@ const MobileMenuItem = ({ href, children, onClick, icon: Icon }) => (
         className="flex items-center w-full px-4 py-3 border-b border-gray-700 last:border-b-0 hover:bg-[#1f294c] transition-colors duration-200 group"
     >
         {Icon && <Icon size={20} className="mr-3 text-blue-400" />}
-        <span className="font-sans text-white text-lg font-light flex-grow truncate">{children}</span> 
+        <span className="font-sans text-white text-lg font-light flex-grow truncate">{children}</span>
         <ArrowRight size={20} className="text-gray-400 group-hover:translate-x-1 transition-transform duration-200" />
     </Link>
 );
 
 // New component for Desktop Dropdown Item to include the icon
 const DropdownMenuItem = ({ href, children, onClick, icon: Icon }) => (
-    <Link 
-        href={href} 
-        onClick={onClick} 
+    <Link
+        href={href}
+        onClick={onClick}
         className="flex items-center px-4 py-2 text-white hover:bg-[#1f294c] transition-colors duration-200 rounded-lg"
     >
         {Icon && <Icon size={18} className="mr-3 text-blue-400" />}
@@ -45,10 +46,10 @@ const DropdownMenuItem = ({ href, children, onClick, icon: Icon }) => (
 
 export default function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
-    const [user, setUser] = useState(null); 
+    const [user, setUser] = useState(null);
     const [pricingDropdownOpen, setPricingDropdownOpen] = useState(false);
-    
-    const router = useRouter(); 
+
+    const router = useRouter();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -62,7 +63,7 @@ export default function Header() {
         setMenuOpen(false);
         router.push("/login");
     };
-    
+
     const togglePricingDropdown = () => {
         setPricingDropdownOpen(!pricingDropdownOpen);
     };
@@ -72,9 +73,9 @@ export default function Header() {
             <MobileMenuItem href="/" onClick={() => setMenuOpen(false)}>Home</MobileMenuItem>
             <MobileMenuItem href="/services" onClick={() => setMenuOpen(false)}>Services</MobileMenuItem>
             <MobileMenuItem href="/how-it-works" onClick={() => setMenuOpen(false)}>How It Works</MobileMenuItem>
-            
+
             {/* Mobile Pricing Dropdown Trigger */}
-            <div 
+            <div
                 onClick={togglePricingDropdown}
                 className="flex items-center w-full px-4 py-3 border-b border-gray-700 last:border-b-0 hover:bg-[#1f294c] transition-colors duration-200 cursor-pointer"
             >
@@ -84,32 +85,30 @@ export default function Header() {
 
             {/* Mobile Pricing Dropdown Menu */}
             {pricingDropdownOpen && (
-                <div className="flex flex-col"> 
-                    <MobileMenuItem 
-                        href="/pricing-adhd-assessment" 
+                <div className="flex flex-col">
+                    <MobileMenuItem
+                        href="/pricing-adhd-assessment"
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
                         icon={ClipboardList}
                     >
                         ADHD Assessment
                     </MobileMenuItem>
-                    <MobileMenuItem 
-                        href="/pricing-adhd-clinical-assessment" 
+                    <MobileMenuItem
+                        href="/pricing-adhd-clinical-assessment"
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
                         icon={Stethoscope}
                     >
                         ADHD Clinical Assessment
                     </MobileMenuItem>
-                    <MobileMenuItem 
-                        href="/pricing-mindhelpa-institute" 
+                    <MobileMenuItem
+                        href="/pricing-mindhelpa-institute"
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
                         icon={GraduationCap}
                     >
-                       
-            
                         Mental Health Recovery
                     </MobileMenuItem>
-                    <MobileMenuItem 
-                        href="/book-a-coach" 
+                    <MobileMenuItem
+                        href="/book-a-coach"
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
                         icon={Users}
                     >
@@ -117,7 +116,7 @@ export default function Header() {
                     </MobileMenuItem>
                 </div>
             )}
-            
+
             <MobileMenuItem href="/resources" onClick={() => setMenuOpen(false)}>Resources</MobileMenuItem>
         </>
     );
@@ -130,7 +129,7 @@ export default function Header() {
             <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                 {/* Logo */}
                 <Link href="/" className="flex items-center">
-                    <img src="/logo.png" alt="ADHD Check Logo" className="h-14" /> 
+                    <img src="/logo.png" alt="ADHD Check Logo" className="h-14" />
                 </Link>
 
                 {/* Desktop Menu */}
@@ -138,7 +137,7 @@ export default function Header() {
                     <Link href="/" className="hover:text-blue-400 transition-all duration-200">Home</Link>
                     <Link href="/services" className="hover:text-blue-400 transition-all duration-200">Services</Link>
                     <Link href="/how-it-works" className="hover:text-blue-400 transition-all duration-200">How It Works</Link>
-                    
+
                     {/* Desktop Pricing Dropdown (Background is bg-[#101b3d]) */}
                     <div className="relative group">
                         <button
@@ -153,33 +152,31 @@ export default function Header() {
                             transform transition-all duration-300 ease-in-out
                             ${pricingDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}
                         `}>
-                            <div className="text-left"> 
-                                <DropdownMenuItem 
-                                    href="/pricing-adhd-assessment" 
+                            <div className="text-left">
+                                <DropdownMenuItem
+                                    href="/pricing-adhd-assessment"
                                     onClick={() => setPricingDropdownOpen(false)}
                                     icon={ClipboardList}
                                 >
                                     ADHD Assessment
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                    href="/pricing-adhd-clinical-assessment" 
-                                    onClick={() => setPricingDropdownOpen(false)} 
+                                <DropdownMenuItem
+                                    href="/pricing-adhd-clinical-assessment"
+                                    onClick={() => setPricingDropdownOpen(false)}
                                     icon={Stethoscope}
                                 >
                                     ADHD Clinical Assessment
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                    href="/pricing-mindhelpa-institute" 
-                                    onClick={() => setPricingDropdownOpen(false)} 
+                                <DropdownMenuItem
+                                    href="/pricing-mindhelpa-institute"
+                                    onClick={() => setPricingDropdownOpen(false)}
                                     icon={GraduationCap}
                                 >
-                                   
-            
                                     Mental Health Recovery
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                    href="/book-a-coach" 
-                                    onClick={() => setPricingDropdownOpen(false)} 
+                                <DropdownMenuItem
+                                    href="/book-a-coach"
+                                    onClick={() => setPricingDropdownOpen(false)}
                                     icon={Users}
                                 >
                                     Psychiatrist Coaching
@@ -241,7 +238,8 @@ export default function Header() {
                     {/* User Login/Logout Logic */}
                     {user ? (
                         <>
-                            <MobileMenuItem href="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</MobileMenuItem>
+                            {/* MODIFIED LINE: Changed href="/dashboard" to href="/dashboard/home" */}
+                            <MobileMenuItem href="/dashboard/home" onClick={() => setMenuOpen(false)}>Dashboard</MobileMenuItem>
                             <button onClick={handleLogout} className="text-lg w-full text-left px-4 py-3 text-red-400 font-semibold">
                                 Logout
                             </button>
