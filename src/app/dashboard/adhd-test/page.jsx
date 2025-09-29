@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import Report from './Report';
-// Removed dynamic import for html2pdf here. We'll import it inside handleDownloadPDF instead.
+// Assuming you have these icons installed via a library like 'lucide-react'
+import { Download, CheckCircle, Loader2 } from 'lucide-react'; 
 import { auth, db } from "../../../lib/firebase";
 import {
   collection,
@@ -11,17 +12,16 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
-  query,
-  orderBy,
-  limit,
-  getDocs,
+  // Removed unused imports: query, orderBy, limit, getDocs
 } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+// Removed unused import: onAuthStateChanged
+// Removed unused import: v4 as uuidv4
 import { useRouter } from "next/navigation";
-import { v4 as uuidv4 } from 'uuid';
 
-// Removed the 'html2pdf' dynamic import to use a direct import inside the handler function
 
+// ----------------------------------------------------------------------
+// FULL QUESTION ARRAY
+// ----------------------------------------------------------------------
 const questions = [
   'Do you often have difficulty sustaining attention in tasks or play activities?',
   'Do you frequently make careless mistakes in schoolwork, work, or or other activities?',
@@ -120,7 +120,8 @@ export default function AdhdTestPage() {
   const [userInfo, setUserInfo] = useState({ name: '', sex: '', dob: '' });
   const [showResumeDialog, setShowResumeDialog] = useState(false);
   const [milestoneNotification, setMilestoneNotification] = useState('');
-  const [isDownloading, setIsDownloading] = useState(false);
+  // 3 States: false (default), true (downloading), 'success' (downloaded)
+  const [isDownloading, setIsDownloading] = useState(false); 
   const [calculatedScore, setCalculatedScore] = useState(0);
 
   const audioRef = useRef(null);
@@ -238,19 +239,17 @@ export default function AdhdTestPage() {
   };
 
   // ----------------------------------------------------------------------
-  // **FIX IS HERE**
+  // UPDATED handleDownloadPDF for UI/Confetti
   const handleDownloadPDF = async () => {
-    // 1. Set downloading state immediately
     setIsDownloading(true);
 
     try {
-      // 2. Dynamically import the html2pdf library when the button is clicked
-      // This is the most reliable way to use a dynamically imported client-side library.
       const html2pdfModule = (await import('html2pdf.js')).default;
 
       const element = document.getElementById('report-content');
       if (!element) {
         console.error("Report content element not found.");
+        setIsDownloading(false);
         return;
       }
 
@@ -262,9 +261,24 @@ export default function AdhdTestPage() {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
-      // 3. Use the imported module's default export (the html2pdf function)
-      html2pdfModule().from(element).set(options).save()
-        .finally(() => setIsDownloading(false));
+      // Wait for the save operation to complete
+      await html2pdfModule().from(element).set(options).save();
+
+      // Post-Download Success Logic:
+      confetti({
+        particleCount: 200,
+        spread: 180,
+        origin: { y: 0.8 },
+        zIndex: 10002
+      });
+
+      // Set state to 'success' for the downloaded message
+      setIsDownloading('success');
+
+      // Clear the success message after 5 seconds
+      setTimeout(() => {
+        setIsDownloading(false);
+      }, 5000); 
 
     } catch (error) {
       console.error("Error during PDF generation:", error);
@@ -275,22 +289,26 @@ export default function AdhdTestPage() {
 
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-6 bg-[#0A0A0A] text-gray-200">
+    // Mobile Balance/Responsive Fixes Applied (p-4 sm:p-6 for better mobile margins)
+    <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#0A0A0A] text-gray-200">
       <audio ref={audioRef} src="/sounds/click.mp3" preload="auto" />
 
+      {/* Background blob animations */}
       <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
         <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
         <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob-delay" />
       </div>
-
+      
+      {/* Milestone Notification */}
       {milestoneNotification && (
         <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[10001] bg-blue-500/80 backdrop-blur-sm text-white px-4 py-2 text-sm md:px-6 md:py-3 md:text-lg font-bold shadow-lg rounded-full animate-fade-in">
           {milestoneNotification}
         </div>
       )}
 
+      {/* Resume Dialog */}
       {showResumeDialog && (
-        <div className="fixed inset-0 z-50 bg-[#0A0A0A] bg-opacity-80 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[#0A0A1A] bg-opacity-80 flex items-center justify-center p-4">
           <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-[#2c2c2c] max-w-md w-full animate-fade-in text-center">
             <h3 className="text-3xl font-bold text-white mb-2">Welcome Back!</h3>
             <p className="text-gray-400 mb-6">You have an unfinished assessment. Resume or start over?</p>
@@ -302,7 +320,10 @@ export default function AdhdTestPage() {
         </div>
       )}
 
-      <div className="relative z-10 w-full max-w-2xl">
+      {/* Main Content Area: Adjusted max-w for better mobile balance */}
+      <div className="relative z-10 w-full max-w-lg md:max-w-2xl">
+        
+        {/* Disclaimer Step */}
         {step === 'disclaimer' && (
           <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-2xl border border-[#2c2c2c] text-center animate-fade-in">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">A Quick Note on Accuracy</h2>
@@ -317,6 +338,7 @@ export default function AdhdTestPage() {
           </div>
         )}
 
+        {/* Form Step */}
         {step === 'form' && (
           <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-2xl border border-[#2c2c2c] animate-fade-in">
             <div className="text-center text-5xl mb-4">🧠</div>
@@ -371,6 +393,7 @@ export default function AdhdTestPage() {
           </div>
         )}
 
+        {/* Quiz Step: Improved Mobile Responsiveness for Options Grid */}
         {step === 'quiz' && (
           <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 md:p-10 rounded-3xl shadow-2xl border border-[#2c2c2c] animate-fade-in">
             <div className="h-4 bg-gray-700 rounded-full overflow-hidden mb-6">
@@ -387,7 +410,8 @@ export default function AdhdTestPage() {
               Question {current + 1} of {questions.length}
             </p>
             <h3 className="text-xl md:text-2xl font-bold text-white mb-8 text-center">{questions[current]}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Force 1 column on mobile, 2 columns on medium screens+ */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> 
               {options.map((opt, idx) => (
                 <button
                   key={idx}
@@ -412,16 +436,30 @@ export default function AdhdTestPage() {
           </div>
         )}
 
+        {/* Results Step: Download Button with Beautiful Icon and Confetti Logic */}
         {step === 'results' && (
           <div>
-            <Report userInfo={userInfo} answers={answers} />
+            {/* Report component is assumed to contain the element with id="report-content" */}
+            <Report userInfo={userInfo} answers={answers} /> 
             <div className="mt-8 flex flex-col items-center">
               <button
                 onClick={handleDownloadPDF}
-                disabled={isDownloading}
-                className="w-full max-w-xs px-8 py-4 font-semibold text-white rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors"
+                disabled={isDownloading !== false}
+                className={`w-full max-w-xs px-8 py-4 font-semibold text-white rounded-2xl transition-colors flex items-center justify-center space-x-2
+                  ${isDownloading === 'success' ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'}`}
               >
-                {isDownloading ? '📄 Generating PDF...' : '📄 Download Detailed Report as PDF'}
+                {/* Beautiful Icon Logic */}
+                {isDownloading === true && <Loader2 className="h-6 w-6 animate-spin" />}
+                {isDownloading === 'success' && <CheckCircle className="h-6 w-6" />}
+                {isDownloading === false && <Download className="h-6 w-6" />}
+                
+                {/* Text Logic */}
+                {isDownloading === true && <span>Generating Report...</span>}
+                {isDownloading === 'success' && 
+                  <span className="font-bold text-lg md:text-xl animate-pulse">
+                    DOWNLOADED to your device!
+                  </span>}
+                {isDownloading === false && <span>Download Detailed Report (PDF)</span>}
               </button>
               <a
                 href="/dashboard/adhd-history"
