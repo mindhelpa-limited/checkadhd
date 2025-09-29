@@ -455,3 +455,45 @@
     .infoGrid { grid-template-columns: 1fr; }
     .navButton { padding: 0.75rem 1rem; }
 }
+
+/* --- ADD THIS BLOCK TO THE END FOR WINDOW.PRINT() FIX --- */
+/* This media query hides everything but the report when the print dialog is open */
+@media print {
+    /* 1. Hide dashboard layout elements (header, sidebar, main body containers) */
+    /* Target common Next.js/Tailwind wrappers for the dashboard outside the report */
+    body > *:not(#report-content),
+    .min-h-\[calc\(100vh-80px\)\] { 
+        display: none !important;
+    }
+
+    /* 2. Force the report content to take the entire print page */
+    #report-content {
+        position: fixed; /* Use fixed for full viewport coverage */
+        top: 0;
+        left: 0;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        box-shadow: none !important;
+        background: white !important;
+        display: block !important;
+        min-height: 100vh;
+    }
+
+    /* 3. Ensure the main content area (which holds the report) takes up the full print page */
+    .lg\:col-span-8, .xl\:col-span-9, .lg\:grid-cols-12 {
+        display: block !important;
+        grid-column: 1 / -1 !important; /* Forces content full width */
+        width: 100% !important;
+    }
+
+    /* 4. Remove any unwanted background/box-shadows that might be inherited */
+    .onScreenReportWrapper, .adhdContainer {
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: white !important;
+    }
+}

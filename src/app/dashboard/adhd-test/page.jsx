@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import Report from './Report';
-import dynamic from 'next/dynamic';
+// Removed dynamic import for html2pdf here. We'll import it inside handleDownloadPDF instead.
 import { auth, db } from "../../../lib/firebase";
 import {
   collection,
@@ -20,10 +20,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
 
-const html2pdf = dynamic(() => import('html2pdf.js'), {
-  ssr: false,
-  loading: () => <div>Loading...</div>,
-});
+// Removed the 'html2pdf' dynamic import to use a direct import inside the handler function
 
 const questions = [
   'Do you often have difficulty sustaining attention in tasks or play activities?',
@@ -116,7 +113,7 @@ function riskFromPercent(scorePercentage) {
 
 export default function AdhdTestPage() {
   const router = useRouter();
-  
+
   const [step, setStep] = useState('disclaimer');
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState(() => new Array(questions.length).fill(null));
@@ -125,7 +122,7 @@ export default function AdhdTestPage() {
   const [milestoneNotification, setMilestoneNotification] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
   const [calculatedScore, setCalculatedScore] = useState(0);
-  
+
   const audioRef = useRef(null);
   const playClickSound = () => {
     if (audioRef.current) {
@@ -157,11 +154,11 @@ export default function AdhdTestPage() {
   const saveResultsToFirestore = async (totalScore, answerArray, userInfo) => {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
-    
+
     const maxScore = answerArray.length * 4;
     const scorePercentage = Math.round((totalScore / maxScore) * 100);
     const { level, riskLevelText } = riskFromPercent(scorePercentage);
-    
+
     try {
       await addDoc(collection(db, "users", currentUser.uid, "results"), {
         takenAt: serverTimestamp(),
@@ -173,7 +170,7 @@ export default function AdhdTestPage() {
         sex: userInfo?.sex || null,
         dob: userInfo?.dob || null,
       });
-      
+
       await updateDoc(doc(db, "users", currentUser.uid), { lastTest: serverTimestamp() });
       console.log("✅ Test result saved");
     } catch (error) {
@@ -240,12 +237,23 @@ export default function AdhdTestPage() {
     setStep('form');
   };
 
-  const handleDownloadPDF = () => {
-    if (!html2pdf) return;
-    const element = document.getElementById('report-content');
-    if (!element) return;
+  // ----------------------------------------------------------------------
+  // **FIX IS HERE**
+  const handleDownloadPDF = async () => {
+    // 1. Set downloading state immediately
     setIsDownloading(true);
-    setTimeout(() => {
+
+    try {
+      // 2. Dynamically import the html2pdf library when the button is clicked
+      // This is the most reliable way to use a dynamically imported client-side library.
+      const html2pdfModule = (await import('html2pdf.js')).default;
+
+      const element = document.getElementById('report-content');
+      if (!element) {
+        console.error("Report content element not found.");
+        return;
+      }
+
       const options = {
         margin: [10, 10, 10, 10],
         filename: `ADHD_Assessment_Report_${(userInfo.name || 'User').replace(/\s/g, '_')}.pdf`,
@@ -253,9 +261,18 @@ export default function AdhdTestPage() {
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
-      html2pdf().from(element).set(options).save().finally(() => setIsDownloading(false));
-    }, 300);
+
+      // 3. Use the imported module's default export (the html2pdf function)
+      html2pdfModule().from(element).set(options).save()
+        .finally(() => setIsDownloading(false));
+
+    } catch (error) {
+      console.error("Error during PDF generation:", error);
+      setIsDownloading(false);
+    }
   };
+  // ----------------------------------------------------------------------
+
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-6 bg-[#0A0A0A] text-gray-200">
@@ -305,7 +322,7 @@ export default function AdhdTestPage() {
             <div className="text-center text-5xl mb-4">🧠</div>
             <h2 className="text-3xl font-bold text-white text-center mb-2">Personal Information</h2>
             <p className="text-gray-400 text-center mb-8">Please provide your details to personalize your report.</p>
-            
+
             <div className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-gray-400 font-semibold mb-2">Full Name</label>
