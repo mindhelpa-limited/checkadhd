@@ -1,7 +1,15 @@
 'use client';
-import { auth, db } from "@/lib/firebase";
+
+// =================================================================================================
+// 1. IMPORTS
+// -------------------------------------------------------------------------------------------------
+// Standard React/Next.js
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from 'framer-motion';
+
+// Firebase
+import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   doc,
@@ -12,17 +20,39 @@ import {
   query,
   limit,
 } from "firebase/firestore";
+
+// UI Components (Heroicons)
 import {
   ChatBubbleBottomCenterTextIcon,
-  CalendarDaysIcon,
   ClockIcon,
   XMarkIcon,
-  PrinterIcon, // ⬅️ NEW: Import PrinterIcon
 } from "@heroicons/react/24/outline";
-import { motion } from 'framer-motion';
 
-// --- Small UI components (visual-only tweaks, no logic) ---
 
+// =================================================================================================
+// 2. HELPER FUNCTIONS
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Determines the ADHD likelihood status based on the score percentage.
+ * @param {number} score - The score out of 100.
+ * @returns {string} The descriptive status text.
+ */
+const getAdhdStatus = (score) => {
+  const s = Number(score) || 0;
+  if (s >= 70) return "High Likelihood";
+  if (s >= 40) return "Moderate Likelihood";
+  return "Low Likelihood";
+};
+
+
+// =================================================================================================
+// 3. SMALL/VISUAL UI COMPONENTS
+// -------------------------------------------------------------------------------------------------
+
+/**
+ * Renders a circular progress ring to display the score.
+ */
 const ScoreRing = ({ score }) => {
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
@@ -58,7 +88,10 @@ const ScoreRing = ({ score }) => {
   );
 };
 
-const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) => (
+/**
+ * Modal shown when retaking the test is not yet available (time limit).
+ */
+const RetakeTestModal = ({ timeLeft, onClose, onTakeTest, playClickSound }) => (
   // Darker backdrop
   <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <motion.div
@@ -94,20 +127,23 @@ const RetakeTestModal = ({ timeLeft, onClose, onViewResults, playClickSound }) =
           </strong>
         </div>
         <button
-          onClick={() => { playClickSound(); onViewResults(); }}
+          onClick={() => { playClickSound(); onClose(); }} // Fallback button only closes now
           className="w-full px-8 py-3 text-sm font-semibold text-white rounded-2xl transition-colors"
           style={{
             background: 'linear-gradient(135deg, #FB923C, #F87171)',
             boxShadow: '0 8px 20px rgba(248,113,113,0.35)'
           }}
         >
-          View Current Result
+          Close
         </button>
       </div>
     </motion.div>
   </div>
 );
 
+/**
+ * Full-screen overlay component for displaying loading status.
+ */
 const FullScreenLoader = ({ message }) => (
   <div
     className="fixed inset-0 flex items-center justify-center z-50"
@@ -125,14 +161,10 @@ const FullScreenLoader = ({ message }) => (
   </div>
 );
 
-const getAdhdStatus = (score) => {
-  const s = Number(score) || 0;
-  if (s >= 70) return "High Likelihood";
-  if (s >= 40) return "Moderate Likelihood";
-  return "Low Likelihood";
-};
 
-// --- Dashboard Component ---
+// =================================================================================================
+// 4. MAIN COMPONENT (DashboardPage)
+// -------------------------------------------------------------------------------------------------
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -150,6 +182,11 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
 
   const audioRef = useRef(null);
+  
+  // --- Animation State and Ref ---
+  const sectionRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
   const playClickSound = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -157,6 +194,7 @@ export default function DashboardPage() {
     }
   };
 
+  // --- Effect: Auth and Data Fetching (Unchanged) ---
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
@@ -174,13 +212,14 @@ export default function DashboardPage() {
 
       const data = docSnap.data();
       if (data?.tier !== "premium") {
-        router.replace("/pricing-adhd-assessment");
+        router.replace("/pricing-a");
         return;
       }
 
-      setUserData({ tier: data.tier }); 
+      setUserData({ tier: data.tier });
       setLoadingMessage("Loading your latest result...");
 
+      // Set up real-time listener for the latest result
       const colRef = collection(db, "users", currentUser.uid, "results");
       const q = query(colRef, orderBy("takenAt", "desc"), limit(1));
       const unsubLatest = onSnapshot(
@@ -195,7 +234,7 @@ export default function DashboardPage() {
             setLevelLabel("");
             setLastTestDate(null);
             setRetakeAvailable(true);
-            setLoading(false);
+            setLoading(false); // <--- IMPORTANT: Set loading to false here
             return;
           }
 
@@ -210,20 +249,14 @@ export default function DashboardPage() {
           setRiskLevelText(d?.riskLevelText ?? "");
           setLevelLabel(d?.level ?? "");
           setLastTestDate(takenAt || null);
-          setLoading(false);
+          setLoading(false); // <--- IMPORTANT: Set loading to false here
 
           setRetakeAvailable(true);
         },
         (err) => {
           console.error("Latest result subscription error:", err);
-          setHasTakenTest(false);
-          setLatestId(null);
-          setScoreOutOf100(null);
-          setRiskLevelText("");
-          setLevelLabel("");
-          setLastTestDate(null);
-          setRetakeAvailable(true);
-          setLoading(false);
+          // Set loading to false even on error to prevent eternal blank page
+          setLoading(false); 
         }
       );
       return () => unsubLatest();
@@ -231,31 +264,58 @@ export default function DashboardPage() {
     return () => unsub();
   }, [router]);
 
+  // --- Animation Effect (Modified to depend on loading state) ---
+  useEffect(() => {
+    if (loading) return; // Wait for loading to finish
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.1, // Trigger when 10% of the element is visible
+      }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, [loading]); // Run this effect when 'loading' state changes
+
+  // --- Handlers ---
+
   const handleTestButtonClick = () => {
     playClickSound();
     router.push("/dashboard/adhd-test");
   };
 
-  // 1. Existing handler for 'View Results' (Absolute URL/External Link)
-  const handleViewResultsClick = () => {
+  const handleViewResultClick = () => {
     playClickSound();
-    window.location.href = "https://mindhelpa.com/dashboard/adhd-history"; 
+    router.push("/dashboard/adhd-history");
   };
-  
-  // 2. NEW handler for 'Print Result' (Internal Next.js Link)
-  const handlePrintResultClick = () => {
-      playClickSound();
-      // Use router.push for the specified internal route
-      router.push("/dashboard/adhd-history");
-  };
+
+  // --- Loading State ---
 
   if (loading) {
     return <FullScreenLoader message={loadingMessage} />;
   }
 
+  // --- Render ---
+
   return (
     <main
-      className="relative min-h-screen p-6 md:p-10 overflow-x-hidden font-sans" 
+      className="relative min-h-screen p-6 md:p-10 overflow-x-hidden font-sans"
       style={{
         color: '#D1D5DB',
         backgroundImage: `
@@ -268,7 +328,7 @@ export default function DashboardPage() {
     >
       <audio ref={audioRef} src="/sounds/click.mp3" preload="auto" />
 
-      {/* Subtle ambient glows (adjusted opacity for dark mode) */}
+      {/* Subtle ambient glows */}
       <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
         <div
           className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full filter blur-3xl opacity-30 animate-blob"
@@ -280,96 +340,16 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="relative max-w-6xl mx-auto z-10">
+      {/* Main content wrapper with On-Scroll Fade-In animation */}
+      <div
+        ref={sectionRef}
+        className={`relative max-w-6xl mx-auto z-10 transform transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          
-          {/* Dashboard Info Card (Slot 2) */}
+
+          {/* Actions card (Slot 1, Order 1 on mobile, 2 on desktop) */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            whileHover={{
-              scale: 1.02,
-              boxShadow: "0 20px 40px rgba(0,0,0,0.5), 0 0 10px rgba(59,130,246,0.15)", 
-              rotate: 0.2,
-            }}
-            className="group relative overflow-hidden p-6 md:p-8 rounded-3xl border md:col-span-2 order-2 md:order-1 transition-all duration-300" 
-            style={{
-              borderColor: '#374151',
-              backgroundImage: `
-                radial-gradient(35% 60% at 15% 0%, rgba(59,130,246,0.1), transparent 70%),
-                radial-gradient(30% 50% at 85% 10%, rgba(20,184,166,0.1), transparent 70%),
-                linear-gradient(160deg, #1F2937, #111827 100%)
-              `,
-              boxShadow: 'inset 0 0 1px rgba(255,255,255,0.1)'
-            }}
-          >
-            <div className="absolute inset-0 opacity-15 group-hover:opacity-30 transition-opacity duration-300"
-                style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.15), rgba(167,139,250,0.15))' }} />
-
-            <div className="mb-6"></div> 
-
-            {userData && (
-              <ul className="space-y-4 md:space-y-6">
-                
-                {/* ADHD Status Item */}
-                <motion.li
-                  whileHover={{ scale: 1.02, backgroundColor: '#111827' }}
-                  className="flex items-center p-4 rounded-xl border transition-all duration-300"
-                  style={{ borderColor: '#374151', background: '#1F2937' }}
-                >
-                  <ChatBubbleBottomCenterTextIcon className="h-6 w-6 text-[#A78BFA] mr-4 flex-shrink-0" />
-                  <div>
-                    <strong className="text-white">ADHD Status:</strong>
-                    <p className="font-semibold text-[#60A5FA]">
-                      {hasTakenTest && scoreOutOf100 != null ? getAdhdStatus(scoreOutOf100) : "Not available yet"}
-                    </p>
-                    {hasTakenTest && riskLevelText && (
-                      <p className="text-xs text-[#9CA3AF] mt-1">{levelLabel} • {riskLevelText}</p>
-                    )}
-                  </div>
-                </motion.li>
-
-                {/* View Results Item (Clickable - External Link) */}
-                <motion.li
-                  onClick={handleViewResultsClick}
-                  whileHover={{ scale: 1.02, backgroundColor: '#111827', cursor: 'pointer' }}
-                  className="flex items-center p-4 rounded-xl border transition-all duration-300 cursor-pointer"
-                  style={{ borderColor: '#374151', background: '#1F2937' }}
-                >
-                  <CalendarDaysIcon className="h-6 w-6 text-[#FB923C] mr-4 flex-shrink-0" />
-                  <div>
-                    <strong className="text-white">View Results:</strong>
-                    <p className="text-[#9CA3AF]">
-                      {hasTakenTest && lastTestDate
-                        ? `Last test taken: ${lastTestDate.toLocaleDateString()}`
-                        : "No test history yet"}
-                    </p>
-                  </div>
-                </motion.li>
-                
-                {/* 3. NEW: Print Result Item (Clickable - Internal Link) */}
-                <motion.li
-                  onClick={handlePrintResultClick}
-                  whileHover={{ scale: 1.02, backgroundColor: '#111827', cursor: 'pointer' }}
-                  className="flex items-center p-4 rounded-xl border transition-all duration-300 cursor-pointer"
-                  style={{ borderColor: '#374151', background: '#1F2937' }}
-                >
-                  <PrinterIcon className="h-6 w-6 text-[#10B981] mr-4 flex-shrink-0" /> {/* Green/Emerald icon */}
-                  <div>
-                    <strong className="text-white">Print Result:</strong>
-                    <p className="text-[#9CA3AF]">
-                      {hasTakenTest ? "Download or print your full assessment." : "Print not available yet"}
-                    </p>
-                  </div>
-                </motion.li>
-              </ul>
-            )}
-          </motion.div>
-
-
-          {/* Actions card (Slot 1) */}
-          <motion.div
+            // Restored Framer Motion for a nice immediate entrance
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -378,7 +358,7 @@ export default function DashboardPage() {
               boxShadow: "0 20px 40px rgba(0,0,0,0.5), 0 0 10px rgba(248,113,113,0.15)",
               rotate: -0.2,
             }}
-            className="relative overflow-hidden p-6 md:p-8 rounded-3xl border flex flex-col justify-between transition-all duration-300 order-1 md:order-2" 
+            className="relative overflow-hidden p-6 md:p-8 rounded-3xl border flex flex-col justify-between transition-all duration-300 order-1 md:order-2"
             style={{
               borderColor: '#374151',
               backgroundImage: `
@@ -390,13 +370,13 @@ export default function DashboardPage() {
             }}
           >
             <div className="absolute inset-0 opacity-20 transition-opacity duration-300"
-                style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.15), rgba(167,139,250,0.15))' }} />
-            
+              style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.15), rgba(167,139,250,0.15))' }} />
+
             <div className="flex flex-col items-center relative z-10">
               <h3 className="text-xl font-bold mb-4 text-white text-center">
                 Ready for your test?
               </h3>
-              
+
               {hasTakenTest && scoreOutOf100 != null && (
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
@@ -423,7 +403,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="relative z-10">
+            <div className="relative z-10 space-y-4"> {/* Added space-y-4 for gap */}
               <motion.button
                 onClick={handleTestButtonClick}
                 whileHover={{ scale: 1.03 }}
@@ -436,8 +416,76 @@ export default function DashboardPage() {
               >
                 {hasTakenTest ? "Retake the Test" : "Take the ADHD Test"}
               </motion.button>
+
+              {/* NEW: View Result Button */}
+              <motion.button
+                onClick={handleViewResultClick}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-opacity-40 text-white"
+                style={{
+                  background: '#60A5FA', // A solid color for differentiation
+                  boxShadow: '0 5px 15px rgba(96, 165, 250, 0.4)'
+                }}
+              >
+                View Result
+              </motion.button>
+
             </div>
           </motion.div>
+
+          {/* Dashboard Info Card (Slot 2, Order 2 on mobile, 1 on desktop) */}
+          <motion.div
+            // Restored Framer Motion for a nice immediate entrance
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            whileHover={{
+              scale: 1.02,
+              boxShadow: "0 20px 40px rgba(0,0,0,0.5), 0 0 10px rgba(59,130,246,0.15)",
+              rotate: 0.2,
+            }}
+            className="group relative overflow-hidden p-6 md:p-8 rounded-3xl border md:col-span-2 order-2 md:order-1 transition-all duration-300"
+            style={{
+              borderColor: '#374151',
+              backgroundImage: `
+                radial-gradient(35% 60% at 15% 0%, rgba(59,130,246,0.1), transparent 70%),
+                radial-gradient(30% 50% at 85% 10%, rgba(20,184,166,0.1), transparent 70%),
+                linear-gradient(160deg, #1F2937, #111827 100%)
+              `,
+              boxShadow: 'inset 0 0 1px rgba(255,255,255,0.1)'
+            }}
+          >
+            <div className="absolute inset-0 opacity-15 group-hover:opacity-30 transition-opacity duration-300"
+              style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.15), rgba(167,139,250,0.15))' }} />
+
+            <div className="mb-6"></div>
+
+            {userData && (
+              <ul className="space-y-4 md:space-y-6">
+
+                {/* ADHD Status Item */}
+                <motion.li
+                  whileHover={{ scale: 1.02, backgroundColor: '#111827' }}
+                  className="flex items-center p-4 rounded-xl border transition-all duration-300"
+                  style={{ borderColor: '#374151', background: '#1F2937' }}
+                >
+                  <ChatBubbleBottomCenterTextIcon className="h-6 w-6 text-[#A78BFA] mr-4 flex-shrink-0" />
+                  <div>
+                    <strong className="text-white">ADHD Status:</strong>
+                    <p className="font-semibold text-[#60A5FA]">
+                      {hasTakenTest && scoreOutOf100 != null ? getAdhdStatus(scoreOutOf100) : "Not available yet"}
+                    </p>
+                    {hasTakenTest && riskLevelText && (
+                      <p className="text-xs text-[#9CA3AF] mt-1">{levelLabel} • {riskLevelText}</p>
+                    )}
+                  </div>
+                </motion.li>
+
+              </ul>
+            )}
+          </motion.div>
+
         </div>
       </div>
 
@@ -445,18 +493,22 @@ export default function DashboardPage() {
         <RetakeTestModal
           timeLeft={timeLeft}
           onClose={() => { playClickSound(); setShowModal(false); }}
-          onViewResults={handleViewResultsClick}
+          onTakeTest={handleTestButtonClick}
           playClickSound={playClickSound}
         />
       )}
+
+      {/* ========================================================================================= */}
+      {/* 5. STYLES */}
+      {/* ----------------------------------------------------------------------------------------- */}
 
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap');
 
         /* Set the default text color for the entire body to white/light-gray */
-        body { 
-          font-family: 'Inter', sans-serif; 
-          color: #D1D5DB; 
+        body {
+          font-family: 'Inter', sans-serif;
+          color: #D1D5DB;
           background: #030712;
         }
 
