@@ -10,10 +10,12 @@ export default function Footer() {
         {/* Column 1 - Logo + Description */}
         <div>
           <Link href="/" className="flex items-center mb-4">
-            <Image src="/logo.png" alt="ADHD Check Logo" width={32} height={32} className="h-8 w-auto" />
+            {/* Added 'unoptimized' prop to prevent processing that might cause blur */}
+            <Image src="/logo.png" alt="ADHD Check Logo" width={32} height={32} className="h-8 w-auto" unoptimized />
           </Link>
           <p className="text-sm text-white/70 mt-3 leading-relaxed">
-            Evidence-based ADHD assessment and recovery program designed to support focus, calm, and progress.
+            {/* Updated text as requested */}
+            Mental Health Screening, Evaluation Assessment and Recovery. Take charge of your mental health with our Recovery tools and crush your personal goals using our Psychiatrist-Led Coaching.
           </p>
         </div>
 

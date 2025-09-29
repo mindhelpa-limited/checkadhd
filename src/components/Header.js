@@ -140,7 +140,7 @@ export default function Header() {
     );
 
     return (
-        <header className="bg-black/40 backdrop-blur-md text-white fixed top-0 left-0 right-0 z-50 shadow-lg">
+        <header className="bg-black/40 backdrop-blur-md text-white md:fixed top-0 left-0 right-0 z-50 shadow-lg">
             <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                 {/* Logo (using Link) */}
                 <Link href="/" className="flex items-center">

@@ -1,16 +1,20 @@
 'use client';
 
+// ===============================================
+// I. IMPORTS
+// ===============================================
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Users, User, ChevronDown, Loader2 } from 'lucide-react';
+import { CheckCircle, Users, User, ChevronDown, Loader2, Zap } from 'lucide-react';
 
 // LOCAL IMPORTS
 import Footer from "../../components/home/Footer";
 import { auth } from "@/lib/firebase";
 
 // ===============================================
-// I. DATA STRUCTURE – Matches backend PRODUCT_LOOKUPS
+// II. DATA STRUCTURE – Uses EXACT user content
 // ===============================================
 
 const COACHING_CONTENT = {
@@ -43,14 +47,14 @@ const LARGE_GROUP_PRICING = [
 ];
 
 // ===============================================
-// II. TOGGLE & PRICING CARD COMPONENTS
+// III. HELPER COMPONENTS (Background/UI elements)
 // ===============================================
 
 /**
  * Renders the toggle button for switching between Individual and Group Coaching.
  */
 const GroupToggle = ({ active, setActive }) => (
-  <div className="flex bg-gray-700/50 p-1 rounded-full w-full max-w-sm mx-auto shadow-xl backdrop-blur-sm relative">
+  <div className="flex bg-gray-700/50 p-1 rounded-full w-full max-w-sm mx-auto shadow-2xl backdrop-blur-sm relative border border-blue-700/50">
     <button
       onClick={() => setActive('individual')}
       className={`flex-1 py-3 rounded-full text-sm font-semibold transition-all duration-300 relative z-10 ${
@@ -80,10 +84,10 @@ const GroupToggle = ({ active, setActive }) => (
 );
 
 /**
- * Renders a single pricing card with tier details and an expandable feature list.
+ * Renders a single pricing card with tier details and a permanently visible feature list.
  */
 const PricingCard = ({ tier, sessions, price, persons, savings, product, handleCheckout, loadingPlan }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  // Removed all state/toggle logic for features
   const isLoading = loadingPlan === product;
 
   const features = [
@@ -98,7 +102,7 @@ const PricingCard = ({ tier, sessions, price, persons, savings, product, handleC
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative flex flex-col p-6 bg-gray-900/70 border border-blue-700/50 rounded-2xl shadow-2xl backdrop-blur-md hover:shadow-blue-900/50 transition-all duration-300 transform hover:scale-[1.02]"
+      className="relative flex flex-col p-6 bg-[#101b3d]/80 border border-blue-400/20 rounded-2xl shadow-2xl backdrop-blur-md hover:shadow-blue-900/50 transition-all duration-300 transform hover:scale-[1.02]"
     >
       <div className="text-center">
         <h3 className="text-2xl font-bold text-blue-400">{tier}</h3>
@@ -111,50 +115,43 @@ const PricingCard = ({ tier, sessions, price, persons, savings, product, handleC
         )}
       </div>
 
-      {/* Expandable features */}
+      {/* Feature List (Always visible, non-collapsible) */}
       <div className="mt-auto">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full text-blue-300 hover:text-blue-200 py-2 flex justify-center items-center text-sm font-semibold transition-colors"
+
+        <div
+          className="w-full text-blue-300 py-2 flex justify-center items-center text-sm font-semibold transition-colors border-t border-gray-700/50 mt-4"
         >
-          {isOpen ? 'Hide Details' : 'What is included?'}
+          {'What is included?'}
           <ChevronDown
             size={18}
-            className={`ml-2 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+            className={`ml-2 transition-transform duration-300`}
           />
-        </button>
+        </div>
 
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mt-4 overflow-hidden"
-            >
-              <ul className="space-y-2 text-left mb-6 text-gray-300">
-                <li className="flex items-start">
-                  <CheckCircle size={18} className="text-green-400 mr-2 mt-1" />
-                  <span className="font-semibold text-white mr-1">{sessions}</span>
-                </li>
-                {features.map((f, i) => (
-                  <li key={i} className="flex items-start">
-                    <CheckCircle size={18} className="text-blue-400 mr-2 mt-1" />
-                    <span className="text-sm">{f}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="mt-4 overflow-hidden">
+          <ul className="space-y-2 text-left mb-6 text-gray-300">
+            <li className="flex items-start">
+              <CheckCircle size={18} className="text-green-400 mr-2 mt-1 flex-shrink-0" />
+              <div>
+                <span className="font-semibold text-white mr-1">{sessions}</span>
+                <span className="text-sm text-gray-400">{persons ? ` for ${persons}` : ''}</span>
+              </div>
+            </li>
+            {features.map((f, i) => (
+              <li key={i} className="flex items-start">
+                <CheckCircle size={18} className="text-blue-400 mr-2 mt-1 flex-shrink-0" />
+                <span className="text-sm">{f}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <motion.button
           onClick={() => handleCheckout(product)}
           disabled={isLoading}
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="w-full mt-4 py-3 font-extrabold rounded-xl text-white bg-blue-600 shadow-lg disabled:bg-blue-400 flex justify-center items-center"
+          className="w-full mt-4 py-3 font-extrabold rounded-xl text-white bg-blue-600 shadow-xl shadow-blue-500/30 hover:bg-blue-700 transition-all disabled:bg-blue-400 flex justify-center items-center"
         >
           {isLoading ? (
             <>
@@ -170,7 +167,30 @@ const PricingCard = ({ tier, sessions, price, persons, savings, product, handleC
 };
 
 // ===============================================
-// III. MAIN COMPONENT
+// IV. HERO BACKGROUND COMPONENT (Evolving Sphere)
+// ===============================================
+
+const EvolvingSphere = () => (
+  <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
+    {/* Background radial gradient for depth */}
+    <div className="absolute inset-0 bg-radial-gradient-hero opacity-50"></div>
+
+    {/* The Evolving Sphere Container - Centered and large */}
+    <div className="relative w-[500px] h-[500px] sm:w-[800px] sm:h-[800px] flex items-center justify-center sphere-blur">
+      {/* Outer Pulsing Ring - Slow, broad movement */}
+      <div className="absolute w-full h-full border-4 border-blue-500/10 rounded-full animate-pulse-slow"></div>
+
+      {/* Middle Fading Ring - Symbolizing clarity/thought waves */}
+      <div className="absolute w-[80%] h-[80%] border-2 border-cyan-400/20 rounded-full animate-ping-medium"></div>
+
+      {/* Central, subtle rotation */}
+      <div className="absolute w-[60%] h-[60%] border border-blue-600/30 rounded-full animate-spin-slow-medium"></div>
+    </div>
+  </div>
+);
+
+// ===============================================
+// V. MAIN COMPONENT
 // ===============================================
 
 export default function CoachingPricingPage() {
@@ -180,7 +200,8 @@ export default function CoachingPricingPage() {
   const [error, setError] = useState("");
   const [couponCode, setCouponCode] = useState("");
 
-  const pricingData = activeTab === 'individual' ? INDIVIDUAL_PRICING : SMALL_GROUP_PRICING;
+  const isIndividualTab = activeTab === 'individual';
+  const pricingData = isIndividualTab ? INDIVIDUAL_PRICING : SMALL_GROUP_PRICING;
   const showLargeGroup = activeTab === 'group';
 
   /**
@@ -223,60 +244,113 @@ export default function CoachingPricingPage() {
   };
 
   return (
-    <div className="min-h-screen pt-20 pb-20 text-white font-sans bg-gradient-to-b from-[#06113b] to-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="text-center mb-16">
-          <h1 className="text-6xl font-black mb-4 bg-gradient-to-r from-blue-300 to-blue-600 bg-clip-text text-transparent">
+    <div className="min-h-screen text-white font-sans bg-[#0a122a] overflow-hidden">
+
+      {/* UPDATED HERO SECTION */}
+      <div className="relative py-24 sm:py-32 overflow-hidden border-b border-blue-900/50">
+        <EvolvingSphere /> {/* Using the new component */}
+        <div className="relative z-20 max-w-4xl mx-auto px-6 lg:px-8 text-center animate-hero-title-fade">
+
+          {/* EXACTLY your content used here: Title */}
+          <h1 className="mt-2 text-4xl font-bold tracking-tight text-white sm:text-6xl leading-tight">
             {COACHING_CONTENT.title}
           </h1>
-          <p className="text-lg text-gray-400 max-w-4xl mx-auto">{COACHING_CONTENT.body}</p>
-          {error && <p className="text-red-400 mt-4 font-medium">{error}</p>}
-        </header>
 
-        {/* Group/Individual Toggle */}
-        <GroupToggle active={activeTab} setActive={setActiveTab} />
-
-        {/* Coupon input */}
-        <div className="max-w-md mx-auto mt-8">
-          <input
-            type="text"
-            placeholder="Enter coupon code"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value)}
-            className="w-full p-4 border-2 border-gray-600 rounded-xl text-white bg-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-          />
+          {/* EXACTLY your content used here: Body */}
+          <p className="mt-6 text-xl leading-8 text-gray-300 max-w-3xl mx-auto">
+            {COACHING_CONTENT.body}
+          </p>
         </div>
-
-        {/* Pricing cards */}
-        <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
-          {pricingData.map((plan) => (
-            <PricingCard
-              key={plan.product}
-              {...plan}
-              handleCheckout={handleCheckout}
-              loadingPlan={loadingPlan}
-            />
-          ))}
-        </motion.div>
-
-        {/* Large group section (Conditionally rendered) */}
-        {showLargeGroup && (
-          <div className="lg:col-span-4 mt-16">
-            <h2 className="text-3xl font-bold text-center mb-8 text-blue-300">Large Groups (5-10 persons)</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {LARGE_GROUP_PRICING.map((plan) => (
-                <PricingCard
-                  key={plan.product}
-                  {...plan}
-                  handleCheckout={handleCheckout}
-                  loadingPlan={loadingPlan}
-                />
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+
+      <div className="pt-16 pb-24 sm:pb-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          {/* Group/Individual Toggle */}
+          <div className="mb-12">
+            <GroupToggle active={activeTab} setActive={setActiveTab} />
+          </div>
+
+          {/* Coupon input */}
+          <div className="max-w-lg mx-auto mb-16">
+            <input
+              type="text"
+              placeholder="Enter coupon code"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              className="w-full p-4 border border-blue-700 rounded-xl text-white bg-[#0a122a] placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/50 focus:border-blue-500 transition-all shadow-lg"
+            />
+            {error && <p className="text-red-400 text-center mt-4 font-medium">{error}</p>}
+          </div>
+
+          {/* Pricing cards */}
+          <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {pricingData.map((plan) => (
+              <PricingCard
+                key={plan.product}
+                {...plan}
+                handleCheckout={handleCheckout}
+                loadingPlan={loadingPlan}
+              />
+            ))}
+          </motion.div>
+
+          {/* Large group section (Conditionally rendered) */}
+          {showLargeGroup && (
+            <div className="lg:col-span-4 mt-20 pt-8 border-t border-blue-900/50">
+              <h2 className="text-3xl font-bold text-center mb-8 text-blue-300">Large Groups (5-10 persons)</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {LARGE_GROUP_PRICING.map((plan) => (
+                  <PricingCard
+                    key={plan.product}
+                    {...plan}
+                    handleCheckout={handleCheckout}
+                    loadingPlan={loadingPlan}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       <Footer />
+
+      {/* Custom styles for animations, updated to include Evolving Sphere logic */}
+      <style jsx global>{`
+        @keyframes hero-title-fade {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-hero-title-fade {
+          animation: hero-title-fade 1.5s ease-out forwards;
+        }
+        @keyframes spin-slow-medium {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow-medium {
+          animation: spin-slow-medium 70s linear infinite; /* Slower spin */
+          transform-origin: center;
+        }
+        @keyframes pulse-slow {
+          0%, 100% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.05); opacity: 0.5; }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 10s ease-in-out infinite;
+        }
+        .animate-ping-medium {
+          animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+          opacity: 0;
+        }
+        .bg-radial-gradient-hero {
+          background: radial-gradient(circle at 50% 0%, #06113b 0%, #0a122a 50%);
+        }
+        .sphere-blur {
+            filter: blur(1px); /* Adds a subtle, ethereal feel to the concentric circles */
+        }
+      `}</style>
     </div>
   );
 }
