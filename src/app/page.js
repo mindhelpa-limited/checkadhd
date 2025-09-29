@@ -90,7 +90,7 @@ const AssessmentAnimation = ({ className }) => (
 
 /**
  * ComingSoonModal Component
- * A modal that informs the user that a feature is under development.
+ * A modal that informs the users that a feature is under development.
  */
 function ComingSoonModal({ open, onClose }) {
   if (!open) return null;
