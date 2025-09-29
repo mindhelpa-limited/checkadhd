@@ -7,26 +7,23 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-
 // ===================================
 // 2. Third-party Libraries & Icons
 // ===================================
 
 // Icon Imports (Lucide React)
 import {
-  Activity,
-  User,
-  LogOut,
+  Home, // Grouped essential navigation icons first
   ClipboardList,
-  MessageCircle,
-  Award,
-  Home,
   Stethoscope,
+  User, // Used for Profile
+  LogOut,
+  // Other icons, if used elsewhere (removed unused ones for brevity/cleanliness if they aren't in the component logic):
+  // Activity, MessageCircle, Award, 
 } from "lucide-react";
 
 // Third-party Audio Library
 import * as Tone from 'tone';
-
 
 // ===================================
 // 3. Firebase/Local Imports
@@ -38,11 +35,13 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 
-// ===================================
-// 4. Custom Hooks and Logic
-// ===================================
+// ####################################################################
+// ## Custom Hooks & External Logic (Move to a separate file like '@/hooks/useAuth')
+// ####################################################################
 
-// --- Auth Hook ---
+/**
+ * Custom hook to monitor Firebase authentication state and fetch user data.
+ */
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -73,15 +72,59 @@ const useAuth = () => {
   return { user, userData, loading };
 };
 
-// --- Dashboard Layout Component ---
+
+// ####################################################################
+// ## Main Component: DashboardLayout
+// ####################################################################
+
 export default function DashboardLayout({ children }) {
+  // --- 1. Hooks & State ---
   const pathname = usePathname();
   const router = useRouter();
-  const { user, userData, loading } = useAuth();
-  const isRecoveryPath = pathname.startsWith("/dashboard/recovery/");
+  const { user, userData, loading } = useAuth(); // Use the custom hook
   const clickSoundPlayer = useRef(null);
+  
+  // --- 2. Constants & Configuration ---
+  const isRecoveryPath = pathname.startsWith("/dashboard/recovery/");
 
-  /* * Initialize Tone.js and load the sound file once. */
+  // MODIFIED: Removed "Recovery" and "Institute" tabs. 
+  // Added "Profile" tab pointing to "/dashboard/profile".
+  const tabs = [
+    { name: "Home", href: "/dashboard/home", icon: Home },
+    { name: "Assessment", href: "/dashboard", icon: ClipboardList },
+    { name: "Coachee", href: "/dashboard/coachee", icon: Stethoscope },
+    { name: "Profile", href: "/dashboard/profile", icon: User },
+  ];
+
+  // --- 3. Helper Functions ---
+
+  const getFirstName = () => {
+    if (userData?.displayName) {
+      return userData.displayName.split(" ")[0];
+    }
+    if (userData?.email) {
+      return userData.email.split("@")[0];
+    }
+    return "User";
+  };
+  
+  const playClickSound = async () => {
+    if (clickSoundPlayer.current?.loaded) {
+      if (Tone.context.state !== 'running') {
+          await Tone.start();
+      }
+      clickSoundPlayer.current.start(0); 
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/login");
+  };
+
+  // --- 4. Effects (Lifecycle/Side-Effects) ---
+
+  /* Initialize Tone.js and load the sound file once. */
   useEffect(() => {
     const initTone = async () => {
       await Tone.start();
@@ -105,45 +148,17 @@ export default function DashboardLayout({ children }) {
   }, [pathname]);
 
 
-  const playClickSound = async () => {
-    if (clickSoundPlayer.current?.loaded) {
-      if (Tone.context.state !== 'running') {
-          await Tone.start();
-      }
-      clickSoundPlayer.current.start(0); 
-    }
-  };
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push("/login");
-  };
-
-  const getFirstName = () => {
-    if (userData?.displayName) {
-      return userData.displayName.split(" ")[0];
-    }
-    if (userData?.email) {
-      return userData.email.split("@")[0];
-    }
-    return "User";
-  };
-
-  const tabs = [
-    { name: "Home", href: "/dashboard/home", icon: Home },
-    { name: "Assessment", href: "/dashboard", icon: ClipboardList },
-    { name: "Recovery", href: "/dashboard/recovery", icon: Activity },
-    { name: "Coachee", href: "/dashboard/coachee", icon: Stethoscope },
-    { name: "Institute", href: "/dashboard/institute", icon: Award },
-  ];
-
-
+  // --- 5. Early Exit/Loading UI ---
+  // Typically, you'd show a loading spinner here if `loading` is true
+  // if (loading) return <LoadingSpinner />; 
+  
   if (isRecoveryPath) return <>{children}</>;
 
+  // --- 6. Render UI ---
   return (
     <div className="min-h-screen flex flex-col md:flex-row font-sans text-[#111827] bg-[#F3F4F6] relative">
       
-      {/* ===== Premium background ===== */}
+      {/* ===== Premium background (Tailwind styles) ===== */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(900px_500px_at_8%_0%,#93C5FD_0%,transparent_40%),radial-gradient(900px_500px_at_100%_12%,#5EEAD4_0%,transparent_45%)] opacity-25" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(17,24,39,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(17,24,39,0.05)_1px,transparent_1px)] bg-[size:42px_42px]" />
@@ -223,7 +238,7 @@ export default function DashboardLayout({ children }) {
         </main>
       </div>
 
-      {/* ================= Bottom Dock (Mobile) - MODIFIED FOR FULL WIDTH ================= */}
+      {/* ================= Bottom Dock (Mobile) ================= */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 w-full bg-white/80 backdrop-blur-2xl border-t border-[#E5E7EB] shadow-[0_0px_30px_rgba(2,6,23,0.1)] flex justify-around py-3">
         {tabs.map((tab) => {
           const active = pathname === tab.href;
