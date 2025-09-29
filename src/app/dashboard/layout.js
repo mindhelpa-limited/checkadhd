@@ -1,13 +1,16 @@
 'use client';
 
+// ===================================
+// 1. React/Next.js Core & Hooks
+// ===================================
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-// Firebase Imports
-import { auth, db } from "@/lib/firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+
+// ===================================
+// 2. Third-party Libraries & Icons
+// ===================================
 
 // Icon Imports (Lucide React)
 import {
@@ -17,14 +20,29 @@ import {
   ClipboardList,
   MessageCircle,
   Award,
-  Home, // <-- ADDED
-  Stethoscope, // <-- ADDED (using Stethoscope for Doctor icon)
+  Home,
+  Stethoscope,
 } from "lucide-react";
 
-// Third-party Libraries
+// Third-party Audio Library
 import * as Tone from 'tone';
 
-// --- Auth Hook (Unchanged) ---
+
+// ===================================
+// 3. Firebase/Local Imports
+// ===================================
+
+// Firebase/Authentication Imports
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
+
+
+// ===================================
+// 4. Custom Hooks and Logic
+// ===================================
+
+// --- Auth Hook ---
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -81,14 +99,9 @@ export default function DashboardLayout({ children }) {
     }
   }, []);
 
-  // 👇 ADDED HOOK TO FORCE SCROLL TO TOP ON PAGE CHANGE
+  // Hook to force scroll to top on page change
   useEffect(() => {
     window.scrollTo(0, 0);
-    // Optionally, you could try to scroll the main content div instead of the window:
-    // const mainContent = document.getElementById('main-content-scroll-area');
-    // if (mainContent) {
-    // 	mainContent.scrollTo(0, 0);
-    // }
   }, [pathname]);
 
 
@@ -116,14 +129,12 @@ export default function DashboardLayout({ children }) {
     return "User";
   };
 
-  // CORRECTED tabs array according to user instructions and original structure
   const tabs = [
-    { name: "Home", href: "/dashboard/home", icon: Home }, // <-- CHANGED: First item, name, route, icon
-    { name: "Assessment", href: "/dashboard", icon: ClipboardList }, // <-- KEPT
-    { name: "Recovery", href: "/dashboard/recovery", icon: Activity }, // <-- RE-INSERTED the original Recovery tab
-    { name: "Coachee", href: "/dashboard/coachee", icon: Stethoscope }, // <-- CHANGED: name and icon
-    { name: "Institute", href: "/dashboard/institute", icon: Award }, // <-- KEPT
-    // { name: "Profile", href: "/dashboard/profile", icon: User }, // <-- REMOVED
+    { name: "Home", href: "/dashboard/home", icon: Home },
+    { name: "Assessment", href: "/dashboard", icon: ClipboardList },
+    { name: "Recovery", href: "/dashboard/recovery", icon: Activity },
+    { name: "Coachee", href: "/dashboard/coachee", icon: Stethoscope },
+    { name: "Institute", href: "/dashboard/institute", icon: Award },
   ];
 
 
@@ -212,8 +223,8 @@ export default function DashboardLayout({ children }) {
         </main>
       </div>
 
-      {/* ================= Bottom Dock (Mobile) ================= */}
-      <nav className="md:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-md bg-white/70 backdrop-blur-2xl border border-[#E5E7EB] shadow-[0_12px_50px_rgba(2,6,23,0.18)] rounded-2xl flex justify-around py-2.5">
+      {/* ================= Bottom Dock (Mobile) - MODIFIED FOR FULL WIDTH ================= */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 w-full bg-white/80 backdrop-blur-2xl border-t border-[#E5E7EB] shadow-[0_0px_30px_rgba(2,6,23,0.1)] flex justify-around py-3">
         {tabs.map((tab) => {
           const active = pathname === tab.href;
           return (
@@ -222,8 +233,9 @@ export default function DashboardLayout({ children }) {
               href={tab.href}
               onClick={playClickSound}
               className={`flex flex-col items-center text-[11px] px-3 py-1.5 rounded-xl transition-all
-                ${active ? "text-[#2563EB] bg-[#EFF6FF] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
-                            : "text-[#6B7280] hover:text-[#2563EB] hover:bg-white/50"}`}
+                ${active 
+                  ? "text-[#2563EB] bg-[#EFF6FF] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                  : "text-[#6B7280] hover:text-[#2563EB]"}`}
             >
               <tab.icon size={18} className="mb-0.5" />
               <span className="font-medium">{tab.name}</span>

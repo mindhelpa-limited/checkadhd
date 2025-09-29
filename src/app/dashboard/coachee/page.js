@@ -20,14 +20,25 @@ import { onAuthStateChanged } from "firebase/auth";
 
 // --- ⚙️ CORE LOGIC HELPERS ---
 
+// New array for day selection
+const DAYS_OF_WEEK = [
+    { value: '0', label: 'Sunday' },
+    { value: '1', label: 'Monday' },
+    { value: '2', label: 'Tuesday' },
+    { value: '3', label: 'Wednesday' },
+    { value: '4', label: 'Thursday' },
+    { value: '5', label: 'Friday' },
+    { value: '6', label: 'Saturday' },
+];
+
 /**
- * Checks if a given Date object falls on a weekend (Sunday=0, Saturday=6).
- * @param {Date} date - The date to check.
+ * Checks if a given day index (0-6) falls on a weekend (Sunday=0, Saturday=6).
+ * @param {number} dayIndex - The day index (0=Sunday, 6=Saturday).
  * @returns {boolean} True if it is a weekend, false otherwise.
  */
-const isWeekend = (date) => {
-  const day = date.getDay();
-  return day === 0 || day === 6;
+// MODIFIED: Takes day index (0-6) instead of a Date object
+const isWeekend = (dayIndex) => {
+  return dayIndex === 0 || dayIndex === 6;
 };
 
 /**
@@ -43,17 +54,19 @@ const formatHour = (hour) => {
 };
 
 /**
- * Generates available time slots based on the day type.
+ * Generates available time slots based on the day type (via day index).
  * Weekday (Mon-Fri): 7 PM to 11 PM (19:00 to 23:00)
  * Weekend (Sat-Sun): 9 AM to 11 PM (09:00 to 23:00)
- * @param {Date} date - The date object used to determine the time range.
+ * @param {number} dayIndex - The day index (0=Sunday, 6=Saturday).
  * @returns {Array<{value: string, label: string}>} An array of time slot objects.
  */
-const generateTimeSlots = (date) => {
+// MODIFIED: Takes dayIndex instead of a Date object
+const generateTimeSlots = (dayIndex) => {
   const slots = [];
   let startHour, endHour;
 
-  if (isWeekend(date)) {
+  // Use the new isWeekend function with the dayIndex
+  if (isWeekend(dayIndex)) {
     // Weekend slots: 9 AM (9) to 11 PM (23)
     startHour = 9;
     endHour = 23;
@@ -73,17 +86,7 @@ const generateTimeSlots = (date) => {
   return slots;
 };
 
-/**
- * Gets today's date in 'YYYY-MM-DD' format, suitable for HTML date input's min attribute.
- * @returns {string} Today's date string.
- */
-const getTodayDateString = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = (today.getMonth() + 1).toString().padStart(2, '0');
-  const day = today.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+// REMOVED: getTodayDateString is no longer needed
 
 // --- 🌟 REACT COMPONENT: CoacheeDashboard ---
 
@@ -91,17 +94,17 @@ export default function CoacheeDashboard() {
   // --- STATE MANAGEMENT ---
   const [activeTab, setActiveTab] = useState("availability");
   const [user, setUser] = useState(null);
-  const [dateStr, setDateStr] = useState(""); 
+  // MODIFIED: dateStr is now dayIndexStr
+  const [dayIndexStr, setDayIndexStr] = useState(""); // Stores day index as a string ('0' for Sunday)
   const [time, setTime] = useState("");
   const [timeSlots, setTimeSlots] = useState([]); 
   const [mySession, setMySession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Computed value (remains constant)
-  const minDate = getTodayDateString(); 
+  // REMOVED: minDate is no longer needed 
 
-  // --- DATA FETCHING LOGIC ---
+  // --- DATA FETCHING LOGIC (remains largely the same) ---
 
   /**
    * Fetches the user's currently booked session from Firestore.
@@ -118,7 +121,7 @@ export default function CoacheeDashboard() {
     }
   }, []); 
 
-  // Effect 1: Authentication Listener & Initial Data Load
+  // Effect 1: Authentication Listener & Initial Data Load (no change)
   useEffect(() => {
     let timeoutId;
     let isActive = true; 
@@ -152,24 +155,21 @@ export default function CoacheeDashboard() {
     };
   }, [fetchMySession]); 
 
-  // Effect 2: Time Slot Generation (Date change logic)
+  // Effect 2: Time Slot Generation (Day change logic)
+  // MODIFIED: Reruns on dayIndexStr change
   useEffect(() => {
-    if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-      // Append 'T00:00:00' to ensure correct date parsing in local time
-      const dateObj = new Date(dateStr + "T00:00:00"); 
-      
-      if (!isNaN(dateObj.getTime())) {
-        setTimeSlots(generateTimeSlots(dateObj));
-      } else {
-        setTimeSlots([]);
-        console.error("Invalid date object created from:", dateStr);
-      }
+    // Only proceed if a day index string is selected and is a valid number
+    const dayIndex = parseInt(dayIndexStr, 10);
+
+    if (!isNaN(dayIndex) && dayIndex >= 0 && dayIndex <= 6) {
+      // Pass the day index to the time slot generator
+      setTimeSlots(generateTimeSlots(dayIndex));
     } else {
       setTimeSlots([]);
     }
-    // Reset time selection when date changes 
+    // Reset time selection when day changes 
     setTime(""); 
-  }, [dateStr]);
+  }, [dayIndexStr]);
 
   // --- SESSION BOOKING LOGIC ---
 
@@ -178,15 +178,17 @@ export default function CoacheeDashboard() {
       alert("You must be logged in to book a session.");
       return;
     }
-    if (!dateStr || !time) {
-      alert("Please pick a date and time");
+    // MODIFIED: Check for dayIndexStr instead of dateStr
+    if (!dayIndexStr || !time) {
+      alert("Please pick a day and time");
       return;
     }
     if (!window.confirm("Once booked, you can't change this session. Proceed?")) {
       return;
     }
 
-    const slotId = `${dateStr}_${time}`;
+    // MODIFIED: slotId now uses dayIndexStr
+    const slotId = `${dayIndexStr}_${time}`;
 
     try {
       // 1. Atomicity Check: Verify the slot is not already taken
@@ -199,10 +201,12 @@ export default function CoacheeDashboard() {
       }
 
       // 2. Book the session (Document ID = user.uid for uniqueness)
+      // MODIFIED: Store dayIndex instead of a full date
       await setDoc(doc(sessionsRef, user.uid), {
         uid: user.uid,
         email: user.email,
-        date: dateStr, 
+        // CHANGED: date field now stores dayIndexStr
+        dayIndex: dayIndexStr, 
         time,
         slotId, 
         createdAt: new Date().toISOString(),
@@ -221,27 +225,26 @@ export default function CoacheeDashboard() {
 
   // --- MEMOIZED HELPERS FOR JSX RENDERING ---
 
-  // Create a Date object from the current date state, memoized for efficiency
-  const selectedDateObject = useMemo(() => {
-    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
-    // Append 'T00:00:00' for correct local time parsing
-    const d = new Date(dateStr + "T00:00:00");
-    return isNaN(d.getTime()) ? null : d;
-  }, [dateStr]);
+  // MODIFIED: Instead of a Date object, we get the selected Day index (as a number)
+  const selectedDayIndex = useMemo(() => {
+    const dayIndex = parseInt(dayIndexStr, 10);
+    return !isNaN(dayIndex) && dayIndex >= 0 && dayIndex <= 6 ? dayIndex : null;
+  }, [dayIndexStr]);
 
-  // Determine the time range display based on the selected date
-  const getTimeRangeDisplay = (dateObj) => 
-    isWeekend(dateObj) ? '9:00 AM to 11:00 PM' : '7:00 PM to 11:00 PM';
+  // Determine the time range display based on the selected day index
+  // MODIFIED: Takes dayIndex instead of a Date object
+  const getTimeRangeDisplay = (dayIndex) => 
+    isWeekend(dayIndex) ? '9:00 AM to 11:00 PM' : '7:00 PM to 11:00 PM';
 
-  // Helper for Day of the Week
-  const getDayOfWeek = (dateString) => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    // Use the same parsing method as elsewhere: append 'T00:00:00'
-    const dateObj = new Date(dateString + 'T00:00:00'); 
-    return days[dateObj.getDay()];
+  // Helper for Day of the Week Name
+  // MODIFIED: Takes dayIndex
+  const getDayOfWeekName = (dayIndex) => {
+    // dayIndex is 0-6. Find the matching label from DAYS_OF_WEEK.
+    const day = DAYS_OF_WEEK.find(d => d.value === String(dayIndex));
+    return day ? day.label : 'N/A';
   };
   
-  // --- EARLY EXIT CONDITIONS (LOADING, ERROR, UNATHENTICATED) ---
+  // --- EARLY EXIT CONDITIONS (LOADING, ERROR, UNATHENTICATED - no change) ---
 
   if (loading) {
     // Mobile-friendly loading screen
@@ -277,11 +280,9 @@ export default function CoacheeDashboard() {
 
   // --- MAIN DASHBOARD RENDER ---
   return (
-    // 🔑 MAIN CHANGE: Use 'p-4' for mobile and 'sm:p-8' for desktop.
-    // Use 'max-w-lg' for a slightly tighter fit on desktop, keeping it well-contained.
     <div className="w-full max-w-lg mx-auto p-4 sm:p-8 bg-white shadow-2xl rounded-xl border border-gray-100 mt-0 sm:mt-8 mb-8">
       
-      {/* Soft Error Notification */}
+      {/* Soft Error Notification (no change) */}
       {error && (
         <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
           <p className="font-bold">Heads Up!</p>
@@ -289,7 +290,7 @@ export default function CoacheeDashboard() {
         </div>
       )}
 
-      {/* Tab Navigation - Ensure horizontal scroll/stacking works if needed, but flex handles this well */}
+      {/* Tab Navigation (no change) */}
       <div className="flex space-x-4 sm:space-x-6 border-b border-gray-200 mb-6 sm:mb-8 text-base sm:text-lg font-semibold">
         <button
           className={`pb-3 transition duration-150 ease-in-out ${
@@ -317,7 +318,7 @@ export default function CoacheeDashboard() {
       {activeTab === "availability" && (
         <div className="animate-fade-in">
           {mySession ? (
-            // Session Already Booked Message
+            // Session Already Booked Message (no change)
             <div className="p-4 sm:p-6 bg-green-50 border border-green-200 rounded-lg text-center">
               <p className="text-xl text-green-700 font-bold">
                 🎉 Session Booked!
@@ -330,22 +331,28 @@ export default function CoacheeDashboard() {
             // Session Booking Form
             <div className="space-y-6">
               
-              {/* Step 1: Date Picker */}
+              {/* Step 1: Day Selector (REPLACED DATE PICKER) */}
               <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-200 shadow-lg">
                 <label className="block mb-2 font-extrabold text-lg sm:text-xl text-indigo-700">
-                  <span className="text-xl sm:text-2xl mr-2">1.</span> Select a Date
+                  <span className="text-xl sm:text-2xl mr-2">1.</span> Select a Day
                 </label>
-                <input
-                  type="date"
-                  min={minDate} 
-                  value={dateStr}
-                  onChange={(e) => setDateStr(e.target.value)}
+                <select
+                  value={dayIndexStr} // Use dayIndexStr state
+                  onChange={(e) => setDayIndexStr(e.target.value)} // Update dayIndexStr
                   // Input size optimized for mobile
-                  className="border border-indigo-300 p-3 rounded-lg w-full text-base sm:text-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
-                />
+                  className="border border-indigo-300 p-3 rounded-lg w-full text-base sm:text-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 appearance-none bg-white"
+                >
+                    <option value="">-- Select a Day --</option>
+                    {DAYS_OF_WEEK.map((day) => (
+                        <option key={day.value} value={day.value}>
+                            {day.label}
+                        </option>
+                    ))}
+                </select>
               </div>
 
-              {selectedDateObject && (
+              {/* MODIFIED: Check for selectedDayIndex instead of selectedDateObject */}
+              {selectedDayIndex !== null && (
                 <>
                   {/* Step 2: Day Type and Range Display */}
                   <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-md">
@@ -353,15 +360,16 @@ export default function CoacheeDashboard() {
                       <span className="text-xl sm:text-2xl mr-2">2.</span> Check Availability
                     </label>
                     <p className="text-sm sm:text-md text-gray-700">
-                      This is a <strong className="text-indigo-600">{isWeekend(selectedDateObject) ? 'Weekend' : 'Weekday'}</strong>.
+                      This is a <strong className="text-indigo-600">{isWeekend(selectedDayIndex) ? 'Weekend' : 'Weekday'}</strong>.
                     </p>
                     <p className="mt-1 text-xs sm:text-sm text-gray-600 flex items-center">
                       <span className="inline-block h-2 w-2 mr-2 bg-green-500 rounded-full"></span>
-                      Available Times: <strong className="text-green-700 ml-1">{getTimeRangeDisplay(selectedDateObject)}</strong>
+                      {/* MODIFIED: Pass selectedDayIndex to getTimeRangeDisplay */}
+                      Available Times: <strong className="text-green-700 ml-1">{getTimeRangeDisplay(selectedDayIndex)}</strong>
                     </p>
                   </div>
 
-                  {/* Step 3: Time Slot Dropdown */}
+                  {/* Step 3: Time Slot Dropdown (no change besides dependency on state) */}
                   {timeSlots.length > 0 && (
                     <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-md">
                       <label className="block mb-2 font-extrabold text-lg sm:text-xl text-gray-800">
@@ -386,9 +394,10 @@ export default function CoacheeDashboard() {
               )}
 
               {/* Action Button */}
+              {/* MODIFIED: Check for dayIndexStr instead of dateStr */}
               <button
                 onClick={lockSession}
-                disabled={!dateStr || !time}
+                disabled={!dayIndexStr || !time}
                 // Button size optimized for mobile
                 className="w-full bg-green-500 hover:bg-green-600 text-white text-lg sm:text-xl px-4 py-3 rounded-xl shadow-lg transition duration-200 ease-in-out disabled:bg-gray-400 disabled:shadow-none font-bold tracking-wide mt-6 sm:mt-8"
               >
@@ -409,9 +418,10 @@ export default function CoacheeDashboard() {
               </h3>
               
               <div className="space-y-3 text-base sm:text-lg">
+                {/* MODIFIED: Display the day of the week instead of a specific date */}
                 <p className="flex justify-between border-b pb-2">
-                  <strong className="text-gray-600">Date:</strong> 
-                  <span className="font-semibold text-gray-800">{mySession.date}</span>
+                  <strong className="text-gray-600">Day:</strong> 
+                  <span className="font-semibold text-gray-800">{getDayOfWeekName(parseInt(mySession.dayIndex))}</span>
                 </p>
                 <p className="flex justify-between border-b pb-2">
                   <strong className="text-gray-600">Time:</strong> 
@@ -424,7 +434,7 @@ export default function CoacheeDashboard() {
                 <p className="flex justify-between pt-2">
                   <strong className="text-gray-600">Your Schedule:</strong> 
                   <span className="font-extrabold text-green-700 text-right">
-                    Every {getDayOfWeek(mySession.date)} by {formatHour(parseInt(mySession.time.split(':')[0]))} 
+                    Every {getDayOfWeekName(parseInt(mySession.dayIndex))} by {formatHour(parseInt(mySession.time.split(':')[0]))} 
                   </span>
                 </p>
                 {/* END NEW ROW */}
