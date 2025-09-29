@@ -192,7 +192,7 @@ export default function Header() {
                     {/* User Login/Logout Logic */}
                     {user ? (
                         <>
-                            <Link href="/dashboard" className="hover:text-blue-400 transition-all duration-200">Dashboard</Link>
+                            <Link href="/dashboard/home" className="hover:text-blue-400 transition-all duration-200">Dashboard</Link>
                             <button
                                 onClick={handleLogout}
                                 className="text-red-400 font-semibold hover:underline"

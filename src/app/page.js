@@ -425,6 +425,32 @@ export default function FeaturesPage() {
       </div>
 
       {/* --- */}
+{/* CALL TO ACTION (CTA) SECTION */}
+      <div className="bg-[#0a122a] py-24 text-center px-4">
+        <h2 className="text-3xl md:text-4xl font-extrabold font-serif">
+          Ready to Build the Life You Deserve?
+        </h2>
+        <p className="mt-4 text-lg text-gray-300">
+          Your mental health journey doesn’t have to be chaotic. Recovery is
+          possible — and we’ll guide you globally.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+          <button
+            onClick={() => router.push("/how-it-works")}
+            className="glow-on-hover w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-4 px-10 rounded-full transition-all duration-300 shadow-xl"
+          >
+            The Steps →
+          </button>
+          <button
+            onClick={() => router.push("/how-it-works")}
+            className="border border-blue-400/30 text-blue-300 hover:bg-blue-400/10 text-lg font-semibold py-4 px-10 rounded-full transition-all duration-300"
+          >
+            Get Started
+          </button>
+        </div>
+      </div>
+
+      {/* --- */}
 
       <Footer />
 
