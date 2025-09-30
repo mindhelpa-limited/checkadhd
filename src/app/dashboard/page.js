@@ -183,7 +183,7 @@ export default function DashboardPage() {
 
   const audioRef = useRef(null);
   
-  // --- Animation State and Ref ---
+  // --- Animation State and Ref (The requested additions) ---
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -264,19 +264,21 @@ export default function DashboardPage() {
     return () => unsub();
   }, [router]);
 
-  // --- Animation Effect (Modified to depend on loading state) ---
+  // --- Animation Effect (The requested IntersectionObserver logic) ---
   useEffect(() => {
-    if (loading) return; // Wait for loading to finish
+    // We only want the animation to run once the initial data load is complete.
+    if (loading) return; 
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          observer.unobserve(entry.target);
+          // Stop observing after it becomes visible
+          observer.unobserve(entry.target); 
         }
       },
       {
-        root: null,
+        root: null, // relative to the viewport
         rootMargin: "0px",
         threshold: 0.1, // Trigger when 10% of the element is visible
       }
@@ -287,11 +289,13 @@ export default function DashboardPage() {
     }
 
     return () => {
+      // Clean up the observer when the component unmounts or loading changes
       if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
+        // It's safe to call unobserve, even if it was already unobserved inside the callback
+        observer.unobserve(sectionRef.current); 
       }
     };
-  }, [loading]); // Run this effect when 'loading' state changes
+  }, [loading]); // Re-run this effect when 'loading' state changes from true to false
 
   // --- Handlers ---
 
@@ -341,6 +345,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Main content wrapper with On-Scroll Fade-In animation */}
+      {/* The 'ref' links to the IntersectionObserver, and the conditional Tailwind classes 
+        provide the fade-in (opacity-0 to opacity-100) and slide-up (translate-y-10 to translate-y-0) effect.
+      */}
       <div
         ref={sectionRef}
         className={`relative max-w-6xl mx-auto z-10 transform transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
@@ -349,8 +356,9 @@ export default function DashboardPage() {
 
           {/* Actions card (Slot 1, Order 1 on mobile, 2 on desktop) */}
           <motion.div
-            // Restored Framer Motion for a nice immediate entrance
-            initial={{ opacity: 0, y: 20 }}
+            // Framer Motion is kept for an immediate effect on the card itself, 
+            // but the parent 'div' now handles the scroll-based animation for the entire section.
+            initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             whileHover={{
@@ -436,7 +444,8 @@ export default function DashboardPage() {
 
           {/* Dashboard Info Card (Slot 2, Order 2 on mobile, 1 on desktop) */}
           <motion.div
-            // Restored Framer Motion for a nice immediate entrance
+            // Framer Motion is kept for an immediate effect on the card itself, 
+            // but the parent 'div' now handles the scroll-based animation for the entire section.
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}

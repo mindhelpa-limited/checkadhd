@@ -101,7 +101,7 @@ export default function Header() {
                         ADHD Clinical Assessment
                     </MobileMenuItem>
                     <MobileMenuItem
-                        href="/pricing-mindhelpa-institute"
+                        href="/pricing-mental-health-recovery-tools"
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
                         icon={GraduationCap}
                     >
@@ -168,7 +168,7 @@ export default function Header() {
                                     ADHD Clinical Assessment
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    href="/pricing-mindhelpa-institute"
+                                    href="/pricing-mental-health-recovery-tools"
                                     onClick={() => setPricingDropdownOpen(false)}
                                     icon={GraduationCap}
                                 >
