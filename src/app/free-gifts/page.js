@@ -1,6 +1,6 @@
-'use client'; // <-- ADDED THIS DIRECTIVE
+'use client'; 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Mail, BookOpen, Music, CheckCircle, Loader2, ArrowRight } from 'lucide-react';
 
 // Main component must be named App and be the default export.
@@ -35,8 +35,8 @@ const App = () => {
         <h3 className="text-xl font-bold">{title}</h3>
       </div>
       <p className="text-gray-400 mb-4">{description}</p>
-      <div className="w-full h-40 bg-black rounded-lg overflow-hidden flex items-center justify-center">
-        {/* The object-contain class ensures the entire image is visible without cropping. */}
+      {/* Container is transparent, image uses object-contain to ensure the full cover is visible */}
+      <div className="w-full h-40 bg-transparent rounded-lg overflow-hidden flex items-center justify-center">
         <img
           src={imageUrl}
           alt={title}
@@ -112,7 +112,7 @@ const App = () => {
               title="Music Therapy Catalogue"
               description="Access the links to 6 of our acclaimed Afromusic Therapy Albums, scientifically designed to promote relaxation and focus."
               icon={<Music className="w-6 h-6 text-blue-400" />}
-              imageUrl="https://placehold.co/150x200/3b82f6/ffffff?text=Music+Links"
+              imageUrl="/mymusic.jpeg"
               colorClass="bg-gray-800 hover:border-blue-500"
             />
           </div>
@@ -129,15 +129,16 @@ const App = () => {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-grow">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="flex items-center gap-3 flex-grow">
+                {/* Standalone Mail Icon */}
+                <Mail className="w-5 h-5 text-emerald-400 flex-shrink-0 hidden sm:block" /> 
                 <input
                   type="email"
-                  placeholder="Enter your best email address"
+                  placeholder="Enter email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:border-emerald-400 focus:ring focus:ring-emerald-400 focus:ring-opacity-50 text-white placeholder-gray-400 transition"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl focus:border-emerald-400 focus:ring focus:ring-emerald-400 focus:ring-opacity-50 text-white placeholder-gray-400 transition"
                   disabled={isLoading}
                 />
               </div>
