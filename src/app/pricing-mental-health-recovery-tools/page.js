@@ -66,23 +66,22 @@ export default function RecoveryPricingPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [couponCode, setCouponCode] = useState("");
-    // Removed: [billingCycle, setBillingCycle] = useState("monthly"); 
     
     const monthlyPrice = 20;
-    // Removed: const yearlyPrice = 200;
-
-    const displayPrice = monthlyPrice; // Simplified to just monthlyPrice
-    const displaySuffix = "/ month"; // Simplified to just monthly suffix
-    const buttonSuffix = "mo"; // Simplified to just monthly button suffix
+    const displayPrice = monthlyPrice;
+    const displaySuffix = "/ month";
+    const buttonSuffix = "mo";
 
     const handleSubscription = async () => {
         setLoading(true);
         setError("");
         try {
             const user = auth.currentUser;
-            const successRedirect = user ? "/dashboard/recovery" : "/signup";
+            // ✅ Updated redirect paths
+            const successRedirect = user 
+                ? "/dashboard/goal-tracker" 
+                : "/signup-recovery-tools";
 
-            // 🔑 Map billingCycle to backend product (Simplified to only monthly)
             const product = "recovery_monthly";
 
             const response = await fetch("/api/create-checkout-session", {
@@ -147,7 +146,6 @@ export default function RecoveryPricingPage() {
                             The Recovery Plan
                         </h2>
 
-                        {/* Toggle (Removed: The entire toggle div) */}
                         <div className="mt-6">
                             <p className="font-sans px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow-md inline-block">
                                 Monthly Subscription
@@ -161,7 +159,6 @@ export default function RecoveryPricingPage() {
                                 {displaySuffix}
                             </span>
                         </p>
-                        {/* Removed: Yearly savings paragraph */}
 
                         <p className="font-sans mt-4 text-gray-300 text-lg">
                             One subscription. Every tool you need to build focus, consistency,
