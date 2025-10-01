@@ -7,7 +7,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Users, User, ChevronDown, Loader2, Star } from 'lucide-react'; // Added Star icon
+// UPDATED ICONS: ShieldCheck, Zap, Target, Star
+import { CheckCircle, Users, User, ChevronDown, Loader2, Star, ShieldCheck, Zap, Target } from 'lucide-react'; 
 
 // LOCAL IMPORTS
 import Footer from "../../components/home/Footer";
@@ -20,49 +21,58 @@ import { auth } from "@/lib/firebase";
 const COACHING_CONTENT = {
   title: 'Psychiatrist-Led Coaching',
   body: (
-    <ul className="space-y-4 text-left">
-      <li className="flex items-start">
-        <User size={20} className="text-blue-400 mr-3 mt-1 shrink-0" />
-        <div>
-          <strong className="text-white">Personalised One-on-One Coaching</strong>
-          <p className="text-gray-400 text-sm mt-1">
-            Get exclusive coaching from Psychiatrists with extensive experience in managing life stressors and mental disorders, including:
-          </p>
-          <ul className="list-disc list-inside ml-5 mt-2 space-y-1 text-xs text-gray-400">
-            <li>Anxiety and Depression</li>
-            <li>Personality Disorders</li>
-            <li>Phobias and Substance Misuse</li>
-          </ul>
-        </div>
-      </li>
-      <li className="flex items-start">
-        <Users size={20} className="text-blue-400 mr-3 mt-1 shrink-0" />
-        <div>
-          <strong className="text-white">Core Focus & Skills Building</strong>
-          <p className="text-gray-400 text-sm mt-1">
-            Coaching is designed to help you:
-          </p>
-          <ul className="list-disc list-inside ml-5 mt-2 space-y-1 text-xs text-gray-400">
-            <li>Build **resilience** and enhance **coping skills**.</li>
-            <li>Acquire **practical tools** to reinvigorate purpose.</li>
-            <li>Guide you back onto the **path of recovery**.</li>
-          </ul>
-        </div>
-      </li>
-      <li className="flex items-start">
-        <CheckCircle size={20} className="text-green-400 mr-3 mt-1 shrink-0" />
-        <div>
-          <strong className="text-white">Goal-Oriented Weekly Sessions</strong>
-          <p className="text-gray-400 text-sm mt-1">
-            Each session is structured to ensure you:
-          </p>
-          <ul className="list-disc list-inside ml-5 mt-2 space-y-1 text-xs text-gray-400">
-            <li>Effectively **accomplish tasks**.</li>
-            <li>Minimise the risks of **relapse** or **burnout**.</li>
-          </ul>
-        </div>
-      </li>
-    </ul>
+    // Applied background and border styles to make the entire section a visually appealing block
+    <div className="bg-gray-800/60 p-5 sm:p-8 rounded-xl border border-blue-700/50 shadow-inner shadow-black/50">
+      <ul className="space-y-6 text-left">
+        
+        {/* Feature 1: Personalised Coaching (ShieldCheck) */}
+        <li className="flex items-start border-l-4 border-blue-500 pl-4">
+          <ShieldCheck size={24} className="text-green-400 mr-3 mt-1 shrink-0" />
+          <div>
+            <strong className="text-lg text-blue-200 font-extrabold block mb-1">Confidential & Customised Care</strong>
+            <p className="text-gray-300 text-base mt-1">
+              Coaching from Psychiatrists with experience in managing complex mental health issues, including:
+            </p>
+            <ul className="list-disc list-inside ml-5 mt-2 space-y-1 text-xs text-gray-400">
+              <li>Anxiety and Depression</li>
+              <li>Personality Disorders</li>
+              <li>Phobias and Substance Misuse</li>
+            </ul>
+          </div>
+        </li>
+
+        {/* Feature 2: Core Focus & Skills (Zap) */}
+        <li className="flex items-start border-l-4 border-blue-500 pl-4">
+          <Zap size={24} className="text-yellow-400 mr-3 mt-1 shrink-0" />
+          <div>
+            <strong className="text-lg text-blue-200 font-extrabold block mb-1">Build Resilience and Renew Purpose</strong>
+            <p className="text-gray-300 text-base mt-1">
+              Our core focus is on practical skills and recovery:
+            </p>
+            <ul className="list-disc list-inside ml-5 mt-2 space-y-1 text-xs text-gray-400">
+              <li>Enhance resilience and develop coping skills.</li>
+              <li>Acquire actionable tools to find renewed purpose.</li>
+              <li>Establish a clear path to recovery.</li>
+            </ul>
+          </div>
+        </li>
+
+        {/* Feature 3: Goal-Oriented Sessions (Target) */}
+        <li className="flex items-start border-l-4 border-blue-500 pl-4">
+          <Target size={24} className="text-red-400 mr-3 mt-1 shrink-0" />
+          <div>
+            <strong className="text-lg text-blue-200 font-extrabold block mb-1">Structured, High-Impact Weekly Goals</strong>
+            <p className="text-gray-300 text-base mt-1">
+              Sessions are goal-oriented to maximize your progress and stability:
+            </p>
+            <ul className="list-disc list-inside ml-5 mt-2 space-y-1 text-xs text-gray-400">
+              <li>Help you accomplish specific tasks week-by-week.</li>
+              <li>Actively minimise risks of relapse or burnout.</li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </div>
   ),
 };
 
@@ -289,8 +299,8 @@ export default function CoachingPricingPage() {
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-blue-300 to-blue-600 bg-clip-text text-transparent leading-tight">
             Psychiatrist-Led<br className="md:hidden"/> Coaching
           </h1>
-          {/* Ensured description is readable on mobile */}
-          <div className="text-sm md:text-lg text-gray-400 max-w-4xl mx-auto text-left px-2 sm:px-0">
+          {/* Ensure description is centered and visually distinct */}
+          <div className="max-w-4xl mx-auto">
             {COACHING_CONTENT.body}
           </div>
           {error && <p className="text-red-400 mt-4 font-medium">{error}</p>}
