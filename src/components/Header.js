@@ -9,6 +9,7 @@ import {
     Menu,
     X,
     ArrowRight,
+    HeartPulse,
     ChevronDown,
     ChevronUp,
     ClipboardList,
@@ -103,7 +104,7 @@ export default function Header() {
                     <MobileMenuItem
                         href="/pricing-mental-health-recovery-tools"
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
-                        icon={GraduationCap}
+                        icon={HeartPulse}
                     >
                         Mental Health Recovery
                     </MobileMenuItem>
