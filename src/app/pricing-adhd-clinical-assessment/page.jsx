@@ -7,7 +7,6 @@ import {
   Clock,
   BrainCircuit,
   ShieldCheck,
-  DollarSign,
   Lightbulb,
 } from "lucide-react";
 import Footer from "../../components/home/Footer";
@@ -143,7 +142,6 @@ export default function ADHDClinicalAssessmentPricing() {
               Total Investment (One-Time Fee)
             </p>
             <h2 className="text-6xl font-extrabold text-white mt-2 flex items-center justify-center">
-              <DollarSign className="w-8 h-8 mr-2 text-cyan-400" />
               £{displayPrice}
             </h2>
             {discountApplied && (

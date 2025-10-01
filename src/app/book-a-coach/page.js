@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Users, User, ChevronDown, Loader2 } from 'lucide-react'; 
+import { CheckCircle, Users, User, ChevronDown, Loader2, Star } from 'lucide-react'; // Added Star icon
 
 // LOCAL IMPORTS
 import Footer from "../../components/home/Footer";
@@ -19,13 +19,58 @@ import { auth } from "@/lib/firebase";
 
 const COACHING_CONTENT = {
   title: 'Psychiatrist-Led Coaching',
-  body: "Get personalised one-on-one coaching from Psychiatrists with extensive experience in managing persons with life stressors and mental disorders such as Anxiety, Depression, Personality Disorders, Phobias and Substance Misuse. Focus of coaching is on building resilience, coping skills and acquiring tools that can reinvigorate purpose and help you back on the path of recovery. Weekly sessions are goal-oriented and will help you accomplish tasks, minimising risks of relapse or burnout.",
+  body: (
+    <ul className="space-y-4 text-left">
+      <li className="flex items-start">
+        <User size={20} className="text-blue-400 mr-3 mt-1 shrink-0" />
+        <div>
+          <strong className="text-white">Personalised One-on-One Coaching</strong>
+          <p className="text-gray-400 text-sm mt-1">
+            Get exclusive coaching from Psychiatrists with extensive experience in managing life stressors and mental disorders, including:
+          </p>
+          <ul className="list-disc list-inside ml-5 mt-2 space-y-1 text-xs text-gray-400">
+            <li>Anxiety and Depression</li>
+            <li>Personality Disorders</li>
+            <li>Phobias and Substance Misuse</li>
+          </ul>
+        </div>
+      </li>
+      <li className="flex items-start">
+        <Users size={20} className="text-blue-400 mr-3 mt-1 shrink-0" />
+        <div>
+          <strong className="text-white">Core Focus & Skills Building</strong>
+          <p className="text-gray-400 text-sm mt-1">
+            Coaching is designed to help you:
+          </p>
+          <ul className="list-disc list-inside ml-5 mt-2 space-y-1 text-xs text-gray-400">
+            <li>Build **resilience** and enhance **coping skills**.</li>
+            <li>Acquire **practical tools** to reinvigorate purpose.</li>
+            <li>Guide you back onto the **path of recovery**.</li>
+          </ul>
+        </div>
+      </li>
+      <li className="flex items-start">
+        <CheckCircle size={20} className="text-green-400 mr-3 mt-1 shrink-0" />
+        <div>
+          <strong className="text-white">Goal-Oriented Weekly Sessions</strong>
+          <p className="text-gray-400 text-sm mt-1">
+            Each session is structured to ensure you:
+          </p>
+          <ul className="list-disc list-inside ml-5 mt-2 space-y-1 text-xs text-gray-400">
+            <li>Effectively **accomplish tasks**.</li>
+            <li>Minimise the risks of **relapse** or **burnout**.</li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  ),
 };
 
 // INDIVIDUAL PLANS
 const INDIVIDUAL_PRICING = [
   { tier: 'Monthly', sessions: '4 sessions', duration: '1 month', price: '£1,000', product: 'coaching_individual_monthly' },
-  { tier: 'Quarterly', sessions: '12 sessions', duration: '3 months', price: '£2,900', savings: 'Save £100', product: 'coaching_individual_quarterly' },
+  // MARKED AS RECOMMENDED FOR VISUAL APPEAL
+  { tier: 'Quarterly', sessions: '12 sessions', duration: '3 months', price: '£2,900', savings: 'Save £100', product: 'coaching_individual_quarterly', recommended: true },
   { tier: '6-Months', sessions: '24 sessions', duration: '6 months', price: '£5,650', savings: 'Save £350', product: 'coaching_individual_6month' },
   { tier: 'Yearly', sessions: '48 sessions', duration: '1 year', price: '£10,000', savings: 'Save £2,000', product: 'coaching_individual_yearly' },
 ];
@@ -33,7 +78,8 @@ const INDIVIDUAL_PRICING = [
 // SMALL GROUP (1–5 people)
 const SMALL_GROUP_PRICING = [
   { tier: 'Monthly', sessions: '4 weekly sessions', persons: '1-5 persons', price: '£2,000', product: 'coaching_smallgroup_monthly' },
-  { tier: 'Quarterly', sessions: '12 weekly sessions', persons: '1-5 persons', price: '£5,800', savings: 'Save £200', product: 'coaching_smallgroup_quarterly' },
+  // MARKED AS RECOMMENDED FOR VISUAL APPEAL
+  { tier: 'Quarterly', sessions: '12 weekly sessions', persons: '1-5 persons', price: '£5,800', savings: 'Save £200', product: 'coaching_smallgroup_quarterly', recommended: true },
   { tier: '6-Months', sessions: '24 weekly sessions', persons: '1-5 persons', price: '£10,300', savings: 'Save £1,700', product: 'coaching_smallgroup_6month' },
   { tier: 'Yearly', sessions: '48 weekly sessions', persons: '1-5 persons', price: '£20,000', savings: 'Save £4,000', product: 'coaching_smallgroup_yearly' },
 ];
@@ -41,7 +87,8 @@ const SMALL_GROUP_PRICING = [
 // LARGE GROUP (5–10 people)
 const LARGE_GROUP_PRICING = [
   { tier: 'Monthly', sessions: '4 weekly sessions', persons: '5-10 persons', price: '£4,000', product: 'coaching_largegroup_monthly' },
-  { tier: 'Quarterly', sessions: '12 weekly sessions', persons: '5-10 persons', price: '£11,000', savings: 'Save £2,000', product: 'coaching_largegroup_quarterly' },
+  // MARKED AS RECOMMENDED FOR VISUAL APPEAL
+  { tier: 'Quarterly', sessions: '12 weekly sessions', persons: '5-10 persons', price: '£11,000', savings: 'Save £2,000', product: 'coaching_largegroup_quarterly', recommended: true },
   { tier: '6-Months', sessions: '24 weekly sessions', persons: '5-10 persons', price: '£21,000', savings: 'Save £3,000', product: 'coaching_largegroup_6month' },
   { tier: 'Yearly', sessions: '48 weekly sessions', persons: '5-10 persons', price: '£40,000', savings: 'Save £8,000', product: 'coaching_largegroup_yearly' },
 ];
@@ -54,27 +101,28 @@ const LARGE_GROUP_PRICING = [
  * Renders the toggle button for switching between Individual and Group Coaching.
  */
 const GroupToggle = ({ active, setActive }) => (
-  <div className="flex bg-gray-700/50 p-1 rounded-full w-full max-w-sm mx-auto shadow-xl backdrop-blur-sm relative">
+  // Enhanced shadow and background for better visual depth
+  <div className="flex bg-gray-700/50 p-1 rounded-full w-full max-w-sm mx-auto shadow-2xl backdrop-blur-sm relative border border-gray-600/50">
     <button
       onClick={() => setActive('individual')}
-      className={`flex-1 py-3 rounded-full text-sm font-semibold transition-all duration-300 relative z-10 ${
+      className={`flex-1 py-2 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 relative z-10 ${
         active === 'individual' ? 'text-white' : 'text-gray-300'
       }`}
     >
-      <User size={18} className="inline mr-2" /> Individual Coaching
+      <User size={16} className="inline mr-1 md:mr-2" /> Individual
     </button>
     <button
       onClick={() => setActive('group')}
-      className={`flex-1 py-3 rounded-full text-sm font-semibold transition-all duration-300 relative z-10 ${
+      className={`flex-1 py-2 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 relative z-10 ${
         active === 'group' ? 'text-white' : 'text-gray-300'
       }`}
     >
-      <Users size={18} className="inline mr-2" /> Group Coaching
+      <Users size={16} className="inline mr-1 md:mr-2" /> Group
     </button>
     <motion.div
       layout
       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-      className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-blue-600 rounded-full shadow-lg"
+      className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full shadow-lg"
       style={{
         left: active === 'individual' ? '4px' : 'calc(50% + 4px)',
         background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
@@ -86,8 +134,7 @@ const GroupToggle = ({ active, setActive }) => (
 /**
  * Renders a single pricing card with tier details and a permanently visible feature list.
  */
-const PricingCard = ({ tier, sessions, price, persons, savings, product, handleCheckout, loadingPlan }) => {
-  // Removed all state/toggle logic for features
+const PricingCard = ({ tier, sessions, price, persons, savings, product, handleCheckout, loadingPlan, recommended = false }) => {
   const isLoading = loadingPlan === product;
 
   const features = [
@@ -97,19 +144,34 @@ const PricingCard = ({ tier, sessions, price, persons, savings, product, handleC
     'Access to premium resources (coaching)',
   ];
 
+  // Conditional styling for the recommended plan
+  const cardClasses = recommended
+    ? 'border-green-600/70 shadow-green-900/40 transform scale-[1.03] md:scale-105'
+    : 'border-blue-700/50 hover:shadow-blue-900/50';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative flex flex-col p-6 bg-gray-900/70 border border-blue-700/50 rounded-2xl shadow-2xl backdrop-blur-md hover:shadow-blue-900/50 transition-all duration-300 transform hover:scale-[1.02]"
+      // Applied conditional styling
+      className={`relative flex flex-col p-6 bg-gray-900/70 border-2 rounded-2xl shadow-2xl backdrop-blur-md transition-all duration-300 hover:scale-[1.02] ${cardClasses}`}
     >
-      <div className="text-center">
-        <h3 className="text-2xl font-bold text-blue-400">{tier}</h3>
+      {/* Recommended Badge */}
+      {recommended && (
+        <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-green-600 px-4 py-1 rounded-full text-sm font-bold text-white shadow-xl flex items-center">
+            <Star size={16} className="mr-2 fill-yellow-300 text-yellow-300" /> Best Value
+        </div>
+      )}
+
+      <div className="text-center pt-2">
+        {/* Adjusted font size for better mobile/desktop balance */}
+        <h3 className="text-xl md:text-2xl font-bold text-blue-400">{tier}</h3>
         {persons && <p className="text-sm text-gray-400 mb-1">{persons}</p>}
-        <p className="text-4xl font-extrabold text-white my-3">{price}</p>
+        {/* Large, striking price on desktop, slightly smaller on mobile */}
+        <p className="text-4xl md:text-5xl font-extrabold text-white my-3 md:my-4">{price}</p>
         {savings && (
-          <p className="text-sm font-medium text-green-400 bg-green-900/30 py-1 px-3 rounded-full inline-block mb-3">
+          <p className="text-xs md:text-sm font-medium text-green-400 bg-green-900/50 py-1 px-3 rounded-full inline-block mb-4 border border-green-500/50">
             {savings}
           </p>
         )}
@@ -118,28 +180,25 @@ const PricingCard = ({ tier, sessions, price, persons, savings, product, handleC
       {/* Feature List (Always visible, non-collapsible) */}
       <div className="mt-auto">
         
-        {/* Re-introducing the static "What is included?" label with the original styling (text and class names from the collapsed state) */}
         <div 
-          // The original button classes minus the 'button' tag, onClick, and hover effects
           className="w-full text-blue-300 py-2 flex justify-center items-center text-sm font-semibold transition-colors"
         >
           {'What is included?'}
-          {/* ChevronDown is included but remains static (upright) */}
           <ChevronDown
             size={18}
             className={`ml-2 transition-transform duration-300`} 
           />
         </div>
 
-        <div className="mt-4 overflow-hidden">
+        <div className="mt-2 overflow-hidden">
           <ul className="space-y-2 text-left mb-6 text-gray-300">
             <li className="flex items-start">
-              <CheckCircle size={18} className="text-green-400 mr-2 mt-1" />
-              <span className="font-semibold text-white mr-1">{sessions}</span>
+              <CheckCircle size={18} className="text-green-400 mr-2 mt-1 shrink-0" />
+              <span className="font-semibold text-white mr-1 text-sm">{sessions}</span>
             </li>
             {features.map((f, i) => (
               <li key={i} className="flex items-start">
-                <CheckCircle size={18} className="text-blue-400 mr-2 mt-1" />
+                <CheckCircle size={18} className="text-blue-400 mr-2 mt-1 shrink-0" />
                 <span className="text-sm">{f}</span>
               </li>
             ))}
@@ -151,7 +210,8 @@ const PricingCard = ({ tier, sessions, price, persons, savings, product, handleC
           disabled={isLoading}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
-          className="w-full mt-4 py-3 font-extrabold rounded-xl text-white bg-blue-600 shadow-lg disabled:bg-blue-400 flex justify-center items-center"
+          // Enhanced button style and padding
+          className="w-full mt-4 py-3 md:py-4 font-extrabold rounded-xl text-white bg-blue-600 shadow-xl shadow-blue-900/50 hover:bg-blue-700 transition-colors disabled:bg-blue-400 flex justify-center items-center"
         >
           {isLoading ? (
             <>
@@ -221,14 +281,18 @@ export default function CoachingPricingPage() {
   };
 
   return (
-    <div className="min-h-screen pt-20 pb-20 text-white font-sans bg-gradient-to-b from-[#06113b] to-black">
+    // Adjusted padding for better visual spacing on all devices
+    <div className="min-h-screen pt-12 md:pt-20 pb-20 text-white font-sans bg-gradient-to-b from-[#06113b] to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="text-center mb-16">
-          {/* CHANGE 2: Added 'text-4xl' for small screen font size and 'md:text-6xl' for medium/large screens. Added a line break for small screens. */}
-          <h1 className="text-4xl md:text-6xl font-black mb-4 bg-gradient-to-r from-blue-300 to-blue-600 bg-clip-text text-transparent">
+        <header className="text-center mb-10 md:mb-16">
+          {/* Enhanced font size for better mobile/desktop contrast */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-blue-300 to-blue-600 bg-clip-text text-transparent leading-tight">
             Psychiatrist-Led<br className="md:hidden"/> Coaching
           </h1>
-          <p className="text-lg text-gray-400 max-w-4xl mx-auto">{COACHING_CONTENT.body}</p>
+          {/* Ensured description is readable on mobile */}
+          <div className="text-sm md:text-lg text-gray-400 max-w-4xl mx-auto text-left px-2 sm:px-0">
+            {COACHING_CONTENT.body}
+          </div>
           {error && <p className="text-red-400 mt-4 font-medium">{error}</p>}
         </header>
 
@@ -246,8 +310,8 @@ export default function CoachingPricingPage() {
           />
         </div>
 
-        {/* Pricing cards */}
-        <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
+        {/* Pricing cards - Adjusted grid for better mobile/desktop flow */}
+        <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mt-12">
           {pricingData.map((plan) => (
             <PricingCard
               key={plan.product}
@@ -261,8 +325,8 @@ export default function CoachingPricingPage() {
         {/* Large group section (Conditionally rendered) */}
         {showLargeGroup && (
           <div className="lg:col-span-4 mt-16">
-            <h2 className="text-3xl font-bold text-center mb-8 text-blue-300">Large Groups (5-10 persons)</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 text-blue-300">Large Groups (5-10 persons)</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
               {LARGE_GROUP_PRICING.map((plan) => (
                 <PricingCard
                   key={plan.product}

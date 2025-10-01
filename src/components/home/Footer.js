@@ -44,7 +44,7 @@ export default function Footer() {
         {/* Column 4 - Contact */}
         <div>
           <h3 className="text-md font-semibold mb-4 text-white">Contact</h3>
-          <p className="text-white/80 text-sm">support@adhdcheck.com</p>
+          <p className="text-white/80 text-sm">support@mindhelpa.com</p>
           <p className="text-white/80 text-sm">+44 7869 467057</p>
         </div>
       </div>

@@ -15,16 +15,10 @@ import {
 import Footer from "../../components/home/Footer";
 
 // ----------------- New Animated Icon Component -----------------
-
-/**
- * AnimatedSpiralCircle Component
- * Renders a simple, rotating spiral circle icon.
- */
 const AnimatedSpiralCircle = ({ className }) => (
   <div
     className={`w-10 h-10 flex items-center justify-center ${className}`}
   >
-    {/* The SVG for the spiral effect */}
     <svg
       viewBox="0 0 100 100"
       className="w-full h-full text-purple-300 animate-spiral-spin"
@@ -39,24 +33,17 @@ const AnimatedSpiralCircle = ({ className }) => (
         className="opacity-70"
       />
     </svg>
-
-    {/* Custom CSS for the spiral spin animation is added at the bottom */}
   </div>
 );
 
 // ----------------- Data Constants -----------------
-
-/**
- * Services Data
- * Defines the main offerings with navigation details.
- */
 const services = [
   {
     name: "ADHD Assessment",
     description:
       "A complete ADHD test built on DSM-5 standards to help you understand your mind better.",
     imageUrl: "/images/blockstack.png",
-    dest: "/pricing-adhd-assessment", // ✅ goes straight to pricing page
+    dest: "/pricing-adhd-assessment",
     isAdhd: true,
   },
   {
@@ -64,7 +51,7 @@ const services = [
     description:
       "Daily trackers and science-based exercises for resilience, focus, and calm.",
     imageUrl: "/images/trailmuncher.png",
-    dest: "/pricing-mental-health-recovery-tools", // ⬅️ UPDATED DESTINATION
+    dest: "/pricing-mental-health-recovery-tools",
     isAdhd: false,
   },
   {
@@ -72,22 +59,17 @@ const services = [
     description:
       "Work directly with licensed professionals for personalized guidance and strategies.",
     imageUrl: "/images/neuralbounds.png",
-    dest: "/book-a-coach", // ⬅️ UPDATED DESTINATION
+    dest: "/book-a-coach",
     isAdhd: false,
   },
 ];
 
-/**
- * Music/Sound Tiles Data
- * Defines the sound-related features.
- */
 const musicTiles = [
   {
     name: "ADHD CLINICAL ASSESSMENT",
     description:
       "DSM-5 aligned, comprehensive clinical assessment for a clear ADHD diagnosis.",
     imageUrl: "/images/music.png",
-    // ⬅️ UPDATED LINK: Use relative path for Next.js navigation
     dest: "/pricing-adhd-clinical-assessment",
     isAdhd: true,
   },
@@ -96,18 +78,12 @@ const musicTiles = [
     description:
       "Explore our specialized programs and professional training for mental health practitioners.",
     imageUrl: "/images/healing.png",
-    // ⬅️ UPDATED LINK: Use relative path for Next.js navigation
     dest: "/pricing-mindhelpa-institute",
     isAdhd: false,
   },
 ];
 
 // ----------------- Reusable Components -----------------
-
-/**
- * FeatureCard Component
- * Displays a single feature/mission point with an icon, title, and description.
- */
 const FeatureCard = ({ icon, title, description }) => (
   <div className="bg-[#0a122a] border border-white/10 rounded-xl p-8 shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-blue-400/20 group">
     <div className="w-16 h-16 flex items-center justify-center bg-blue-500/10 text-blue-400 rounded-full mx-auto transition-transform duration-300 group-hover:scale-110 group-hover:text-white">
@@ -120,29 +96,20 @@ const FeatureCard = ({ icon, title, description }) => (
   </div>
 );
 
-/**
- * ComingSoonModal Component
- * A modal that informs the user that a feature is under development.
- */
 function ComingSoonModal({ open, onClose }) {
   if (!open) return null;
-
   return (
     <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
       <div className="bg-[#101b3d] border border-white/10 rounded-2xl p-8 w-full max-w-md shadow-2xl relative text-center">
-        {/* Close icon */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-white transition"
         >
           <X size={22} />
         </button>
-
-        {/* Spinner */}
         <div className="flex justify-center mb-6">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
-
         <h3 className="text-2xl font-semibold text-white">Coming Soon</h3>
         <p className="mt-3 text-gray-300">
           This feature is under development. Stay tuned!
@@ -152,35 +119,21 @@ function ComingSoonModal({ open, onClose }) {
   );
 }
 
-// ----------------- Main Page Component -----------------
-
-/**
- * FeaturesPage Component
- * The main component for displaying all features and services.
- */
+// ----------------- Main Page -----------------
 export default function FeaturesPage() {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
 
-  /**
-   * Handles the click event for exploring a service or feature.
-   * Directs to the destination if it's a primary service, otherwise opens the 'Coming Soon' modal.
-   * @param {string} serviceName - The name of the service tile clicked.
-   * @param {string} dest - The destination URL.
-   */
   const handleExploreClick = (serviceName, dest) => {
-    // NOTE: The logic here is simplified to assume all these names are valid,
-    // which is appropriate since you only wanted to update the links.
     if (
       serviceName === "ADHD Assessment" ||
       serviceName === "Mental Health Recovery Tools" ||
       serviceName === "Psychiatrist-Led Coaching" ||
-      serviceName === "ADHD CLINICAL ASSESSMENT" || // New service name
-      serviceName === "Mindhelpa institute" // New service name
+      serviceName === "ADHD CLINICAL ASSESSMENT" ||
+      serviceName === "Mindhelpa institute"
     ) {
       router.push(dest);
     } else {
-      // All others (if any are added later that shouldn't navigate) open Coming Soon modal
       setModalOpen(true);
     }
   };
@@ -203,22 +156,8 @@ export default function FeaturesPage() {
             viewBox="0 0 200 200"
             className="w-[80vw] max-w-md h-auto text-blue-500/20 animate-spin-slow"
           >
-            <circle
-              cx="100"
-              cy="100"
-              r="80"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1"
-            />
-            <circle
-              cx="100"
-              cy="100"
-              r="40"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="0.5"
-            />
+            <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="1"/>
+            <circle cx="100" cy="100" r="40" fill="none" stroke="currentColor" strokeWidth="0.5"/>
             <path
               d="M100 100 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40 A60 60 0 1 1 40 100 A60 60 0 1 0 100 160 A60 60 0 1 1 160 100 A60 60 0 1 0 100 40"
               fill="none"
@@ -233,36 +172,10 @@ export default function FeaturesPage() {
             Built for Every Mind
           </h1>
           <p className="text-lg sm:text-xl text-gray-300">
-            Discover mental health solutions that meet you where you are — and
-            guide you forward with clarity.
+            Discover mental health solutions that meet you where you are — and guide you forward with clarity.
           </p>
         </div>
       </div>
-
-      {/* --- */}
-
-      {/* FEATURES GRID (Mission/Vision/Motto) */}
-      <div className="bg-[#0a122a] py-24 px-4">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-12">
-          <FeatureCard
-            icon={<Target size={28} />}
-            title="Our Mission"
-            description="To make recovery tools and professional care accessible for every mind, everywhere."
-          />
-          <FeatureCard
-            icon={<Globe2 size={28} />}
-            title="Our Vision"
-            description="A world where mental health support is personalized, technology-driven, and available across borders."
-          />
-          <FeatureCard
-            icon={<Quote size={28} />}
-            title="Our Motto"
-            description="Clarity. Care. Community — guiding principles behind all we do."
-          />
-        </div>
-      </div>
-
-      {/* --- */}
 
       {/* SERVICES SECTION */}
       <div className="bg-[#0a122a] py-24 px-4">
@@ -272,17 +185,13 @@ export default function FeaturesPage() {
             Our Services
           </h2>
           <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-            Explore assessments, recovery tools, and coaching programs designed
-            to support your growth.
+            Explore assessments, recovery tools, and coaching programs designed to support your growth.
           </p>
         </div>
 
         <div className="mt-12 max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {services.map((s, i) => (
-            <div
-              key={s.name}
-              className="group rounded-2xl overflow-hidden border border-white/10 bg-[#101b3d] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-            >
+            <div key={s.name} className="group rounded-2xl overflow-hidden border border-white/10 bg-[#101b3d] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
               <div className="relative w-full aspect-[4/3] bg-[#0a122a] flex items-center justify-center overflow-hidden">
                 <Image
                   src={s.imageUrl}
@@ -308,30 +217,21 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* --- */}
-
       {/* MUSIC/SOUNDS SECTION */}
       <div className="bg-[#0a122a] py-16 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          {/* ❌ REPLACED Music2 ICON WITH ANIMATED SPIRAL CIRCLE COMPONENT ➡️ */}
           <AnimatedSpiralCircle className="mx-auto" />
-          {/* ⬅️ END REPLACEMENT */}
-
           <h2 className="mt-3 text-4xl font-serif font-bold text-white">
             Specialized Assessments & Professional Training
           </h2>
           <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-            Access our in-depth ADHD clinical assessment and explore professional
-            programs from the Mindhelpa Institute.
+            Access our in-depth ADHD clinical assessment and explore professional programs from the Mindhelpa Institute.
           </p>
         </div>
 
         <div className="mt-12 max-w-7xl mx-auto grid sm:grid-cols-1 md:grid-cols-2 gap-10">
           {musicTiles.map((m, idx) => (
-            <div
-              key={m.name}
-              className="group rounded-2xl overflow-hidden border border-white/10 bg-[#101b3d] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-            >
+            <div key={m.name} className="group rounded-2xl overflow-hidden border border-white/10 bg-[#101b3d] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
               <div className="relative w-full aspect-[16/9] bg-[#0a122a] overflow-hidden">
                 <Image
                   src={m.imageUrl}
@@ -357,8 +257,6 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* --- */}
-
       {/* DAILY PLAN SECTION */}
       <div className="bg-gray-50 py-20 text-gray-900">
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-16 items-center">
@@ -370,8 +268,7 @@ export default function FeaturesPage() {
               Your Daily Recovery Plan
             </h2>
             <p className="mt-6 text-lg text-gray-700">
-              A five-part daily plan that blends meditation, mindful habits,
-              cognitive care, and real mental health recovery science.
+              A five-part daily plan that blends meditation, mindful habits, cognitive care, and real mental health recovery science.
             </p>
             <button
               onClick={() => router.push("/how-it-works")}
@@ -392,16 +289,13 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* --- */}
-
-      {/* CALL TO ACTION (CTA) SECTION */}
+      {/* CTA SECTION */}
       <div className="bg-[#0a122a] py-24 text-center px-4">
         <h2 className="text-3xl md:text-4xl font-extrabold font-serif">
           Ready to Build the Life You Deserve?
         </h2>
         <p className="mt-4 text-lg text-gray-300">
-          Your mental health journey doesn’t have to be chaotic. Recovery is
-          possible — and we’ll guide you globally.
+          Your mental health journey doesn’t have to be chaotic. Recovery is possible — and we’ll guide you globally.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
           <button
@@ -419,51 +313,32 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* --- */}
-
       <Footer />
 
-      {/* Animations (Global Styles) - ADDED 'spiral-spin' KEYFRAME ➡️ */}
       <style jsx global>{`
         .animate-hero-title-fade {
           animation: hero-title-fade 1.5s ease-out forwards;
         }
         @keyframes hero-title-fade {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         .animate-spin-slow {
           animation: spin 80s linear infinite;
           transform-origin: center;
         }
         @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
-        /* New custom animation for the spiral icon */
         .animate-spiral-spin {
           animation: spiral-spin 4s linear infinite;
         }
         @keyframes spiral-spin {
-          from {
-            transform: rotate(0deg) scale(1);
-          }
-          to {
-            transform: rotate(360deg) scale(1);
-          }
+          from { transform: rotate(0deg) scale(1); }
+          to { transform: rotate(360deg) scale(1); }
         }
       `}</style>
-      {/* ⬅️ END ADDITION */}
 
       <ComingSoonModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
