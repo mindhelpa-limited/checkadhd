@@ -283,7 +283,7 @@ export default function FeaturesPage() {
   // Define the base URL and the version parameter for cache-busting
   const baseUrl = "https://www.mindhelpa.com";
   // Increment this 'v' value every time the image changes and Meta is stubborn
-  const cacheVersion = "v=3"; // Changed from v=2 to v=3 just in case
+  const cacheVersion = "v=4"; // Changed from v=2 to v=3 just in case
 
   const imageUrlWithVersion = `${baseUrl}/images/how-it-works.jpg?${cacheVersion}`;
 
