@@ -4,13 +4,10 @@
 // IMPORTANT: This directive MUST be the very first line for the component
 // to run in the browser and enable access to localStorage, Date, etc.
 
-// --- EXTERNAL LIBRARIES AND HOOKS ---
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Confetti from 'react-confetti';
 import useWindowSize from 'react-use-window-size';
-
-// --- FIREBASE IMPORTS ---
-import { db, auth } from '../lib/firebase';
+import { db, auth } from '../lib/firebase'; // Assuming '../lib/firebase' is correct path
 import {
   collection,
   query,
@@ -23,36 +20,19 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 
-// ------------------------------------
-// --- AUDIO UTILITY FUNCTIONS ---
-// ------------------------------------
+// --- DATE HELPER FUNCTIONS ---
 
-const createAudioPlayer = (src) => {
-  if (typeof window !== 'undefined') {
-    const audio = new Audio(src);
-    // Preload for quicker playback
-    audio.load();
-    return () => {
-      // Reset and play
-      audio.currentTime = 0;
-      audio.play().catch(e => console.error("Audio playback failed:", e));
-    };
-  }
-  return () => {}; // No-op if not in browser
+const formatDate = (date) => {
+  const d = new Date(date);
+  let month = '' + (d.getMonth() + 1);
+  let day = '' + d.getDate();
+  const year = d.getFullYear();
+
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
+
+  return [year, month, day].join('-');
 };
-
-// Memoize players to avoid creating new elements on every render
-const playClickSound = createAudioPlayer('/button-click.mp3');
-const playClapSound = createAudioPlayer('/clap.mp3');
-// NEW: Audio player for the goal update/save sound
-const playGoalUpdateSound = createAudioPlayer('/goals.mp3');
-
-
-// ------------------------------------
-// --- DATE HELPER FUNCTIONS (KEPT FOR FIREBASE LOGIC BUT DISPLAYS REMOVED) ---
-// ------------------------------------
-
-// REMOVED: const formatDate = (date) => { ... }
 
 const getStartOfDay = (dateString = null) => {
   const d = dateString ? new Date(dateString) : new Date();
@@ -69,9 +49,7 @@ const getWeekId = () => {
   return `${year}-W${String(week).padStart(2, '0')}`;
 };
 
-// ------------------------------------
 // --- PERSISTENCE HELPER FUNCTIONS ---
-// ------------------------------------
 
 const LOCAL_STORAGE_KEY = 'dailyGoalInputDrafts';
 const EXPIRY_HOURS = 24;
@@ -112,47 +90,40 @@ const saveDrafts = (drafts) => {
 };
 
 
-// ------------------------------------
 // --- MAIN COMPONENT ---
-// ------------------------------------
 
 export default function GoalTrackerFirebase() {
-  // --- STATE ---
   const [selectedTab, setSelectedTab] = useState('Daily Goal');
   const [dailyGoals, setDailyGoals] = useState([]);
   const [weeklyGoals, setWeeklyGoals] = useState([]);
   const [openedGoalIndex, setOpenedGoalIndex] = useState(null);
-  // REMOVED: [trackerFilterDate, setTrackerFilterDate] useState - Defaulting to today's date for daily queries
+  const [trackerFilterDate, setTrackerFilterDate] = useState(formatDate(new Date()));
   const [showConfetti, setShowConfetti] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState('');
 
-  // Authentication State
+  // FIX 1A: State for authenticated user and loading status
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  // Form Draft State
+  // FIX 2: Move draft state to the main component scope
   const [tempDailyGoalTexts, setTempDailyGoalTexts] = useState(getDrafts);
   const [tempWeeklyGoalTexts, setTempWeeklyGoalTexts] = useState(['', '', '']);
 
-  // --- HOOKS / DERIVED VALUES ---
   const { width, height } = useWindowSize();
 
+  // FIX 1B: Use 'user' state for reliable ID
   const userId = user?.uid;
   const currentWeekId = getWeekId();
 
   const startOfToday = getStartOfDay();
-  // Simplified for Daily Goal tab which now always focuses on Today
-  const startOfFilteredDay = startOfToday;
+  const startOfFilteredDay = getStartOfDay(trackerFilterDate);
   const endOfFilteredDay = new Date(startOfFilteredDay);
   endOfFilteredDay.setDate(endOfFilteredDay.getDate() + 1);
 
-  // --- EFFECTS ---
-
-  // Time/Date Header Effect (Kept for visual header display)
+  // --- TIME/DATE HEADER EFFECT (remains the same) ---
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      // Formatting only the date string
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const dateString = now.toLocaleDateString('en-US', options);
       setCurrentDateTime(dateString);
@@ -164,7 +135,7 @@ export default function GoalTrackerFirebase() {
     return () => clearInterval(timerId);
   }, []);
 
-  // Firebase Auth Listener
+  // --- FIREBASE AUTH LISTENER (FIX 1) ---
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(firebaseUser => {
       setUser(firebaseUser);
@@ -175,8 +146,8 @@ export default function GoalTrackerFirebase() {
   }, []);
 
 
-  // Firebase Data Subscription (READ/LISTEN)
-  // startOfFilteredDay now always equals startOfToday, removing dependency
+  // --- FIREBASE DATA SUBSCRIPTION (READ/LISTEN) ---
+  // Now depends on the reliable 'user' state
   useEffect(() => {
     if (!user) {
       setDailyGoals([]);
@@ -185,14 +156,14 @@ export default function GoalTrackerFirebase() {
     }
 
     const goalsCollection = collection(db, 'goals');
-    const currentUserId = user.uid;
+    const currentUserId = user.uid; // Use reliable user ID
 
-    // 1. Daily Goals Listener (Always for today's date)
+    // 1. Daily Goals Listener
     const dailyGoalsQuery = query(
       goalsCollection,
-      where('userId', '==', currentUserId),
+      where('userId', '==', currentUserId), // Uses currentUserId
       where('type', '==', 'daily'),
-      where('targetDate', '>=', startOfToday),
+      where('targetDate', '>=', startOfFilteredDay),
       where('targetDate', '<', endOfFilteredDay),
       orderBy('targetDate', 'desc')
     );
@@ -203,7 +174,7 @@ export default function GoalTrackerFirebase() {
     // 2. Weekly Goals Listener
     const weeklyGoalsQuery = query(
       goalsCollection,
-      where('userId', '==', currentUserId),
+      where('userId', '==', currentUserId), // Uses currentUserId
       where('type', '==', 'weekly'),
       where('targetWeek', '==', currentWeekId),
       orderBy('createdAt', 'asc')
@@ -217,16 +188,15 @@ export default function GoalTrackerFirebase() {
       unsubscribeDaily();
       unsubscribeWeekly();
     };
-  }, [user, currentWeekId]); // Removed startOfFilteredDay as it's now fixed to startOfToday
+  }, [user, startOfFilteredDay]); // DEPENDS ON 'user'
 
 
-  // ------------------------------------
-  // --- FIREBASE WRITE/UPDATE HANDLERS ---
-  // ------------------------------------
+  // --- FIREBASE WRITE/UPDATE FUNCTIONS (Uses reliable userId) ---
 
   const toggleGoal = async (goalId, currentStatus) => {
     if (!userId) return;
     const goalRef = doc(db, 'goals', goalId);
+    // ... (rest of toggleGoal remains the same)
     try {
       await updateDoc(goalRef, {
         isDone: !currentStatus,
@@ -234,8 +204,6 @@ export default function GoalTrackerFirebase() {
       });
 
       if (!currentStatus) {
-        // Play sound and show confetti only when marking as DONE
-        playClapSound();
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 3000);
       }
@@ -248,6 +216,7 @@ export default function GoalTrackerFirebase() {
   const updateGoalTitle = async (goalId, newTitle) => {
     if (!userId || !newTitle.trim()) return;
     const goalRef = doc(db, 'goals', goalId);
+    // ... (rest of updateGoalTitle remains the same)
     try {
       await updateDoc(goalRef, {
         title: newTitle.trim(),
@@ -258,33 +227,32 @@ export default function GoalTrackerFirebase() {
     }
   };
 
+  // Now relies on the reliable 'userId' and handles clearing the new state correctly
   const addNewGoal = async (type, title, index) => {
     const goalsList = type === 'daily' ? dailyGoals : weeklyGoals;
+
+    // If userId is null (auth still loading), this check will prevent saving
     if (!userId || !title.trim() || goalsList.length > 3) {
       return;
     }
 
-    // If this is an existing goal, update it
+    const targetDate = type === 'daily' ? startOfToday : startOfFilteredDay;
+
     const existingGoal = goalsList[index];
     if (existingGoal) {
       await updateGoalTitle(existingGoal.id, title);
     } else {
-      // Otherwise, add a new one
       const newGoalData = {
         userId: userId,
         title: title.trim(),
         type: type,
         isDone: false,
         createdAt: serverTimestamp(),
-        // Daily goals are always set for startOfToday now
         ...(type === 'daily' && { targetDate: startOfToday }),
         ...(type === 'weekly' && { targetWeek: currentWeekId })
       };
       await addDoc(collection(db, 'goals'), newGoalData);
     }
-    
-    // Play the goal update sound when goal is saved/updated
-    playGoalUpdateSound(); // NEW: Call the play function here
 
     setOpenedGoalIndex(null);
 
@@ -306,21 +274,15 @@ export default function GoalTrackerFirebase() {
   };
 
 
-  // ------------------------------------
-  // --- TRACKER/STREAK LOGIC (MEMOS) ---
-  // ------------------------------------
-
+  // --- TRACKER/STREAK LOGIC (remains the same) ---
   const completedDailyCount = useMemo(() => dailyGoals.filter(goal => goal.isDone).length, [dailyGoals]);
   const completedWeeklyCount = useMemo(() => weeklyGoals.filter(goal => goal.isDone).length, [weeklyGoals]);
   const dailyStreakScore = completedDailyCount;
   const weeklyStreakScore = completedWeeklyCount;
   const goalPlaceholders = [0, 1, 2];
 
-  // ------------------------------------
-  // --- RENDER HELPER FUNCTIONS ---
-  // ------------------------------------
-
-  // Reusable Accordion Goal Form Renderer
+  // --- REUSABLE ACCORDION GOAL FORM RENDERER ---
+  // Accepts tempGoalTexts and setTempGoalTexts as props
   const renderGoalAccordions = (type, tempGoalTexts, setTempGoalTexts) => {
     const goals = type === 'daily' ? dailyGoals : weeklyGoals;
     const isDaily = type === 'daily';
@@ -354,11 +316,18 @@ export default function GoalTrackerFirebase() {
       addNewGoal(type, tempGoalTexts[index], index);
     };
 
-    // Since we removed the date filter, Daily Goals are always for 'Today' now
-    const canEditOrToggle = (!authLoading && userId); // Editing is always possible for 'today' (current daily goals) or current weekly goals
+    const isToday = formatDate(startOfFilteredDay) === formatDate(startOfToday);
+    // Prevent editing/toggling if auth is loading
+    const canEditOrToggle = (!authLoading && userId) && (!isDaily || isToday);
 
     return (
       <div className="space-y-3 sm:space-y-4">
+        {isDaily && !isToday && (
+          <div className="p-4 bg-yellow-900/50 text-yellow-300 rounded-lg text-sm font-medium">
+            Goals for **{new Date(startOfFilteredDay).toLocaleDateString()}** are read-only. Use the Tracker tab for history.
+          </div>
+        )}
+
         {goalPlaceholders.map((index) => {
           const goal = goals[index];
           const isOpened = openedGoalIndex === index;
@@ -381,8 +350,7 @@ export default function GoalTrackerFirebase() {
               >
                 <div className="flex items-center min-w-0">
                   <span className={`text-base sm:text-lg font-semibold ${goal?.isDone ? 'text-green-400' : 'text-indigo-400'}`}>
-                    {/* MODIFICATION: Moved trophy to come before the goal number */}
-                    {isDaily ? '🏆 GOAL' : '🏆 WEEKLY'} {index + 1}
+                    {isDaily ? 'GOAL' : 'WEEKLY'} {index + 1}
                   </span>
                   <span className={`ml-2 sm:ml-3 text-xs sm:text-sm font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${
                     goal?.isDone ? 'bg-green-700 text-green-200' : goal ? 'bg-indigo-700 text-indigo-200' : 'bg-gray-600 text-gray-300'
@@ -447,6 +415,9 @@ export default function GoalTrackerFirebase() {
                         </button>
                       )}
                     </div>
+                    {!canEditOrToggle && (
+                      <p className="text-sm text-red-400 italic">This is a past goal/week and cannot be edited or marked.</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -458,28 +429,50 @@ export default function GoalTrackerFirebase() {
   };
 
   const renderDailyGoalForm = () => {
-    // REMOVED: useEffect to reset filter date
+    useEffect(() => {
+      setTrackerFilterDate(formatDate(new Date()));
+    }, []);
+
     return renderGoalAccordions('daily', tempDailyGoalTexts, setTempDailyGoalTexts);
   };
 
   const renderWeeklyGoalForm = () => renderGoalAccordions('weekly', tempWeeklyGoalTexts, setTempWeeklyGoalTexts);
 
 
-  // Tracker rendering function with mobile footer fix (pb-20)
   const renderTracker = () => (
-    <div className="space-y-6 sm:space-y-8 pb-20">
-      {/* REMOVED: DATE FILTER UI */}
+    <div className="space-y-6 sm:space-y-8">
+      {/* DATE FILTER UI (remains the same) */}
+      <div className="p-4 bg-gray-900 rounded-lg border border-gray-700">
+        <h3 className="text-xl font-semibold text-gray-200 mb-3">
+          Historical Daily Goal Tracker
+        </h3>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+          <label htmlFor="daily-date-filter" className="text-sm font-medium text-gray-300 whitespace-nowrap">
+            View Daily Score for:
+          </label>
+          <input
+            id="daily-date-filter"
+            type="date"
+            value={trackerFilterDate}
+            onChange={(e) => setTrackerFilterDate(e.target.value)}
+            className="w-full max-w-xs p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 dark-mode-date-picker"
+          />
+        </div>
+      </div>
 
-      {/* Daily Score Tracker (Always Reflects Today's Goals) */}
+      {/* Daily Score Tracker (Reflects Filter Date) */}
       <div className="p-5 sm:p-6 bg-gray-800 shadow-xl rounded-lg border-t-4 border-indigo-500">
         <h4 className="text-lg sm:text-xl font-bold text-indigo-400 mb-3">
-          Daily Completion Score (Today)
+          Daily Completion Score
         </h4>
+        <p className="text-base text-gray-400 mb-1">
+          Goals for: {new Date(trackerFilterDate).toLocaleDateString()}
+        </p>
         <p className="text-4xl sm:text-5xl font-extrabold text-white">
           {dailyStreakScore} / 3
         </p>
         <div className="mt-2 text-gray-400 text-sm">
-          *Score based on today's goal completion.
+          *Score based on the date selected above.
         </div>
       </div>
 
@@ -499,10 +492,7 @@ export default function GoalTrackerFirebase() {
   );
 
 
-  // ------------------------------------
-  // --- MAIN RENDER LOGIC ---
-  // ------------------------------------
-
+  // --- MAIN RENDER ---
   const tabContent = {
     'Daily Goal': renderDailyGoalForm(),
     'Weekly Goal': renderWeeklyGoalForm(),
@@ -511,7 +501,7 @@ export default function GoalTrackerFirebase() {
 
   const tabs = ['Daily Goal', 'Weekly Goal', 'Tracker'];
 
-  // Show a loading state while authentication is pending
+  // FIX 1C: Show a loading state while authentication is pending
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-50 p-4 sm:p-8 flex items-center justify-center">
@@ -545,19 +535,16 @@ export default function GoalTrackerFirebase() {
 
       <div className="max-w-4xl mx-auto">
 
-        {/* TIME/DATE HEADER - Current Date Display (Kept for visual header) */}
-        <div className="mb-2 overflow-hidden whitespace-nowrap border-y border-gray-700/50 py-1">
-          <p className="text-base font-medium text-indigo-400 inline-block pr-10 animate-slow-marquee">
-            <span className="font-semibold text-white ml-2">{currentDateTime}</span>
-            <span className="font-semibold text-white ml-2">{currentDateTime}</span>
-            <span className="font-semibold text-white ml-2">{currentDateTime}</span>
-            <span className="font-semibold text-white ml-2">{currentDateTime}</span>
-          </p>
-        </div>
+        {/* TIME/DATE HEADER */}
+        <p className="text-lg font-medium text-indigo-400 mb-2">
+          Hi, today is:
+          <span className="font-semibold text-white ml-2">
+            {currentDateTime}
+          </span>
+        </p>
 
-        {/* H1 TITLE */}
         <h1 className="text-2xl sm:text-4xl font-extrabold text-white mb-6">
-          Focus Goal Dashboard
+          ✨ Focus Goal Dashboard
         </h1>
 
         {/* Tab Navigation */}
@@ -568,7 +555,6 @@ export default function GoalTrackerFirebase() {
               onClick={() => {
                 setSelectedTab(tab);
                 setOpenedGoalIndex(null);
-                playClickSound();
               }}
               className={`flex-1 sm:flex-none py-3 px-3 sm:px-6 text-sm sm:text-lg font-medium transition-colors duration-200 focus:outline-none ${
                 selectedTab === tab
