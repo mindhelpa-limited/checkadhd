@@ -44,6 +44,8 @@ const createAudioPlayer = (src) => {
 // Memoize players to avoid creating new elements on every render
 const playClickSound = createAudioPlayer('/button-click.mp3');
 const playClapSound = createAudioPlayer('/clap.mp3');
+// NEW: Audio player for the goal update/save sound
+const playGoalUpdateSound = createAudioPlayer('/goals.mp3');
 
 
 // ------------------------------------
@@ -280,6 +282,9 @@ export default function GoalTrackerFirebase() {
       };
       await addDoc(collection(db, 'goals'), newGoalData);
     }
+    
+    // Play the goal update sound when goal is saved/updated
+    playGoalUpdateSound(); // NEW: Call the play function here
 
     setOpenedGoalIndex(null);
 
