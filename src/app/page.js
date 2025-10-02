@@ -282,8 +282,9 @@ export default function FeaturesPage() {
 
   return (
     <div className="bg-[#0a122a] text-white overflow-hidden">
-      {/* ✅ Metadata for social preview */}
+      {/* ✅ Metadata for social preview - UPDATED WITH REQUESTED VALUES */}
       <Head>
+        {/* Standard SEO Tags (Good practice) */}
         <title>Psychiatrist-Led Coaching</title>
         <meta
           name="description"
@@ -307,6 +308,10 @@ export default function FeaturesPage() {
           name="twitter:description"
           content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
         />
+        {/* NOTE: If you are serving the image from a separate domain or using a complex path, 
+           you must use the absolute URL here (e.g., https://yourdomain.com/images/how-it-works.jpg).
+           Since it's in the public folder, the relative path /images/how-it-works.jpg should work
+           once deployed and accessed via the public domain. */}
         <meta name="twitter:image" content="/images/how-it-works.jpg" />
       </Head>
       
