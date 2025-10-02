@@ -7,6 +7,7 @@ module.exports = {
   ],
   theme: {
     extend: {
+      // --- Custom Colors, Fonts, and Box Shadows ---
       colors: {
         'cream': '#FDFBF8',
         'charcoal': '#2D3748',
@@ -24,7 +25,10 @@ module.exports = {
       boxShadow: {
         'subtle': '0 4px 20px rgba(0, 0, 0, 0.05)',
       },
+
+      // --- Custom Keyframes (including the new 'marquee') ---
       keyframes: {
+        // Existing keyframes
         wave: {
           '0%, 100%': { transform: 'rotate(0deg)' },
           '10%': { transform: 'rotate(14deg)' },
@@ -46,12 +50,26 @@ module.exports = {
           '0%': { transform: 'translate(-50%, -50%) rotate(0deg)' },
           '100%': { transform: 'translate(-50%, -50%) rotate(360deg)' },
         },
+        
+        // ** MARQUEE KEYFRAME (FIXED) **
+        // Defines the horizontal scroll motion from 0% (natural position) to -100% of the text width.
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-100%)' }, 
+        },
       },
+
+      // --- Custom Animation Utilities (including the new 'slow-marquee') ---
       animation: {
+        // Existing animations
         wave: 'wave 2.5s infinite',
         'fade-in': 'fade-in 0.3s ease-out forwards',
         'spin-minute': 'spin-minute 60s linear infinite',
         'spin-hour': 'spin-hour 720s linear infinite',
+
+        // ** MARQUEE ANIMATION UTILITY **
+        // Links the 'marquee' keyframe to a 30s linear, infinite loop.
+        'slow-marquee': 'marquee 30s linear infinite', 
       },
     },
   },
