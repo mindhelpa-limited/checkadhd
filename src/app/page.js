@@ -12,12 +12,14 @@ import {
   X,
 } from "lucide-react";
 
+import Head from "next/head"; // ✅ Added for metadata
+
 // FIX APPLIED HERE: Corrected the path from "../../components/home/Footer" to "../components/home/Footer"
 import Footer from "../components/home/Footer";
 
 
 // =========================================================================
-// 1. REUSABLE COMPONENTS (BEFORE MAIN LOGIC)
+/* 1. REUSABLE COMPONENTS (BEFORE MAIN LOGIC) */
 // =========================================================================
 
 /**
@@ -122,7 +124,7 @@ function ComingSoonModal({ open, onClose }) {
 }
 
 // =========================================================================
-// 2. HERO COMPONENT
+/* 2. HERO COMPONENT */
 // =========================================================================
 
 function Hero() {
@@ -199,7 +201,7 @@ function Hero() {
 
 
 // =========================================================================
-// 3. DATA CONSTANTS
+/* 3. DATA CONSTANTS */
 // =========================================================================
 
 /**
@@ -246,12 +248,11 @@ const musicTiles = [
     dest: "/pricing-adhd-clinical-assessment",
     isAdhd: true,
   },
-  // REMOVED: The Mindhelpa institute card was here
 ];
 
 
 // =========================================================================
-// 4. MAIN PAGE COMPONENT (DEFAULT EXPORT)
+/* 4. MAIN PAGE COMPONENT (DEFAULT EXPORT) */
 // =========================================================================
 
 /**
@@ -281,6 +282,33 @@ export default function FeaturesPage() {
 
   return (
     <div className="bg-[#0a122a] text-white overflow-hidden">
+      {/* ✅ Metadata for social preview */}
+      <Head>
+        <title>Psychiatrist-Led Coaching</title>
+        <meta
+          name="description"
+          content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
+        />
+
+        {/* Open Graph (Facebook/WhatsApp) */}
+        <meta property="og:title" content="Psychiatrist-Led Coaching" />
+        <meta
+          property="og:description"
+          content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
+        />
+        <meta property="og:image" content="/images/how-it-works.jpg" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Mindhelpa" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Psychiatrist-Led Coaching" />
+        <meta
+          name="twitter:description"
+          content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
+        />
+        <meta name="twitter:image" content="/images/how-it-works.jpg" />
+      </Head>
       
       {/* RENDER THE NEW HERO COMPONENT */}
       <Hero /> 
@@ -333,7 +361,7 @@ export default function FeaturesPage() {
 
       {/* --- */}
 
-      {/* MUSIC/SOUNDS SECTION */}
+      {/* MUSIC/SOUNDS SECTION (Specialized Assessments) */}
       <div className="bg-[#0a122a] py-16 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <AnimatedSpiralCircle className="mx-auto" />
@@ -425,7 +453,7 @@ export default function FeaturesPage() {
       </div>
 
       {/* --- */}
-{/* CALL TO ACTION (CTA) SECTION */}
+      {/* CALL TO ACTION (CTA) SECTION */}
       <div className="bg-[#0a122a] py-24 text-center px-4">
         <h2 className="text-3xl md:text-4xl font-extrabold font-serif">
           Ready to Build the Life You Deserve?
