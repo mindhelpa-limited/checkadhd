@@ -282,7 +282,7 @@ export default function FeaturesPage() {
 
   return (
     <div className="bg-[#0a122a] text-white overflow-hidden">
-      {/* ✅ Metadata for social preview - UPDATED WITH REQUESTED VALUES */}
+      {/* ✅ Metadata for social preview - NOW USING ABSOLUTE URL FOR IMAGE */}
       <Head>
         {/* Standard SEO Tags (Good practice) */}
         <title>Psychiatrist-Led Coaching</title>
@@ -297,7 +297,9 @@ export default function FeaturesPage() {
           property="og:description"
           content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
         />
-        <meta property="og:image" content="/images/how-it-works.jpg" />
+        {/* 🔥 FIX: Changed to absolute URL based on your domain: */}
+        <meta property="og:image" content="https://www.mindhelpa.com/images/how-it-works.jpg" />
+        <meta property="og:url" content="https://www.mindhelpa.com/" /> 
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Mindhelpa" />
 
@@ -308,11 +310,8 @@ export default function FeaturesPage() {
           name="twitter:description"
           content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
         />
-        {/* NOTE: If you are serving the image from a separate domain or using a complex path, 
-           you must use the absolute URL here (e.g., https://yourdomain.com/images/how-it-works.jpg).
-           Since it's in the public folder, the relative path /images/how-it-works.jpg should work
-           once deployed and accessed via the public domain. */}
-        <meta name="twitter:image" content="/images/how-it-works.jpg" />
+        {/* 🔥 FIX: Changed to absolute URL based on your domain: */}
+        <meta name="twitter:image" content="https://www.mindhelpa.com/images/how-it-works.jpg" />
       </Head>
       
       {/* RENDER THE NEW HERO COMPONENT */}
