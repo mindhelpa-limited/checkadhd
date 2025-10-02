@@ -102,7 +102,7 @@ const App = () => {
             The Free Mind Toolkit
           </h1>
           <p className="mt-4 text-xl text-gray-300 max-w-3xl mx-auto">
-            Unlock **instant access** to two powerful resources designed to inspire, uplift, and center your spirit. Just tell us where to send your gifts!
+            Unlock instant access to two powerful resources designed to inspire, uplift, and center your spirit. Just tell us where to send your gifts!
           </p>
         </header>
 

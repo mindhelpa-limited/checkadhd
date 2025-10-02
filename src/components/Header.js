@@ -16,23 +16,34 @@ import {
     Stethoscope,
     GraduationCap,
     HeartHandshake,
-    Users
+    Users,
+    Gift // Import the Gift icon
 } from "lucide-react";
 
-// Updated MobileMenuItem to accept an optional 'icon' prop and adjust styling for it
-const MobileMenuItem = ({ href, children, onClick, icon: Icon }) => (
+// Updated MobileMenuItem to accept an optional 'icon' prop for the RIGHT side and pulse effect
+const MobileMenuItem = ({ href, children, onClick, icon: Icon, rotateEffect }) => ( // Changed prop name to rotateEffect
     <Link
         href={href}
         onClick={onClick}
         className="flex items-center w-full px-4 py-3 border-b border-gray-700 last:border-b-0 hover:bg-[#1f294c] transition-colors duration-200 group"
     >
-        {Icon && <Icon size={20} className="mr-3 text-blue-400" />}
         <span className="font-sans text-white text-lg font-light flex-grow truncate">{children}</span>
-        <ArrowRight size={20} className="text-gray-400 group-hover:translate-x-1 transition-transform duration-200" />
+        
+        {/* Right side: Conditionally render the custom Icon or the standard ArrowRight */}
+        {Icon ? (
+            // Custom Icon for Claim Gifts (replaces ArrowRight)
+            <Icon 
+                size={20} 
+                className={`text-blue-400 transition-colors duration-200 ${rotateEffect ? 'animate-slow-spin' : ''}`} // Apply the new animation class
+            />
+        ) : (
+            // Standard ArrowRight icon
+            <ArrowRight size={20} className="text-gray-400 group-hover:translate-x-1 transition-transform duration-200" />
+        )}
     </Link>
 );
 
-// New component for Desktop Dropdown Item to include the icon
+// New component for Dropdown Item to include the icon
 const DropdownMenuItem = ({ href, children, onClick, icon: Icon }) => (
     <Link
         href={href}
@@ -119,13 +130,20 @@ export default function Header() {
             )}
 
             <MobileMenuItem href="/resources" onClick={() => setMenuOpen(false)}>Resources</MobileMenuItem>
+            
+            {/* UPDATED MOBILE MENU ITEM: Claim Gifts (after Resources) */}
+            <MobileMenuItem 
+                href="/free-gifts" 
+                onClick={() => setMenuOpen(false)}
+                icon={Gift} 
+                rotateEffect={true} // Changed to rotateEffect
+            >
+                Claim Gifts
+            </MobileMenuItem>
         </>
     );
 
     return (
-        // Header: Changed bg-black/40 to bg-[#101b3d] to ensure a solid dark background
-        // Added 'w-full' for explicit width, and 'relative' for mobile.
-        // On desktop (md:), it's fixed.
         <header className="bg-[#101b3d] backdrop-blur-md text-white w-full relative md:fixed md:top-0 md:left-0 md:right-0 z-50 shadow-lg">
             <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                 {/* Logo */}
@@ -187,6 +205,15 @@ export default function Header() {
                     </div>
 
                     <Link href="/resources" className="hover:text-blue-400 transition-all duration-200">Resources</Link>
+                    
+                    {/* UPDATED DESKTOP MENU ITEM: Claim Gifts (after Resources) */}
+                    <Link 
+                        href="/free-gifts" 
+                        className="hover:text-blue-400 transition-all duration-200" 
+                    >
+                        Claim Gifts
+                    </Link>
+
                     {/* User Login/Logout Logic */}
                     {user ? (
                         <>
@@ -239,7 +266,6 @@ export default function Header() {
                     {/* User Login/Logout Logic */}
                     {user ? (
                         <>
-                            {/* MODIFIED LINE: Changed href="/dashboard" to href="/dashboard/home" */}
                             <MobileMenuItem href="/dashboard/home" onClick={() => setMenuOpen(false)}>Dashboard</MobileMenuItem>
                             <button onClick={handleLogout} className="text-lg w-full text-left px-4 py-3 text-red-400 font-semibold">
                                 Logout
@@ -260,3 +286,19 @@ export default function Header() {
         </header>
     );
 }
+
+/*
+// Add this to your global CSS file (e.g., globals.css)
+@keyframes slow-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-slow-spin {
+  animation: slow-spin 4s linear infinite; // Adjust '4s' for desired speed
+}
+*/

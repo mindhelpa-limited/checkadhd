@@ -84,7 +84,7 @@ export default function Footer() {
 
       <div className="text-center text-white/40 text-sm py-6 border-t border-white/10">
         {/* Updated copyright text to Mindhelpa Limited and used dynamic year */}
-        © {currentYear} **Mindhelpa Limited**. All rights reserved.
+        © {currentYear} Mindhelpa Limited. All rights reserved.
       </div>
       <style jsx>{`
         .footer-radial-bg {
