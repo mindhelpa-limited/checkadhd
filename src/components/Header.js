@@ -21,12 +21,13 @@ import {
 } from "lucide-react";
 
 // Updated MobileMenuItem to accept an optional 'icon' prop for the RIGHT side and pulse effect
-const MobileMenuItem = ({ href, children, onClick, icon: Icon, rotateEffect }) => ( // Changed prop name to rotateEffect
+const MobileMenuItem = ({ href, children, onClick, icon: Icon, pulseEffect }) => (
     <Link
         href={href}
         onClick={onClick}
         className="flex items-center w-full px-4 py-3 border-b border-gray-700 last:border-b-0 hover:bg-[#1f294c] transition-colors duration-200 group"
     >
+        {/* Left side: Standard items don't have an icon here, the previous version had a placeholder which I'll remove as it's not needed for standard items */}
         <span className="font-sans text-white text-lg font-light flex-grow truncate">{children}</span>
         
         {/* Right side: Conditionally render the custom Icon or the standard ArrowRight */}
@@ -34,7 +35,7 @@ const MobileMenuItem = ({ href, children, onClick, icon: Icon, rotateEffect }) =
             // Custom Icon for Claim Gifts (replaces ArrowRight)
             <Icon 
                 size={20} 
-                className={`text-blue-400 transition-colors duration-200 ${rotateEffect ? 'animate-slow-spin' : ''}`} // Apply the new animation class
+                className={`text-blue-400 transition-colors duration-200 ${pulseEffect ? 'animate-pulse' : ''}`} 
             />
         ) : (
             // Standard ArrowRight icon
@@ -135,8 +136,8 @@ export default function Header() {
             <MobileMenuItem 
                 href="/free-gifts" 
                 onClick={() => setMenuOpen(false)}
-                icon={Gift} 
-                rotateEffect={true} // Changed to rotateEffect
+                icon={Gift} // Use the Gift icon to replace ArrowRight
+                pulseEffect={true} // Enable pulse effect for the icon
             >
                 Claim Gifts
             </MobileMenuItem>
@@ -209,7 +210,7 @@ export default function Header() {
                     {/* UPDATED DESKTOP MENU ITEM: Claim Gifts (after Resources) */}
                     <Link 
                         href="/free-gifts" 
-                        className="hover:text-blue-400 transition-all duration-200" 
+                        className="hover:text-blue-400 transition-all duration-200" // Standard hover effect
                     >
                         Claim Gifts
                     </Link>
@@ -286,19 +287,3 @@ export default function Header() {
         </header>
     );
 }
-
-/*
-// Add this to your global CSS file (e.g., globals.css)
-@keyframes slow-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-slow-spin {
-  animation: slow-spin 4s linear infinite; // Adjust '4s' for desired speed
-}
-*/

@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 
-import Head from "next/head"; // ✅ Added for metadata
+import Head from "next/head"; 
 
 // FIX APPLIED HERE: Corrected the path from "../../components/home/Footer" to "../components/home/Footer"
 import Footer from "../components/home/Footer";
@@ -280,9 +280,16 @@ export default function FeaturesPage() {
     }
   };
 
+  // Define the base URL and the version parameter for cache-busting
+  const baseUrl = "https://www.mindhelpa.com";
+  // Increment this 'v' value every time the image changes and Meta is stubborn
+  const cacheVersion = "v=3"; // Changed from v=2 to v=3 just in case
+
+  const imageUrlWithVersion = `${baseUrl}/images/how-it-works.jpg?${cacheVersion}`;
+
   return (
     <div className="bg-[#0a122a] text-white overflow-hidden">
-      {/* ✅ Metadata for social preview - NOW USING ABSOLUTE URL FOR IMAGE */}
+      {/* ✅ Metadata for social preview - NOW USING ABSOLUTE URL WITH CACHE-BUSTING */}
       <Head>
         {/* Standard SEO Tags (Good practice) */}
         <title>Psychiatrist-Led Coaching</title>
@@ -297,9 +304,9 @@ export default function FeaturesPage() {
           property="og:description"
           content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
         />
-        {/* 🔥 FIX: Changed to absolute URL based on your domain: */}
-        <meta property="og:image" content="https://www.mindhelpa.com/images/how-it-works.jpg" />
-        <meta property="og:url" content="https://www.mindhelpa.com/" /> 
+        {/* 🔥 FIX: Used absolute URL with a version parameter to force a fresh scrape */}
+        <meta property="og:image" content={imageUrlWithVersion} />
+        <meta property="og:url" content={baseUrl + "/"} /> 
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Mindhelpa" />
 
@@ -310,8 +317,8 @@ export default function FeaturesPage() {
           name="twitter:description"
           content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
         />
-        {/* 🔥 FIX: Changed to absolute URL based on your domain: */}
-        <meta name="twitter:image" content="https://www.mindhelpa.com/images/how-it-works.jpg" />
+        {/* 🔥 FIX: Used absolute URL with a version parameter to force a fresh scrape */}
+        <meta name="twitter:image" content={imageUrlWithVersion} />
       </Head>
       
       {/* RENDER THE NEW HERO COMPONENT */}
