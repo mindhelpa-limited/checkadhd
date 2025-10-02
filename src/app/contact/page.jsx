@@ -36,7 +36,7 @@ export default function ContactPage() {
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold text-gray-900">Email</h3>
                   <p className="text-gray-600">Our support team is available to help.</p>
-                  <a href="mailto:support@adhdcheck.net" className="text-blue-600 font-semibold hover:underline">support@adhdcheck.net</a>
+                  <a href="mailto:support@adhdcheck.net" className="text-blue-600 font-semibold hover:underline">support@mindhelpa.com</a>
                 </div>
               </div>
               <div className="flex items-start">
@@ -69,7 +69,7 @@ export default function ContactPage() {
           {/* Right Side: Contact Form */}
           <div className="bg-gray-50 p-8 rounded-2xl shadow-lg">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
-            <form action="mailto:support@adhdcheck.net" method="POST" encType="text/plain">
+            <form action="mailto:support@mindhelpa.com" method="POST" encType="text/plain">
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold leading-6 text-gray-900">Full Name</label>
                 <input type="text" name="name" id="name" autoComplete="name" className="mt-2 block w-full rounded-md border-0 px-3.5 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600" />
