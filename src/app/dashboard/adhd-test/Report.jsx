@@ -1,9 +1,8 @@
 "use client";
 
 import styles from "./assessment.module.css";
-import Image from "next/image";
 
-// ✅ Direct path (public asset)
+// ✅ Use direct public path (works perfectly with html2pdf)
 const adhdLogo = "/logo2.png";
 
 // --- Score Config ---
@@ -46,7 +45,7 @@ const REPORT_CONTENT = {
   },
 };
 
-// --- Calculate score details ---
+// --- Calculate Score ---
 const getScoreDetails = (answers) => {
   const totalScore = answers.reduce((sum, val) => sum + (val || 0), 0);
   const questionsCount = answers.length;
@@ -69,6 +68,7 @@ const getScoreDetails = (answers) => {
   };
 };
 
+// === MAIN REPORT COMPONENT ===
 export default function Report({ userInfo, answers }) {
   const {
     scorePercentage,
@@ -119,26 +119,28 @@ export default function Report({ userInfo, answers }) {
           alignItems: "center",
           justifyContent: "center",
           textAlign: "center",
-          marginBottom: "10px",
+          marginBottom: "15px",
         }}
       >
-        <Image
+        {/* ✅ Plain <img> to ensure full rendering in html2pdf */}
+        <img
           src={adhdLogo}
           alt="Mindhelpa Logo"
-          width={140}
-          height={140}
           style={{
+            width: "180px",
+            height: "auto",
             objectFit: "contain",
-            marginBottom: "10px",
+            marginBottom: "8px",
           }}
         />
+
         <p
           className={styles.subtitleReportPdf}
           style={{
             fontWeight: "600",
             color: "#1e40af",
             fontSize: "18px",
-            marginTop: "8px",
+            marginTop: "6px",
           }}
         >
           Professional ADHD Self-Assessment
@@ -233,17 +235,15 @@ export default function Report({ userInfo, answers }) {
         <ul className={styles.list}>
           <li className={styles.listItem}>
             <strong>Consult a Professional:</strong> Discuss these results with a
-            doctor, psychiatrist, or psychologist for a comprehensive clinical
-            evaluation.
+            psychiatrist or psychologist for a comprehensive evaluation.
           </li>
           <li className={styles.listItem}>
-            <strong>Behavioral Strategies:</strong> Explore time management
-            techniques, organizational systems, and minimizing distractions.
+            <strong>Behavioral Strategies:</strong> Explore time management,
+            focus techniques, and structured organization systems.
           </li>
           <li className={styles.listItem}>
-            <strong>Lifestyle Adjustments:</strong> Regular physical exercise, a
-            balanced diet, and adequate sleep can significantly impact ADHD
-            symptoms.
+            <strong>Lifestyle Adjustments:</strong> Regular exercise, balanced
+            nutrition, and proper rest can improve mental focus.
           </li>
         </ul>
       </div>
@@ -253,12 +253,12 @@ export default function Report({ userInfo, answers }) {
         <h3 className={styles.sectionTitle}>Important Disclaimers</h3>
         <ul className={styles.list}>
           <li className={styles.listItem}>
-            <strong>Screening Tool Only:</strong> This is an informational
-            self-assessment tool. It does not provide a clinical diagnosis.
+            <strong>Screening Tool Only:</strong> This self-assessment is for
+            informational purposes only and does not replace professional advice.
           </li>
           <li className={styles.listItem}>
-            <strong>Professional Evaluation Required:</strong> For an accurate
-            diagnosis, please consult with a qualified healthcare provider.
+            <strong>Professional Evaluation Required:</strong> Please consult a
+            licensed clinician for a confirmed diagnosis.
           </li>
         </ul>
       </div>
@@ -266,15 +266,15 @@ export default function Report({ userInfo, answers }) {
       {/* === FOOTER === */}
       <div className={styles.pdfFooter}>
         <div className={styles.pdfFooterLogo}>Mindhelpa</div>
-        <p>Generated using clinically-validated ADHD assessment tools:</p>
+        <p>Generated using clinically validated ADHD screening tools:</p>
         <ul className={styles.pdfToolList}>
           {toolList.slice(0, 4).map((tool) => (
             <li key={tool}>{tool}</li>
           ))}
         </ul>
         <p className={styles.confidential}>
-          This report is confidential and intended for the assessed individual’s
-          review.
+          This report is confidential and intended solely for the assessed
+          individual’s review.
         </p>
         <p
           style={{
