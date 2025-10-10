@@ -1,8 +1,8 @@
 // File Path: /src/app/dashboard/goal-tracker/page.js
 
 // 1. Mark as client component if you use state, effects, or hooks like useRouter
-//    (If the component you import, GoalTrackerFirebase, is client-side, 
-//     this wrapper component must also be marked 'use client' if it imports client-side code).
+//    (If the component you import, GoalTrackerFirebase, is client-side, 
+//     this wrapper component must also be marked 'use client' if it imports client-side code).
 'use client'; 
 
 import React, { useEffect, useState } from 'react';
@@ -23,29 +23,32 @@ import { auth } from '../../../lib/firebase';
 
 
 export default function GoalTrackerPage() {
-    // You can use the router hook here since this component is marked 'use client'
-    const router = useRouter(); 
-    
-    // Example state/effects for this wrapper component
-    const [isLoading, setIsLoading] = useState(true);
+    // You can use the router hook here since this component is marked 'use client'
+    const router = useRouter(); 
+    
+    // Example state/effects for this wrapper component
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Basic logic to check user status (requires the 'auth' import above)
-    useEffect(() => {
-        // You might replace this with an onAuthStateChanged listener 
-        // in a real application or manage auth higher up.
-        if (auth && !auth.currentUser) {
-             // Example: Redirect unauthenticated users
-             // router.push('/login'); 
-        }
-        setIsLoading(false);
-    }, [router]);
-    
-    if (isLoading) {
-        return <div className="p-8 text-center text-gray-400">Loading goals...</div>;
-    }
+    // Basic logic to check user status (requires the 'auth' import above)
+    useEffect(() => {
+        // You might replace this with an onAuthStateChanged listener 
+        // in a real application or manage auth higher up.
+        if (auth && !auth.currentUser) {
+             // Example: Redirect unauthenticated users
+             // router.push('/login'); 
+        }
+        setIsLoading(false);
+    }, [router]);
+    
+    if (isLoading) {
+        return <div className="p-8 text-center text-gray-400">Loading goals...</div>;
+    }
 
-    return (
-        // The main dashboard content is rendered by the imported client component
-        <GoalTrackerFirebase />
-    );
+    return (
+        // FIX: Added h-full (height full) and overflow-y-auto 
+        // to enable scrolling for all content on small screens.
+        <div className="h-full overflow-y-auto">
+            <GoalTrackerFirebase />
+        </div>
+    );
 }

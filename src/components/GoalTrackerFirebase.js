@@ -1,5 +1,3 @@
-// File Path: /src/components/GoalTrackerFirebase.js
-
 'use client';
 // IMPORTANT: This directive MUST be the very first line for the component
 // to run in the browser and enable access to localStorage, Date, etc.
@@ -7,6 +5,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Confetti from 'react-confetti';
 import useWindowSize from 'react-use-window-size';
+
+// --- FIREBASE IMPORTS ---
 import { db, auth } from '../lib/firebase'; // Assuming '../lib/firebase' is correct path
 import {
   collection,
@@ -40,87 +40,117 @@ const getStartOfDay = (dateString = null) => {
   return d;
 };
 
-const getWeekId = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const startOfYear = new Date(year, 0, 1);
-  const days = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
-  const week = Math.ceil((days + startOfYear.getDay() + 1) / 7);
-  return `${year}-W${String(week).padStart(2, '0')}`;
-};
+// --- PERSISTENCE HELPER FUNCTIONS (Modified for Zito Expiry) ---
 
-// --- PERSISTENCE HELPER FUNCTIONS ---
+const LOCAL_STORAGE_KEY_DAILY = 'dailyGoalInputDrafts';
+// NEW: For Zito Daily Goal
+const LOCAL_STORAGE_KEY_ZITO = 'zitoDailyGoalInputDrafts';
+const DAILY_EXPIRY_HOURS = 24;
+// MODIFIED: Zito expiry set to 168 hours (7 days)
+const ZITO_EXPIRY_HOURS = 168;
 
-const LOCAL_STORAGE_KEY = 'dailyGoalInputDrafts';
-const EXPIRY_HOURS = 24;
 
-const getDrafts = () => {
+const getDrafts = (key) => {
   if (typeof window === 'undefined') {
     return ['', '', ''];
   }
 
-  const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+  const stored = localStorage.getItem(key);
   if (stored) {
     try {
       const data = JSON.parse(stored);
       const now = new Date().getTime();
+
+      // Check for expiry
       if (now < data.expiry) {
         return data.drafts;
       } else {
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        // Expired, clear and return empty
+        localStorage.removeItem(key);
       }
+
     } catch (error) {
       console.error("Error parsing goal drafts from localStorage:", error);
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      localStorage.removeItem(key);
     }
   }
   return ['', '', ''];
 };
 
-const saveDrafts = (drafts) => {
+const getDailyDrafts = () => getDrafts(LOCAL_STORAGE_KEY_DAILY);
+// NEW: Get Zito Drafts
+const getZitoDrafts = () => getDrafts(LOCAL_STORAGE_KEY_ZITO);
+
+
+const saveDrafts = (key, drafts) => {
   if (typeof window !== 'undefined') {
+    let data = { drafts };
     const now = new Date().getTime();
-    const expiry = now + (EXPIRY_HOURS * 60 * 60 * 1000);
-    const data = {
-      drafts,
-      expiry,
-    };
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+    let expiryHours = 0;
+
+    // Determine expiry based on key
+    if (key === LOCAL_STORAGE_KEY_DAILY) {
+      expiryHours = DAILY_EXPIRY_HOURS; // 24 hours
+    } else if (key === LOCAL_STORAGE_KEY_ZITO) {
+      expiryHours = ZITO_EXPIRY_HOURS; // 168 hours (7 days)
+    }
+
+    if (expiryHours > 0) {
+      data.expiry = now + (expiryHours * 60 * 60 * 1000);
+    }
+
+    localStorage.setItem(key, JSON.stringify(data));
   }
 };
+
+const saveDailyDrafts = (drafts) => saveDrafts(LOCAL_STORAGE_KEY_DAILY, drafts);
+// NEW: Save Zito Drafts
+const saveZitoDrafts = (drafts) => saveDrafts(LOCAL_STORAGE_KEY_ZITO, drafts);
 
 
 // --- MAIN COMPONENT ---
 
 export default function GoalTrackerFirebase() {
+  // --- STATE DECLARATIONS ---
+  // UI State
+  // 1. CHANGED: Initial tab name
   const [selectedTab, setSelectedTab] = useState('Daily Goal');
-  const [dailyGoals, setDailyGoals] = useState([]);
-  const [weeklyGoals, setWeeklyGoals] = useState([]);
   const [openedGoalIndex, setOpenedGoalIndex] = useState(null);
+  const [zitoOpenedGoalIndex, setZitoOpenedGoalIndex] = useState(null); // NEW: Zito Index State
   const [trackerFilterDate, setTrackerFilterDate] = useState(formatDate(new Date()));
   const [showConfetti, setShowConfetti] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState('');
 
-  // FIX 1A: State for authenticated user and loading status
+  // Data/Firebase State
+  const [dailyGoals, setDailyGoals] = useState([]);
+  const [zitoDailyGoals, setZitoDailyGoals] = useState([]); // NEW: Zito Goals State
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  // FIX 2: Move draft state to the main component scope
-  const [tempDailyGoalTexts, setTempDailyGoalTexts] = useState(getDrafts);
-  const [tempWeeklyGoalTexts, setTempWeeklyGoalTexts] = useState(['', '', '']);
+  // Local Storage Draft State
+  // Initialize drafts
+  const [tempDailyGoalTexts, setTempDailyGoalTexts] = useState(getDailyDrafts);
+  const [tempZitoGoalTexts, setTempZitoGoalTexts] = useState(getZitoDrafts); // NEW: Zito Draft State
 
+  // Hooks & Derived Values
   const { width, height } = useWindowSize();
-
-  // FIX 1B: Use 'user' state for reliable ID
   const userId = user?.uid;
-  const currentWeekId = getWeekId();
 
   const startOfToday = getStartOfDay();
   const startOfFilteredDay = getStartOfDay(trackerFilterDate);
   const endOfFilteredDay = new Date(startOfFilteredDay);
   endOfFilteredDay.setDate(endOfFilteredDay.getDate() + 1);
 
-  // --- TIME/DATE HEADER EFFECT (remains the same) ---
+  // --- MEMOIZED CALCULATIONS ---
+  const completedDailyCount = useMemo(() => dailyGoals.filter(goal => goal.isDone).length, [dailyGoals]);
+  const completedZitoDailyCount = useMemo(() => zitoDailyGoals.filter(goal => goal.isDone).length, [zitoDailyGoals]); // NEW: Zito
+  const dailyStreakScore = completedDailyCount + completedZitoDailyCount; // Combined score
+  const goalPlaceholders = [0, 1, 2];
+
+
+  // --- SIDE EFFECTS (useEffect) ---
+
+  // TIME/DATE HEADER EFFECT
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -135,7 +165,7 @@ export default function GoalTrackerFirebase() {
     return () => clearInterval(timerId);
   }, []);
 
-  // --- FIREBASE AUTH LISTENER (FIX 1) ---
+  // FIREBASE AUTH LISTENER
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(firebaseUser => {
       setUser(firebaseUser);
@@ -146,22 +176,21 @@ export default function GoalTrackerFirebase() {
   }, []);
 
 
-  // --- FIREBASE DATA SUBSCRIPTION (READ/LISTEN) ---
-  // Now depends on the reliable 'user' state
+  // FIREBASE DATA SUBSCRIPTION (READ/LISTEN - Daily & Zito Daily)
   useEffect(() => {
     if (!user) {
       setDailyGoals([]);
-      setWeeklyGoals([]);
+      setZitoDailyGoals([]); // Clear Zito goals on sign out
       return;
     }
 
     const goalsCollection = collection(db, 'goals');
-    const currentUserId = user.uid; // Use reliable user ID
+    const currentUserId = user.uid;
 
-    // 1. Daily Goals Listener
+    // 1. Daily Goals Listener (type: 'daily')
     const dailyGoalsQuery = query(
       goalsCollection,
-      where('userId', '==', currentUserId), // Uses currentUserId
+      where('userId', '==', currentUserId),
       where('type', '==', 'daily'),
       where('targetDate', '>=', startOfFilteredDay),
       where('targetDate', '<', endOfFilteredDay),
@@ -171,32 +200,41 @@ export default function GoalTrackerFirebase() {
       setDailyGoals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).slice(0, 3));
     });
 
-    // 2. Weekly Goals Listener
-    const weeklyGoalsQuery = query(
+    // 2. Zito Daily Goals Listener (NEW: type: 'zitodaily')
+    const zitoDailyGoalsQuery = query(
       goalsCollection,
-      where('userId', '==', currentUserId), // Uses currentUserId
-      where('type', '==', 'weekly'),
-      where('targetWeek', '==', currentWeekId),
-      orderBy('createdAt', 'asc')
+      where('userId', '==', currentUserId),
+      where('type', '==', 'zitodaily'), // NEW goal type
+      where('targetDate', '>=', startOfFilteredDay),
+      where('targetDate', '<', endOfFilteredDay),
+      orderBy('targetDate', 'desc')
     );
-
-    const unsubscribeWeekly = onSnapshot(weeklyGoalsQuery, (snapshot) => {
-      setWeeklyGoals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).slice(0, 3));
+    const unsubscribeZitoDaily = onSnapshot(zitoDailyGoalsQuery, (snapshot) => {
+      setZitoDailyGoals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).slice(0, 3));
     });
+
 
     return () => {
       unsubscribeDaily();
-      unsubscribeWeekly();
+      unsubscribeZitoDaily(); // Unsubscribe Zito
     };
-  }, [user, startOfFilteredDay]); // DEPENDS ON 'user'
+  }, [user, startOfFilteredDay]);
+
+  // Reset filter date when switching to the main tabs (embedded here from renderGoalAccordions for better effect visibility)
+  useEffect(() => {
+    // 1. CHANGED: Updated tab name check
+    if (selectedTab === 'Daily Goal' || selectedTab === 'Weekly Goal') {
+      setTrackerFilterDate(formatDate(new Date()));
+    }
+  }, [selectedTab]);
 
 
-  // --- FIREBASE WRITE/UPDATE FUNCTIONS (Uses reliable userId) ---
+  // --- FIREBASE WRITE/UPDATE FUNCTIONS (Actions) ---
 
   const toggleGoal = async (goalId, currentStatus) => {
     if (!userId) return;
     const goalRef = doc(db, 'goals', goalId);
-    // ... (rest of toggleGoal remains the same)
+
     try {
       await updateDoc(goalRef, {
         isDone: !currentStatus,
@@ -216,7 +254,7 @@ export default function GoalTrackerFirebase() {
   const updateGoalTitle = async (goalId, newTitle) => {
     if (!userId || !newTitle.trim()) return;
     const goalRef = doc(db, 'goals', goalId);
-    // ... (rest of updateGoalTitle remains the same)
+
     try {
       await updateDoc(goalRef, {
         title: newTitle.trim(),
@@ -227,16 +265,15 @@ export default function GoalTrackerFirebase() {
     }
   };
 
-  // Now relies on the reliable 'userId' and handles clearing the new state correctly
   const addNewGoal = async (type, title, index) => {
-    const goalsList = type === 'daily' ? dailyGoals : weeklyGoals;
+    // Now handles 'daily' and 'zitodaily' types
+    if (type !== 'daily' && type !== 'zitodaily') return;
 
-    // If userId is null (auth still loading), this check will prevent saving
+    const goalsList = type === 'daily' ? dailyGoals : zitoDailyGoals;
+
     if (!userId || !title.trim() || goalsList.length > 3) {
       return;
     }
-
-    const targetDate = type === 'daily' ? startOfToday : startOfFilteredDay;
 
     const existingGoal = goalsList[index];
     if (existingGoal) {
@@ -248,53 +285,45 @@ export default function GoalTrackerFirebase() {
         type: type,
         isDone: false,
         createdAt: serverTimestamp(),
-        ...(type === 'daily' && { targetDate: startOfToday }),
-        ...(type === 'weekly' && { targetWeek: currentWeekId })
+        targetDate: startOfToday,
       };
       await addDoc(collection(db, 'goals'), newGoalData);
     }
 
-    setOpenedGoalIndex(null);
+    // Determine which state/storage to update
+    const setTempGoalTexts = type === 'daily' ? setTempDailyGoalTexts : setTempZitoGoalTexts;
+    const saveDraftsFunction = type === 'daily' ? saveDailyDrafts : saveZitoDrafts;
+    const setOpenedIndex = type === 'daily' ? setOpenedGoalIndex : setZitoOpenedGoalIndex;
+
+    setOpenedIndex(null);
 
     // Update state and clear localStorage draft after successful Firebase save
-    if (type === 'daily') {
-      setTempDailyGoalTexts(prevTexts => {
-        const newTexts = [...prevTexts];
-        newTexts[index] = '';
-        saveDrafts(newTexts);
-        return newTexts;
-      });
-    } else if (type === 'weekly') {
-      setTempWeeklyGoalTexts(prevTexts => {
-        const newTexts = [...prevTexts];
-        newTexts[index] = '';
-        return newTexts;
-      });
-    }
+    setTempGoalTexts(prevTexts => {
+      const newTexts = [...prevTexts];
+      newTexts[index] = '';
+      saveDraftsFunction(newTexts);
+      return newTexts;
+    });
   };
 
 
-  // --- TRACKER/STREAK LOGIC (remains the same) ---
-  const completedDailyCount = useMemo(() => dailyGoals.filter(goal => goal.isDone).length, [dailyGoals]);
-  const completedWeeklyCount = useMemo(() => weeklyGoals.filter(goal => goal.isDone).length, [weeklyGoals]);
-  const dailyStreakScore = completedDailyCount;
-  const weeklyStreakScore = completedWeeklyCount;
-  const goalPlaceholders = [0, 1, 2];
-
   // --- REUSABLE ACCORDION GOAL FORM RENDERER ---
-  // Accepts tempGoalTexts and setTempGoalTexts as props
-  const renderGoalAccordions = (type, tempGoalTexts, setTempGoalTexts) => {
-    const goals = type === 'daily' ? dailyGoals : weeklyGoals;
-    const isDaily = type === 'daily';
+  const renderGoalAccordions = (type, goals, tempGoalTexts, setTempGoalTexts, openedGoalIndex, setOpenedGoalIndex, isTrackerView = false) => {
+
+    const saveDraftsFunction = type === 'daily' ? saveDailyDrafts : saveZitoDrafts;
 
     const handleGoalClick = (index) => {
       setOpenedGoalIndex(openedGoalIndex === index ? null : index);
 
-      if (goals[index]?.title && !tempGoalTexts[index]) {
+      // If a goal is already saved, pull the saved title into the draft state for editing
+      if (goals[index]?.title) {
         setTempGoalTexts(prevTexts => {
           const newTexts = [...prevTexts];
-          newTexts[index] = goals[index].title;
-          if (isDaily) saveDrafts(newTexts);
+          // Use the saved title as the draft if the draft is currently empty.
+          if (newTexts[index] === '') {
+            newTexts[index] = goals[index].title;
+          }
+          saveDraftsFunction(newTexts);
           return newTexts;
         });
       }
@@ -305,9 +334,7 @@ export default function GoalTrackerFirebase() {
         const newTexts = [...prevTexts];
         newTexts[index] = e.target.value;
 
-        if (isDaily) {
-          saveDrafts(newTexts);
-        }
+        saveDraftsFunction(newTexts);
         return newTexts;
       });
     };
@@ -317,14 +344,22 @@ export default function GoalTrackerFirebase() {
     };
 
     const isToday = formatDate(startOfFilteredDay) === formatDate(startOfToday);
-    // Prevent editing/toggling if auth is loading
-    const canEditOrToggle = (!authLoading && userId) && (!isDaily || isToday);
+    // Prevent editing/toggling if auth is loading or if it's a past period
+    const canEditOrToggle = (!authLoading && userId) && isToday;
 
     return (
       <div className="space-y-3 sm:space-y-4">
-        {isDaily && !isToday && (
+        {/* READ-ONLY WARNING */}
+        {!isToday && (selectedTab === 'Daily Goal' || selectedTab === 'Weekly Goal') && (
           <div className="p-4 bg-yellow-900/50 text-yellow-300 rounded-lg text-sm font-medium">
-            Goals for **{new Date(startOfFilteredDay).toLocaleDateString()}** are read-only. Use the Tracker tab for history.
+            Goals for **{new Date(startOfFilteredDay).toLocaleDateString()}** are read-only.
+          </div>
+        )}
+
+        {/* Not-logged-in warning */}
+        {!userId && !authLoading && (
+          <div className="p-4 bg-red-900/50 text-red-300 rounded-lg text-sm font-medium">
+            Please log in to set or track your goals.
           </div>
         )}
 
@@ -333,7 +368,10 @@ export default function GoalTrackerFirebase() {
           const isOpened = openedGoalIndex === index;
           const completionStatus = goal ? (goal.isDone ? 'Completed' : 'Active') : 'Not Set';
 
-          const currentGoalText = tempGoalTexts[index] !== undefined ? tempGoalTexts[index] : goal?.title || '';
+          // Goal text prioritization logic
+          const currentGoalText = selectedTab === 'Tracker' ? (goal?.title || '') : (tempGoalTexts[index] || goal?.title || '');
+          // Editing is only allowed in the main 'Daily Goal' tab (and Zito) and if it's for today
+          const isGoalEditable = canEditOrToggle && (selectedTab !== 'Tracker');
 
           return (
             <div key={index} className="border border-gray-700 rounded-lg overflow-hidden shadow-md">
@@ -345,16 +383,16 @@ export default function GoalTrackerFirebase() {
                     : isOpened
                       ? 'bg-gray-700 hover:bg-gray-600'
                       : 'bg-gray-800 hover:bg-gray-700'
-                }`}
-                onClick={() => handleGoalClick(index)}
+                  } ${!isGoalEditable && selectedTab !== 'Tracker' ? 'opacity-75 cursor-default' : ''}`}
+                onClick={() => isGoalEditable || selectedTab === 'Tracker' ? handleGoalClick(index) : null}
               >
                 <div className="flex items-center min-w-0">
                   <span className={`text-base sm:text-lg font-semibold ${goal?.isDone ? 'text-green-400' : 'text-indigo-400'}`}>
-                    {isDaily ? 'GOAL' : 'WEEKLY'} {index + 1}
+                    {type.toUpperCase().replace('DAILY', '').replace('ZITO', '')} GOAL {index + 1}
                   </span>
                   <span className={`ml-2 sm:ml-3 text-xs sm:text-sm font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${
                     goal?.isDone ? 'bg-green-700 text-green-200' : goal ? 'bg-indigo-700 text-indigo-200' : 'bg-gray-600 text-gray-300'
-                  }`}>
+                    }`}>
                     {completionStatus}
                   </span>
                 </div>
@@ -373,27 +411,28 @@ export default function GoalTrackerFirebase() {
               {isOpened && (
                 <div className="p-4 bg-gray-800 border-t border-gray-700">
                   <div className="space-y-4">
-                    <label htmlFor={`goal-${index}-title`} className="block text-sm font-medium text-gray-400">
-                      {isDaily ? 'Daily Goal Title:' : 'Weekly Goal Title:'}
+                    <label htmlFor={`goal-${type}-${index}-title`} className="block text-sm font-medium text-gray-400">
+                      {type === 'daily' ? 'Daily Goal Title:' : 'Weekly Goal Title:'}
                     </label>
                     <textarea
-                      id={`goal-${index}-title`}
+                      id={`goal-${type}-${index}-title`}
                       rows="2"
                       value={currentGoalText}
                       onChange={(e) => handleTextChange(e, index)}
                       placeholder="What exactly do you need to achieve?"
                       className="w-full p-3 border border-gray-600 bg-gray-900 text-gray-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-base"
-                      disabled={!canEditOrToggle}
+                      disabled={!isGoalEditable} // Only editable in main tabs for current period
                     />
 
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
                       {/* Save Button */}
                       <button
                         onClick={() => handleSave(index)}
-                        disabled={!currentGoalText.trim() || !canEditOrToggle}
+                        // The button can save if we have current text AND is editable
+                        disabled={!currentGoalText.trim() || !isGoalEditable}
                         className={`w-full sm:w-auto px-5 py-2.5 text-white font-medium rounded-lg transition duration-150 ${
-                          (!currentGoalText.trim() || !canEditOrToggle) ? 'bg-indigo-800/50 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
-                        }`}
+                          (!currentGoalText.trim() || !isGoalEditable) ? 'bg-indigo-800/50 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+                          }`}
                       >
                         {goal ? 'Update Goal' : 'Save Goal'}
                       </button>
@@ -402,21 +441,21 @@ export default function GoalTrackerFirebase() {
                       {goal && (
                         <button
                           onClick={() => toggleGoal(goal.id, goal.isDone)}
-                          disabled={!canEditOrToggle}
+                          disabled={!isGoalEditable} // Only togglable in main tabs for current period
                           className={`w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-2.5 rounded-lg font-bold transition duration-150 ${
-                            !canEditOrToggle
+                            !isGoalEditable
                               ? 'bg-gray-900 text-gray-600 cursor-not-allowed'
                               : goal.isDone
                                 ? 'bg-green-500 text-white hover:bg-green-600'
                                 : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
-                          }`}
+                            }`}
                         >
                           {goal.isDone ? '✅ ACHIEVED' : '⏳ MARK AS DONE'}
                         </button>
                       )}
                     </div>
-                    {!canEditOrToggle && (
-                      <p className="text-sm text-red-400 italic">This is a past goal/week and cannot be edited or marked.</p>
+                    {!isGoalEditable && selectedTab !== 'Tracker' && (
+                      <p className="text-sm text-red-400 italic">This is a past period goal and cannot be edited or marked.</p>
                     )}
                   </div>
                 </div>
@@ -428,27 +467,44 @@ export default function GoalTrackerFirebase() {
     );
   };
 
-  const renderDailyGoalForm = () => {
-    useEffect(() => {
-      setTrackerFilterDate(formatDate(new Date()));
-    }, []);
+  // --- TAB RENDERER FUNCTIONS ---
 
-    return renderGoalAccordions('daily', tempDailyGoalTexts, setTempDailyGoalTexts);
+  const renderDailyGoalForm = () => {
+    return renderGoalAccordions(
+      'daily',
+      dailyGoals,
+      tempDailyGoalTexts,
+      setTempDailyGoalTexts,
+      openedGoalIndex,
+      setOpenedGoalIndex,
+      false
+    );
   };
 
-  const renderWeeklyGoalForm = () => renderGoalAccordions('weekly', tempWeeklyGoalTexts, setTempWeeklyGoalTexts);
+  // NEW: Render Zito Daily Goal Form
+  const renderZitoDailyGoalForm = () => {
+    return renderGoalAccordions(
+      'zitodaily',
+      zitoDailyGoals,
+      tempZitoGoalTexts,
+      setTempZitoGoalTexts,
+      zitoOpenedGoalIndex,
+      setZitoOpenedGoalIndex,
+      false
+    );
+  };
 
 
   const renderTracker = () => (
     <div className="space-y-6 sm:space-y-8">
-      {/* DATE FILTER UI (remains the same) */}
+      {/* DAILY DATE FILTER UI */}
       <div className="p-4 bg-gray-900 rounded-lg border border-gray-700">
         <h3 className="text-xl font-semibold text-gray-200 mb-3">
           Historical Daily Goal Tracker
         </h3>
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
           <label htmlFor="daily-date-filter" className="text-sm font-medium text-gray-300 whitespace-nowrap">
-            View Daily Score for:
+            View Daily Goals for:
           </label>
           <input
             id="daily-date-filter"
@@ -458,50 +514,50 @@ export default function GoalTrackerFirebase() {
             className="w-full max-w-xs p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 dark-mode-date-picker"
           />
         </div>
+
+        <div className="mt-6 space-y-6">
+          <h4 className="text-lg font-semibold text-indigo-300">Standard Daily Goals</h4>
+          {/* RENDER STANDARD DAILY GOALS IN TRACKER VIEW */}
+          {renderGoalAccordions('daily', dailyGoals, tempDailyGoalTexts, setTempDailyGoalTexts, openedGoalIndex, setOpenedGoalIndex, true)}
+
+          <h4 className="text-lg font-semibold text-indigo-300">Weekly Goals</h4>
+          {/* RENDER ZITO DAILY GOALS IN TRACKER VIEW */}
+          {renderGoalAccordions('zitodaily', zitoDailyGoals, tempZitoGoalTexts, setTempZitoGoalTexts, zitoOpenedGoalIndex, setZitoOpenedGoalIndex, true)}
+        </div>
       </div>
 
       {/* Daily Score Tracker (Reflects Filter Date) */}
       <div className="p-5 sm:p-6 bg-gray-800 shadow-xl rounded-lg border-t-4 border-indigo-500">
         <h4 className="text-lg sm:text-xl font-bold text-indigo-400 mb-3">
-          Daily Completion Score
+          Combined Daily Completion Score
         </h4>
         <p className="text-base text-gray-400 mb-1">
           Goals for: {new Date(trackerFilterDate).toLocaleDateString()}
         </p>
         <p className="text-4xl sm:text-5xl font-extrabold text-white">
-          {dailyStreakScore} / 3
+          {dailyStreakScore} / 6
         </p>
         <div className="mt-2 text-gray-400 text-sm">
-          *Score based on the date selected above.
-        </div>
-      </div>
-
-      {/* Weekly Streak Tracker (Current Week) */}
-      <div className="p-5 sm:p-6 bg-gray-800 shadow-xl rounded-lg border-t-4 border-teal-500">
-        <h4 className="text-lg sm:text-xl font-bold text-teal-400 mb-3">
-          Weekly Completion Score (Current Week: {currentWeekId})
-        </h4>
-        <p className="text-4xl sm:text-5xl font-extrabold text-white">
-          {weeklyStreakScore} / 3
-        </p>
-        <div className="mt-2 text-gray-400 text-sm">
-          *Complete all 3 goals to achieve your weekly focus.
+          *Score based on the date selected above, combining both Daily Goal sets (3 + 3 goals).
         </div>
       </div>
     </div>
   );
 
 
-  // --- MAIN RENDER ---
+  // --- MAIN RENDER LOGIC ---
+
+  // 4. CHANGED: Item in tabs array
+  const tabs = ['Daily Goal', 'Weekly Goal', 'Tracker'];
+
+  // 3. CHANGED: Key in tabContent object
   const tabContent = {
     'Daily Goal': renderDailyGoalForm(),
-    'Weekly Goal': renderWeeklyGoalForm(),
+    'Weekly Goal': renderZitoDailyGoalForm(),
     'Tracker': renderTracker(),
   };
 
-  const tabs = ['Daily Goal', 'Weekly Goal', 'Tracker'];
-
-  // FIX 1C: Show a loading state while authentication is pending
+  // Show a loading state while authentication is pending
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-50 p-4 sm:p-8 flex items-center justify-center">
@@ -554,13 +610,30 @@ export default function GoalTrackerFirebase() {
               key={tab}
               onClick={() => {
                 setSelectedTab(tab);
-                setOpenedGoalIndex(null);
+                // Reset index for the newly selected tab
+                if (tab === 'Daily Goal') {
+                  setOpenedGoalIndex(null);
+                  setZitoOpenedGoalIndex(null);
+                  // 5. CHANGED: Updated tab name check
+                } else if (tab === 'Weekly Goal') {
+                  setOpenedGoalIndex(null);
+                  setZitoOpenedGoalIndex(null);
+                } else {
+                  setOpenedGoalIndex(null);
+                  setZitoOpenedGoalIndex(null);
+                }
+
+                // Reset date filter to today when going back to Daily Goal tab
+                // 6. CHANGED: Updated tab name check
+                if (tab === 'Daily Goal' || tab === 'Weekly Goal') {
+                  setTrackerFilterDate(formatDate(new Date()));
+                }
               }}
               className={`flex-1 sm:flex-none py-3 px-3 sm:px-6 text-sm sm:text-lg font-medium transition-colors duration-200 focus:outline-none ${
                 selectedTab === tab
                   ? 'border-b-4 border-indigo-500 text-indigo-400'
                   : 'text-gray-400 hover:text-white'
-              }`}
+                }`}
             >
               {tab}
             </button>
