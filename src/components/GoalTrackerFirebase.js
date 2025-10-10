@@ -1,10 +1,13 @@
-'use client';
+"use client";
 // IMPORTANT: This directive MUST be the very first line for the component
 // to run in the browser and enable access to localStorage, Date, etc.
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Confetti from 'react-confetti';
 import useWindowSize from 'react-use-window-size';
+
+// --- ADDED: Next.js 'next/link' for the back button ---
+import Link from 'next/link';
 
 // --- FIREBASE IMPORTS ---
 import { db, auth } from '../lib/firebase'; // Assuming '../lib/firebase' is correct path
@@ -49,7 +52,6 @@ const DAILY_EXPIRY_HOURS = 24;
 // MODIFIED: Zito expiry set to 168 hours (7 days)
 const ZITO_EXPIRY_HOURS = 168;
 
-
 const getDrafts = (key) => {
   if (typeof window === 'undefined') {
     return ['', '', ''];
@@ -81,7 +83,6 @@ const getDailyDrafts = () => getDrafts(LOCAL_STORAGE_KEY_DAILY);
 // NEW: Get Zito Drafts
 const getZitoDrafts = () => getDrafts(LOCAL_STORAGE_KEY_ZITO);
 
-
 const saveDrafts = (key, drafts) => {
   if (typeof window !== 'undefined') {
     let data = { drafts };
@@ -107,19 +108,16 @@ const saveDailyDrafts = (drafts) => saveDrafts(LOCAL_STORAGE_KEY_DAILY, drafts);
 // NEW: Save Zito Drafts
 const saveZitoDrafts = (drafts) => saveDrafts(LOCAL_STORAGE_KEY_ZITO, drafts);
 
-
 // --- MAIN COMPONENT ---
 
 export default function GoalTrackerFirebase() {
   // --- STATE DECLARATIONS ---
   // UI State
-  // 1. CHANGED: Initial tab name
   const [selectedTab, setSelectedTab] = useState('Daily Goal');
   const [openedGoalIndex, setOpenedGoalIndex] = useState(null);
   const [zitoOpenedGoalIndex, setZitoOpenedGoalIndex] = useState(null); // NEW: Zito Index State
   const [trackerFilterDate, setTrackerFilterDate] = useState(formatDate(new Date()));
   const [showConfetti, setShowConfetti] = useState(false);
-  const [currentDateTime, setCurrentDateTime] = useState('');
 
   // Data/Firebase State
   const [dailyGoals, setDailyGoals] = useState([]);
@@ -131,6 +129,13 @@ export default function GoalTrackerFirebase() {
   // Initialize drafts
   const [tempDailyGoalTexts, setTempDailyGoalTexts] = useState(getDailyDrafts);
   const [tempZitoGoalTexts, setTempZitoGoalTexts] = useState(getZitoDrafts); // NEW: Zito Draft State
+
+  // New: Popup/buttons state (as requested)
+  const [showCallPopup, setShowCallPopup] = useState(false);
+  const [showNotifyPopup, setShowNotifyPopup] = useState(false);
+  const [phoneName, setPhoneName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [countryCode, setCountryCode] = useState('+234');
 
   // Hooks & Derived Values
   const { width, height } = useWindowSize();
@@ -147,23 +152,7 @@ export default function GoalTrackerFirebase() {
   const dailyStreakScore = completedDailyCount + completedZitoDailyCount; // Combined score
   const goalPlaceholders = [0, 1, 2];
 
-
   // --- SIDE EFFECTS (useEffect) ---
-
-  // TIME/DATE HEADER EFFECT
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      const dateString = now.toLocaleDateString('en-US', options);
-      setCurrentDateTime(dateString);
-    };
-
-    updateTime();
-    const timerId = setInterval(updateTime, 60000);
-
-    return () => clearInterval(timerId);
-  }, []);
 
   // FIREBASE AUTH LISTENER
   useEffect(() => {
@@ -174,7 +163,6 @@ export default function GoalTrackerFirebase() {
 
     return () => unsubscribe();
   }, []);
-
 
   // FIREBASE DATA SUBSCRIPTION (READ/LISTEN - Daily & Zito Daily)
   useEffect(() => {
@@ -213,7 +201,6 @@ export default function GoalTrackerFirebase() {
       setZitoDailyGoals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).slice(0, 3));
     });
 
-
     return () => {
       unsubscribeDaily();
       unsubscribeZitoDaily(); // Unsubscribe Zito
@@ -222,12 +209,10 @@ export default function GoalTrackerFirebase() {
 
   // Reset filter date when switching to the main tabs (embedded here from renderGoalAccordions for better effect visibility)
   useEffect(() => {
-    // 1. CHANGED: Updated tab name check
     if (selectedTab === 'Daily Goal' || selectedTab === 'Weekly Goal') {
       setTrackerFilterDate(formatDate(new Date()));
     }
   }, [selectedTab]);
-
 
   // --- FIREBASE WRITE/UPDATE FUNCTIONS (Actions) ---
 
@@ -306,7 +291,6 @@ export default function GoalTrackerFirebase() {
     });
   };
 
-
   // --- REUSABLE ACCORDION GOAL FORM RENDERER ---
   const renderGoalAccordions = (type, goals, tempGoalTexts, setTempGoalTexts, openedGoalIndex, setOpenedGoalIndex, isTrackerView = false) => {
 
@@ -374,15 +358,15 @@ export default function GoalTrackerFirebase() {
           const isGoalEditable = canEditOrToggle && (selectedTab !== 'Tracker');
 
           return (
-            <div key={index} className="border border-gray-700 rounded-lg overflow-hidden shadow-md">
+            <div key={index} className="border-none bg-gray-800 rounded-xl shadow-lg shadow-black/30 transition-shadow duration-300 hover:shadow-xl">
               {/* Accordion Header */}
               <div
-                className={`flex items-center justify-between p-3 sm:p-4 cursor-pointer transition-all duration-300 ${
+                className={`flex items-center justify-between p-3 sm:p-4 cursor-pointer transition-all duration-300 rounded-xl ${
                   goal?.isDone
-                    ? 'bg-green-900/50'
+                    ? 'bg-green-900/30 border-l-4 border-green-500 rounded-l-none' // Vibrant Green Accent
                     : isOpened
-                      ? 'bg-gray-700 hover:bg-gray-600'
-                      : 'bg-gray-800 hover:bg-gray-700'
+                      ? 'bg-gray-700 hover:bg-gray-700/80'
+                      : 'bg-gray-800 hover:bg-gray-700/80'
                   } ${!isGoalEditable && selectedTab !== 'Tracker' ? 'opacity-75 cursor-default' : ''}`}
                 onClick={() => isGoalEditable || selectedTab === 'Tracker' ? handleGoalClick(index) : null}
               >
@@ -398,7 +382,7 @@ export default function GoalTrackerFirebase() {
                 </div>
 
                 {/* Current Goal Title (Preview) */}
-                <div className="text-gray-400 truncate max-w-[50%] sm:max-w-md ml-2 flex-grow text-right text-sm">
+                <div className="text-gray-300 truncate max-w-[50%] sm:max-w-md ml-2 flex-grow text-right text-sm">
                   {goal?.title || 'Click to set goal'}
                 </div>
 
@@ -409,7 +393,7 @@ export default function GoalTrackerFirebase() {
 
               {/* Accordion Content (Form) */}
               {isOpened && (
-                <div className="p-4 bg-gray-800 border-t border-gray-700">
+                <div className="p-4 bg-gray-900 border-t border-gray-700 rounded-b-xl">
                   <div className="space-y-4">
                     <label htmlFor={`goal-${type}-${index}-title`} className="block text-sm font-medium text-gray-400">
                       {type === 'daily' ? 'Daily Goal Title:' : 'Weekly Goal Title:'}
@@ -420,7 +404,7 @@ export default function GoalTrackerFirebase() {
                       value={currentGoalText}
                       onChange={(e) => handleTextChange(e, index)}
                       placeholder="What exactly do you need to achieve?"
-                      className="w-full p-3 border border-gray-600 bg-gray-900 text-gray-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-base"
+                      className="w-full p-3 border border-indigo-700/50 bg-gray-950 text-gray-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-base"
                       disabled={!isGoalEditable} // Only editable in main tabs for current period
                     />
 
@@ -430,7 +414,7 @@ export default function GoalTrackerFirebase() {
                         onClick={() => handleSave(index)}
                         // The button can save if we have current text AND is editable
                         disabled={!currentGoalText.trim() || !isGoalEditable}
-                        className={`w-full sm:w-auto px-5 py-2.5 text-white font-medium rounded-lg transition duration-150 ${
+                        className={`w-full sm:w-auto px-5 py-2.5 text-white font-medium rounded-lg transition duration-150 shadow-md ${
                           (!currentGoalText.trim() || !isGoalEditable) ? 'bg-indigo-800/50 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
                           }`}
                       >
@@ -442,11 +426,11 @@ export default function GoalTrackerFirebase() {
                         <button
                           onClick={() => toggleGoal(goal.id, goal.isDone)}
                           disabled={!isGoalEditable} // Only togglable in main tabs for current period
-                          className={`w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-2.5 rounded-lg font-bold transition duration-150 ${
+                          className={`w-full sm:w-auto flex items-center justify-center space-x-2 px-5 py-2.5 rounded-lg font-bold transition duration-150 shadow-md ${
                             !isGoalEditable
                               ? 'bg-gray-900 text-gray-600 cursor-not-allowed'
                               : goal.isDone
-                                ? 'bg-green-500 text-white hover:bg-green-600'
+                                ? 'bg-green-500 text-white hover:bg-green-600 shadow-green-700/50'
                                 : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                             }`}
                         >
@@ -494,11 +478,10 @@ export default function GoalTrackerFirebase() {
     );
   };
 
-
   const renderTracker = () => (
     <div className="space-y-6 sm:space-y-8">
       {/* DAILY DATE FILTER UI */}
-      <div className="p-4 bg-gray-900 rounded-lg border border-gray-700">
+      <div className="p-4 bg-gray-900 rounded-xl border border-gray-700">
         <h3 className="text-xl font-semibold text-gray-200 mb-3">
           Historical Daily Goal Tracker
         </h3>
@@ -527,7 +510,7 @@ export default function GoalTrackerFirebase() {
       </div>
 
       {/* Daily Score Tracker (Reflects Filter Date) */}
-      <div className="p-5 sm:p-6 bg-gray-800 shadow-xl rounded-lg border-t-4 border-indigo-500">
+      <div className="p-5 sm:p-6 bg-gray-800 shadow-xl rounded-xl border-t-4 border-indigo-400/80">
         <h4 className="text-lg sm:text-xl font-bold text-indigo-400 mb-3">
           Combined Daily Completion Score
         </h4>
@@ -544,13 +527,10 @@ export default function GoalTrackerFirebase() {
     </div>
   );
 
-
   // --- MAIN RENDER LOGIC ---
 
-  // 4. CHANGED: Item in tabs array
   const tabs = ['Daily Goal', 'Weekly Goal', 'Tracker'];
 
-  // 3. CHANGED: Key in tabContent object
   const tabContent = {
     'Daily Goal': renderDailyGoalForm(),
     'Weekly Goal': renderZitoDailyGoalForm(),
@@ -575,9 +555,8 @@ export default function GoalTrackerFirebase() {
     );
   }
 
-
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-50 p-4 sm:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-gray-900 text-gray-50 pt-3 sm:pt-4 pb-20 sm:pb-10 px-4 sm:px-8">
       {showConfetti && (
         <Confetti
           width={width}
@@ -590,60 +569,146 @@ export default function GoalTrackerFirebase() {
       )}
 
       <div className="max-w-4xl mx-auto">
-
-        {/* TIME/DATE HEADER */}
-        <p className="text-lg font-medium text-indigo-400 mb-2">
-          Hi, today is:
-          <span className="font-semibold text-white ml-2">
-            {currentDateTime}
-          </span>
-        </p>
-
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-white mb-6">
-          ✨ Focus Goal Dashboard
-        </h1>
+        
+        {/* === MOBILE ONLY BACK BUTTON === */}
+        <div className="sm:hidden -mt-2 mb-4">
+          <Link href="/dashboard/recovery-tools" className="flex items-center text-indigo-400 hover:text-indigo-300 transition-colors duration-150">
+            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span className="text-base font-medium">Back to Tools</span>
+          </Link>
+        </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-gray-700 mb-8 sticky top-0 bg-gray-900 z-10 shadow-lg">
+        <div className="flex border-b border-gray-700 mb-6 sticky top-0 bg-gray-950/90 backdrop-blur-sm z-10 shadow-lg shadow-black/40">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => {
                 setSelectedTab(tab);
                 // Reset index for the newly selected tab
-                if (tab === 'Daily Goal') {
-                  setOpenedGoalIndex(null);
-                  setZitoOpenedGoalIndex(null);
-                  // 5. CHANGED: Updated tab name check
-                } else if (tab === 'Weekly Goal') {
-                  setOpenedGoalIndex(null);
-                  setZitoOpenedGoalIndex(null);
-                } else {
-                  setOpenedGoalIndex(null);
-                  setZitoOpenedGoalIndex(null);
-                }
+                setOpenedGoalIndex(null);
+                setZitoOpenedGoalIndex(null);
 
-                // Reset date filter to today when going back to Daily Goal tab
-                // 6. CHANGED: Updated tab name check
+                // Reset date filter to today when going back to main tabs
                 if (tab === 'Daily Goal' || tab === 'Weekly Goal') {
                   setTrackerFilterDate(formatDate(new Date()));
                 }
               }}
               className={`flex-1 sm:flex-none py-3 px-3 sm:px-6 text-sm sm:text-lg font-medium transition-colors duration-200 focus:outline-none ${
                 selectedTab === tab
-                  ? 'border-b-4 border-indigo-500 text-indigo-400'
+                  ? 'border-b-4 border-indigo-400 text-indigo-300'
                   : 'text-gray-400 hover:text-white'
-                }`}
+              }`}
             >
               {tab}
             </button>
           ))}
         </div>
 
-        {/* Tab Content Box: bg-gray-800 */}
-        <div className="bg-gray-800 shadow-2xl rounded-xl p-4 sm:p-8">
+        {/* Tab Content Box - Softened background, border, and prominent shadow */}
+        <div className="bg-gray-800/70 backdrop-blur-sm shadow-indigo-900/40 shadow-2xl rounded-2xl border border-gray-700/50 p-4 sm:p-8 mb-6">
           {tabContent[selectedTab]}
         </div>
+        
+        {/* === STICKY BUTTONS (BOTTOM, BELOW ALL TABS) === */}
+        <div className="fixed bottom-0 left-0 right-0 z-20 p-3 bg-gray-950/90 backdrop-blur-sm border-t border-gray-700/50 flex gap-3 justify-center sm:relative sm:flex sm:justify-center sm:gap-4 sm:p-0 sm:bg-transparent sm:border-t-0 sm:shadow-none">
+          <button
+            onClick={() => setShowCallPopup(true)}
+            // Enhanced pulse and shadow for premium feel
+            className="flex-1 px-4 py-3 sm:px-6 sm:py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xl shadow-indigo-600/50 animate-pulse text-sm sm:text-base sm:flex-none transition-all duration-300"
+          >
+            📞 Remind me by phone call
+          </button>
+
+          <button
+            onClick={() => setShowNotifyPopup(true)}
+            className="flex-1 px-4 py-3 sm:px-6 sm:py-3 bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold rounded-xl shadow-lg text-sm sm:text-base sm:flex-none transition-all duration-300"
+          >
+            🔔 Phone notifications
+          </button>
+        </div>
+
+        {/* === POPUPS === */}
+        {showCallPopup && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+            <div className="bg-gray-800 rounded-xl p-6 w-[90%] max-w-md shadow-2xl shadow-indigo-900/50">
+              <h2 className="text-xl font-semibold text-indigo-400 mb-4 text-center">
+                📞 Schedule a Call Reminder
+              </h2>
+              <label className="block text-sm text-gray-300 mb-2">
+                What should I call you?
+              </label>
+              <input
+                type="text"
+                value={phoneName}
+                onChange={(e) => setPhoneName(e.target.value)}
+                className="w-full p-2 rounded-lg bg-gray-900 text-gray-200 border border-indigo-700/50 mb-4 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+              <label className="block text-sm text-gray-300 mb-2">
+                Enter phone number
+              </label>
+              <div className="flex gap-2 mb-4">
+                <select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  className="p-2 bg-gray-900 text-gray-200 border border-indigo-700/50 rounded-lg w-24 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="+234">🇳🇬 +234</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+91">🇮🇳 +91</option>
+                </select>
+
+                {/* ⬇ Widened input */}
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="Phone number"
+                  className="flex-1 min-w-[220px] p-2 bg-gray-900 text-gray-200 border border-indigo-700/50 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowCallPopup(false)}
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => setShowCallPopup(false)}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {showNotifyPopup && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+            <div className="bg-gray-800 rounded-xl p-6 w-[90%] max-w-sm text-center shadow-2xl shadow-indigo-900/50">
+              <h2 className="text-lg font-semibold text-indigo-400 mb-3">
+                🔔 Notifications Scheduled
+              </h2>
+              <p className="text-gray-300 mb-4">
+                You will be notified by <b>6:00 AM</b> and <b>12:00 PM</b> every morning.
+              </p>
+              <button
+                onClick={() => setShowNotifyPopup(false)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                Okay
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
