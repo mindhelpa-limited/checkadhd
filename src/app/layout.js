@@ -4,8 +4,7 @@ import { usePathname } from "next/navigation";
 import Head from "next/head";
 import Header from "../components/Header";
 import "./globals.css";
-import { SEO_CONFIG } from "../seoConfig"; // ✅ Import your central metadata file
-
+import { SEO_CONFIG } from "./seoConfig";
 export default function Layout({ children }) {
   const pathname = usePathname();
   const isDashboardPage = pathname.startsWith("/dashboard");
