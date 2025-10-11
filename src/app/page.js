@@ -1,8 +1,13 @@
 "use client"; // <-- Must be the absolute first line
 
+// =========================================================================
+/* 1. EXTERNAL/LIBRARY IMPORTS */
+// =========================================================================
+
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Head from "next/head";
 import {
   Target,
   Globe2,
@@ -12,14 +17,64 @@ import {
   X,
 } from "lucide-react";
 
-import Head from "next/head"; 
+// =========================================================================
+/* 2. INTERNAL IMPORTS */
+// =========================================================================
 
-// FIX APPLIED HERE: Corrected the path from "../../components/home/Footer" to "../components/home/Footer"
-import Footer from "../components/home/Footer";
-
+import Footer from "../components/home/Footer"; 
 
 // =========================================================================
-/* 1. REUSABLE COMPONENTS (BEFORE MAIN LOGIC) */
+/* 3. DATA CONSTANTS */
+// =========================================================================
+
+/**
+ * Services Data
+ * Defines the main offerings with navigation details.
+ */
+const services = [
+  {
+    name: "ADHD Assessment",
+    description:
+      "A complete ADHD test built on DSM-5 standards to help you understand your mind better.",
+    imageUrl: "/images/blockstack.png",
+    dest: "/pricing-adhd-assessment", 
+    isAdhd: true,
+  },
+  {
+    name: "Mental Health Recovery Tools",
+    description:
+      "Daily trackers and science-based exercises for resilience, focus, and calm.",
+    imageUrl: "/images/trailmuncher.png",
+    dest: "/pricing-mental-health-recovery-tools", 
+    isAdhd: false,
+  },
+  {
+    name: "Psychiatrist-Led Coaching",
+    description:
+      "Work directly with licensed professionals for personalized guidance and strategies.",
+    imageUrl: "/images/neuralbounds.png",
+    dest: "/book-a-coach", 
+    isAdhd: false,
+  },
+];
+
+/**
+ * Music/Sound Tiles Data (Used for Specialized Assessments)
+ * Defines the sound-related features.
+ */
+const musicTiles = [
+  {
+    name: "ADHD CLINICAL ASSESSMENT",
+    description:
+      "DSM-5 aligned, comprehensive clinical assessment for a clear ADHD diagnosis.",
+    imageUrl: "/images/music.png",
+    dest: "/pricing-adhd-clinical-assessment",
+    isAdhd: true,
+  },
+];
+
+// =========================================================================
+/* 4. REUSABLE COMPONENTS (HELPER COMPONENTS) */
 // =========================================================================
 
 /**
@@ -54,10 +109,6 @@ const AnimatedSpiralCircle = ({ className }) => (
  */
 const AssessmentAnimation = ({ className }) => (
   <div className={`relative w-full h-full flex items-center justify-center ${className}`}>
-    {/*
-        This SVG recreates the style from the uploaded image.
-        The 'currentColor' is set by the parent's text-color utility class (e.g., text-blue-500)
-    */}
     <svg viewBox="0 0 500 500" className="w-full h-full max-w-lg text-blue-500/50 animate-spin-assessment-circle" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Outer Circle */}
       <circle cx="250" cy="250" r="240" stroke="currentColor" strokeWidth="1" opacity="0.4" />
@@ -119,28 +170,24 @@ function ComingSoonModal({ open, onClose }) {
           This feature is under development. Stay tuned!
         </p>
       </div>
+      
     </div>
   );
 }
 
 // =========================================================================
-/* 2. HERO COMPONENT */
+/* 5. MAJOR PAGE SECTIONS (HERO) */
 // =========================================================================
 
 function Hero() {
-  // We use window.location.href for the navigation since Next.js 'useRouter' 
-  // is not used in this component, matching your requested code block's logic.
   const startJourneyRoute = "/services"; 
 
-  // Function to handle navigation using standard browser method
   const handleNavigation = (route) => {
-    // Simulates navigation
     window.location.href = route;
   };
 
   return (
     <section className="relative min-h-[calc(100vh-72px)] bg-[#0a122a] text-white flex items-center justify-center px-6 sm:px-10 overflow-hidden">
-      {/* Background Image Container - Replaced Next.js <Image> with standard <img> */}
       <div className="absolute inset-0 z-0">
         <img
           src="/hero-new.png"
@@ -151,20 +198,21 @@ function Hero() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a122a] to-transparent" />
       </div>
 
-      {/* Main Content */}
-      <div className={`relative z-20 max-w-4xl text-center space-y-8 py-24 px-4 sm:px-0 animate-fade-in-up`}>
+      <div className={`relative z-20 max-w-4xl text-center space-y-8 py-16 sm:py-20 px-4 sm:px-0 animate-fade-in-up`}>
         
-        <p className="font-sans text-blue-300 uppercase text-sm tracking-widest font-semibold">
-          MENTAL HEALTH MADE HUMAN
+        {/* GAP REDUCTION: Added mb-2 to reduce space below tagline */}
+        <p className="font-sans text-blue-300 uppercase text-sm tracking-widest font-semibold mb-2">
+          FORTIFY YOUR MIND
         </p>
 
-        <h1 className="font-sans text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight">
+        {/* GAP REDUCTION: Added mt-0 to reduce space above H1 */}
+        <h1 className="font-sans text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight mt-0">
           Your health matters. <br className="hidden sm:block" />
           It’s time to take charge — <span className="text-blue-400">your way.</span>
         </h1>
 
         <p className="font-sans text-base sm:text-lg text-gray-300 font-normal leading-relaxed max-w-2xl mx-auto">
-          Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals.
+          Enjoy Psychiatrist-Led Coaching and master tools designed to help you crush your goals.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 mt-6 justify-center">
@@ -186,12 +234,10 @@ function Hero() {
         </div>
       </div>
 
-      {/* Scroll cue */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-sm text-blue-400/50 animate-bounce z-30">
         ↓ Scroll to learn more
       </div>
 
-      {/* Animations - Note: Animations for this component are added to the global style block below */}
       <div className="absolute bottom-0 left-0 w-full h-px">
         <div className="h-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
       </div>
@@ -201,58 +247,7 @@ function Hero() {
 
 
 // =========================================================================
-/* 3. DATA CONSTANTS */
-// =========================================================================
-
-/**
- * Services Data
- * Defines the main offerings with navigation details.
- */
-const services = [
-  {
-    name: "ADHD Assessment",
-    description:
-      "A complete ADHD test built on DSM-5 standards to help you understand your mind better.",
-    imageUrl: "/images/blockstack.png",
-    dest: "/pricing-adhd-assessment", // ✅ goes straight to pricing page
-    isAdhd: true,
-  },
-  {
-    name: "Mental Health Recovery Tools",
-    description:
-      "Daily trackers and science-based exercises for resilience, focus, and calm.",
-    imageUrl: "/images/trailmuncher.png",
-    dest: "/pricing-mental-health-recovery-tools", // ⬅ UPDATED DESTINATION
-    isAdhd: false,
-  },
-  {
-    name: "Psychiatrist-Led Coaching",
-    description:
-      "Work directly with licensed professionals for personalized guidance and strategies.",
-    imageUrl: "/images/neuralbounds.png",
-    dest: "/book-a-coach", // ⬅ UPDATED DESTINATION
-    isAdhd: false,
-  },
-];
-
-/**
- * Music/Sound Tiles Data
- * Defines the sound-related features.
- */
-const musicTiles = [
-  {
-    name: "ADHD CLINICAL ASSESSMENT",
-    description:
-      "DSM-5 aligned, comprehensive clinical assessment for a clear ADHD diagnosis.",
-    imageUrl: "/images/music.png",
-    dest: "/pricing-adhd-clinical-assessment",
-    isAdhd: true,
-  },
-];
-
-
-// =========================================================================
-/* 4. MAIN PAGE COMPONENT (DEFAULT EXPORT) */
+/* 6. MAIN PAGE COMPONENT (DEFAULT EXPORT) */
 // =========================================================================
 
 /**
@@ -272,7 +267,6 @@ export default function FeaturesPage() {
       serviceName === "Mental Health Recovery Tools" ||
       serviceName === "Psychiatrist-Led Coaching" ||
       serviceName === "ADHD CLINICAL ASSESSMENT" 
-      // REMOVED: || serviceName === "Mindhelpa institute"
     ) {
       router.push(dest);
     } else {
@@ -283,13 +277,13 @@ export default function FeaturesPage() {
   // Define the base URL and the version parameter for cache-busting
   const baseUrl = "https://www.mindhelpa.com";
   // Increment this 'v' value every time the image changes and Meta is stubborn
-  const cacheVersion = "v=4"; // Changed from v=2 to v=3 just in case
+  const cacheVersion = "v=4"; 
 
   const imageUrlWithVersion = `${baseUrl}/images/how-it-works.jpg?${cacheVersion}`;
 
   return (
     <div className="bg-[#0a122a] text-white overflow-hidden">
-      {/* ✅ Metadata for social preview - NOW USING ABSOLUTE URL WITH CACHE-BUSTING */}
+      {/* Metadata for social preview */}
       <Head>
         {/* Standard SEO Tags (Good practice) */}
         <title>Psychiatrist-Led Coaching</title>
@@ -304,7 +298,6 @@ export default function FeaturesPage() {
           property="og:description"
           content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
         />
-        {/* 🔥 FIX: Used absolute URL with a version parameter to force a fresh scrape */}
         <meta property="og:image" content={imageUrlWithVersion} />
         <meta property="og:url" content={baseUrl + "/"} /> 
         <meta property="og:type" content="website" />
@@ -317,11 +310,10 @@ export default function FeaturesPage() {
           name="twitter:description"
           content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
         />
-        {/* 🔥 FIX: Used absolute URL with a version parameter to force a fresh scrape */}
         <meta name="twitter:image" content={imageUrlWithVersion} />
       </Head>
       
-      {/* RENDER THE NEW HERO COMPONENT */}
+      {/* RENDER THE HERO COMPONENT */}
       <Hero /> 
 
       {/* --- */}
@@ -385,7 +377,7 @@ export default function FeaturesPage() {
           </p>
         </div>
 
-        {/* UPDATED: Two-column layout for the card and the new animation */}
+        {/* Two-column layout for the card and the new animation */}
         <div className="mt-12 max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           
           {/* Assessment Card (Left Side) */}
@@ -493,7 +485,7 @@ export default function FeaturesPage() {
 
       <Footer />
 
-      {/* Animations (Global Styles) - CLEANED UP */}
+      {/* 7. Global Styles */}
       <style jsx global>{`
         /* Floating Background Glows (No longer needed without CTA, but keeping just in case) */
         @keyframes float {
@@ -544,7 +536,7 @@ export default function FeaturesPage() {
         }
         /* The spin animation used in the ComingSoonModal */
         .animate-spin-slow {
-          animation: spin 2s linear infinite; /* Kept the existing fast spin */
+          animation: spin 2s linear infinite; 
           transform-origin: center;
         }
         @keyframes spin {

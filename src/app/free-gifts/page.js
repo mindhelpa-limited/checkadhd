@@ -99,10 +99,10 @@ const App = () => {
         {/* Header Section */}
         <header className="text-center mb-12">
           <h1 className="text-5xl sm:text-6xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-blue-300">
-            The Free Mind Toolkit
+            Mental Health Toolkit
           </h1>
           <p className="mt-4 text-xl text-gray-300 max-w-3xl mx-auto">
-            Unlock instant access to two powerful resources designed to inspire, uplift, and center your spirit. Just tell us where to send your gifts!
+            Unlock instant access to two powerful resources designed to inspire, uplift, and nourish your mental health. Just tell us where to send your gifts!
           </p>
         </header>
 

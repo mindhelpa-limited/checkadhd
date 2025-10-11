@@ -65,14 +65,7 @@ const services = [
 ];
 
 const musicTiles = [
-  {
-    name: "ADHD CLINICAL ASSESSMENT",
-    description:
-      "DSM-5 aligned, comprehensive clinical assessment for a clear ADHD diagnosis.",
-    imageUrl: "/images/music.png",
-    dest: "/pricing-adhd-clinical-assessment",
-    isAdhd: true,
-  },
+  // This array is intentionally left empty
 ];
 
 // ----------------- Reusable Components -----------------
@@ -120,8 +113,7 @@ export default function FeaturesPage() {
     if (
       serviceName === "ADHD Assessment" ||
       serviceName === "Mental Health Recovery Tools" ||
-      serviceName === "Psychiatrist-Led Coaching" ||
-      serviceName === "ADHD CLINICAL ASSESSMENT"
+      serviceName === "Psychiatrist-Led Coaching"
     ) {
       router.push(dest);
     } else {
@@ -132,7 +124,8 @@ export default function FeaturesPage() {
   return (
     <div className="bg-[#0a122a] text-white overflow-hidden">
       {/* HERO SECTION */}
-      <div className="relative min-h-[80vh] flex items-center justify-center text-center px-4 sm:px-8">
+      {/* Reduced min-h-[60vh] to min-h-[55vh] */}
+      <div className="relative min-h-[55vh] flex items-center justify-center text-center px-4 sm:px-8">
         <div className="absolute inset-0 z-0 opacity-10">
           <Image
             src="/images/feature-one.png"
@@ -162,14 +155,15 @@ export default function FeaturesPage() {
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
             Built for Every Mind
           </h1>
-          <p className className="text-lg sm:text-xl text-gray-300">
+          <p className="text-lg sm:text-xl text-gray-300">
             Discover mental health solutions that meet you where you are — and guide you forward with clarity.
           </p>
         </div>
       </div>
 
       {/* SERVICES SECTION */}
-      <div className="bg-[#0a122a] py-24 px-4">
+      {/* Reduced py-16 to py-12 for less vertical space */}
+      <div className="bg-[#0a122a] py-12 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <BrainCircuit className="w-10 h-10 text-cyan-400 mx-auto" />
           <h2 className="mt-3 text-4xl font-serif font-bold text-white">
@@ -205,66 +199,6 @@ export default function FeaturesPage() {
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* MUSIC/SOUNDS SECTION */}
-      <div className="bg-[#0a122a] py-16 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <AnimatedSpiralCircle className="mx-auto" />
-          <h2 className="mt-3 text-4xl font-serif font-bold text-white">
-            Specialized Assessments
-          </h2>
-          <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-            Access our in-depth ADHD clinical assessment.
-          </p>
-        </div>
-
-        <div className="mt-12 max-w-7xl mx-auto grid sm:grid-cols-1 md:grid-cols-2 gap-10">
-          {musicTiles.map((m, idx) => (
-            <div key={m.name} className="group rounded-2xl overflow-hidden border border-white/10 bg-[#101b3d] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-              <div className="relative w-full aspect-[16/9] bg-[#0a122a] overflow-hidden">
-                <Image
-                  src={m.imageUrl}
-                  alt={m.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority={idx === 0}
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-white">{m.name}</h3>
-                <p className="mt-2 text-gray-400">{m.description}</p>
-                <button
-                  onClick={() => handleExploreClick(m.name, m.dest)}
-                  className="mt-4 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 transition-colors"
-                >
-                  Explore
-                </button>
-              </div>
-            </div>
-          ))}
-          {/* Empty div with a different animated shape for the right side */}
-          <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#101b3d] shadow-xl flex items-center justify-center p-6 aspect-[16/9]">
-            <svg
-              viewBox="0 0 200 200"
-              className="w-full h-full text-blue-500/20 animate-spin-slow-reverse"
-            >
-              {/* This is a simple radiating lines pattern for a different feel */}
-              {[...Array(8)].map((_, i) => (
-                <line
-                  key={i}
-                  x1="100" y1="100"
-                  x2={100 + 80 * Math.cos(i * Math.PI / 4)}
-                  y2={100 + 80 * Math.sin(i * Math.PI / 4)}
-                  stroke="currentColor"
-                  strokeWidth="0.5"
-                />
-              ))}
-              <circle cx="100" cy="100" r="20" fill="none" stroke="currentColor" strokeWidth="1"/>
-            </svg>
-          </div>
         </div>
       </div>
 

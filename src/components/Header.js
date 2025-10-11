@@ -125,7 +125,7 @@ export default function Header() {
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
                         icon={Users}
                     >
-                        Psychiatrist Coaching
+                        Psychiatrist Led Coaching
                     </MobileMenuItem>
                 </div>
             )}
@@ -199,7 +199,7 @@ export default function Header() {
                                     onClick={() => setPricingDropdownOpen(false)}
                                     icon={Users}
                                 >
-                                    Psychiatrist Coaching
+                                    Psychiatrist Led Coaching
                                 </DropdownMenuItem>
                             </div>
                         </div>
