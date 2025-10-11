@@ -225,6 +225,15 @@ function SignUpPage() {
           >
             🚀 Continue
           </button>
+          {/* New Login link added here */}
+          <p className="text-center text-sm">
+            <a
+              href="/login"
+              className="text-blue-400 hover:text-blue-300 transition-colors font-medium"
+            >
+              Already have an account? Please click me to login
+            </a>
+          </p>
         </form>
       </div>
     </div>

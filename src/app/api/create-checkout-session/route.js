@@ -16,7 +16,7 @@ const PRODUCT_LOOKUPS = {
   recovery_yearly: { key: "recovery_yearly", mode: "subscription", tag: "recovery" },
   institute: { key: "institute_onetime", mode: "payment", tag: "institute" },
 
-  // ---- Coaching: Small Groups (1-5) ----
+  // ---- Coaching: Small Groups (1–5) ----
   coaching_smallgroup_monthly: { key: "coaching_smallgroup_monthly", mode: "subscription", tag: "coaching" },
   coaching_smallgroup_quarterly: { key: "coaching_smallgroup_quarterly", mode: "subscription", tag: "coaching" },
   coaching_smallgroup_6month: { key: "coaching_smallgroup_6month", mode: "subscription", tag: "coaching" },
@@ -28,7 +28,7 @@ const PRODUCT_LOOKUPS = {
   coaching_individual_6month: { key: "coaching_individual_6month", mode: "subscription", tag: "coaching" },
   coaching_individual_yearly: { key: "coaching_individual_yearly", mode: "subscription", tag: "coaching" },
 
-  // ---- Coaching: Large Groups (5-10) ----
+  // ---- Coaching: Large Groups (5–10) ----
   coaching_largegroup_monthly: { key: "coaching_largegroup_monthly", mode: "subscription", tag: "coaching" },
   coaching_largegroup_quarterly: { key: "coaching_largegroup_quarterly", mode: "subscription", tag: "coaching" },
   coaching_largegroup_6month: { key: "coaching_largegroup_6month", mode: "subscription", tag: "coaching" },
@@ -90,7 +90,25 @@ export async function POST(request) {
             metadata: { firebase_uid: uid },
           });
           customerId = customer.id;
-          await userRef.set({ stripeCustomerId: customerId }, { merge: true });
+
+          // ✅ Save Stripe customer ID + plan info in Firestore
+          await userRef.set(
+            {
+              stripeCustomerId: customerId,
+              activeSubscription: product,
+              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+        } else {
+          // ✅ Update last subscription info even if customer already exists
+          await userRef.set(
+            {
+              activeSubscription: product,
+              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
         }
       } catch {
         uid = null;

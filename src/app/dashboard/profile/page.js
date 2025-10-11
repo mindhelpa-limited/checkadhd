@@ -1,270 +1,276 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { auth, db } from "@/lib/firebase";
-import { onAuthStateChanged, updateProfile, getAuth, signOut } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { auth, db } from '@/lib/firebase';
+import { signOut, updateProfile } from 'firebase/auth';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import {
-  CreditCardIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  Cog6ToothIcon,
-  ArrowLeftStartOnRectangleIcon
-} from "@heroicons/react/24/outline";
+  Loader2,
+  LogOut,
+  CreditCard,
+  Package,
+  X,
+  Clock,
+} from 'lucide-react';
 
 export default function ProfilePage() {
-  const router = useRouter();
   const [user, setUser] = useState(null);
-  const [userData, setUserData] = useState(null);
-  const [displayName, setDisplayName] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
-  const [isManagingSubscription, setIsManagingSubscription] = useState(false);
+  const [message, setMessage] = useState('');
+  const [userTiers, setUserTiers] = useState([]);
+  const [showPurchased, setShowPurchased] = useState(false);
 
+  // ✅ Fetch user data and migrate old fields automatically
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (!currentUser) {
-        router.push("/login");
-        return;
-      }
-      setUser(currentUser);
+    const fetchUser = async () => {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        setUser(currentUser);
+        setName(currentUser.displayName || '');
+        setEmail(currentUser.email || '');
 
-      const userDocRef = doc(db, "users", currentUser.uid);
-      const docSnap = await getDoc(userDocRef);
+        const userRef = doc(db, 'users', currentUser.uid);
+        const snap = await getDoc(userRef);
 
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setUserData(data);
-        setDisplayName(data.displayName || currentUser.displayName || "");
-      } else {
-        setDisplayName(currentUser.displayName || "");
+        if (snap.exists()) {
+          const data = snap.data();
+
+          // 🛠 Auto-migrate if old tier exists but new tiers doesn't
+          if (!data.tiers && data.tier) {
+            const newTiers = [
+              {
+                product: data.tier,
+                type: 'onetime',
+                date: new Date().toISOString(),
+              },
+            ];
+            await updateDoc(userRef, {
+              tiers: newTiers,
+              updatedAt: new Date().toISOString(),
+            });
+            console.log(`🛠 Migrated old tier to new tiers for ${data.email}`);
+            setUserTiers(newTiers);
+          } else if (data.tiers && Array.isArray(data.tiers)) {
+            setUserTiers(data.tiers);
+          }
+        }
       }
       setLoading(false);
-    });
-    return () => unsubscribe();
-  }, [router]);
+    };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.push("/login");
-    } catch (error) {
-      console.error("Error logging out:", error);
-      setMessage("❌ Failed to log out. Please try refreshing.");
-    }
-  };
+    fetchUser();
+  }, []);
 
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
+  // ✅ Save name/email updates
+  const handleSave = async () => {
     if (!user) return;
-    setMessage("");
-
+    setSaving(true);
+    setMessage('');
     try {
-      await updateProfile(user, { displayName });
-      const userDocRef = doc(db, "users", user.uid);
-      await setDoc(userDocRef, { displayName }, { merge: true });
-      setMessage("✅ Profile updated successfully!");
-      setUserData((prev) => ({ ...(prev || {}), displayName }));
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      setMessage("❌ Failed to update profile. Please try again.");
+      await updateProfile(user, { displayName: name });
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, { name, email });
+      setMessage('✅ Profile updated successfully');
+    } catch (err) {
+      console.error(err);
+      setMessage('❌ Error updating profile');
+    } finally {
+      setSaving(false);
     }
   };
 
+  // ✅ Stripe customer portal
   const handleManageSubscription = async () => {
-    setIsManagingSubscription(true);
-    setMessage("");
     try {
-      const currentUser = getAuth().currentUser;
-      if (!currentUser) {
-        router.push("/login");
-        return;
-      }
-
-      const token = await currentUser.getIdToken();
-
-      const res = await fetch("/api/manage-subscription", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+      const token = await user.getIdToken();
+      const res = await fetch('/api/create-portal-session', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
       });
 
-      const raw = await res.text();
-      let data;
-      try {
-        data = JSON.parse(raw);
-      } catch {
-        console.error("Non-JSON response from /api/manage-subscription:\n", raw);
-        throw new Error("Server returned HTML instead of JSON. Check API route & auth.");
-      }
-
-      if (!res.ok) {
-        throw new Error(data.error || "Could not open billing portal.");
-      }
-
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
       window.location.href = data.url;
-    } catch (error) {
-      setMessage(`❌ ${error.message}`);
-      setIsManagingSubscription(false);
+    } catch (err) {
+      alert(err.message);
     }
   };
 
-  // While loading, you might want to render a spinner or skeleton screen
-  if (loading) {
+  // ✅ Logout
+  const handleLogout = async () => {
+    await signOut(auth);
+    window.location.href = '/';
+  };
+
+  if (loading)
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-[#3B82F6] font-semibold">Loading profile...</p>
+      <div className="h-screen flex items-center justify-center text-gray-500">
+        <Loader2 className="animate-spin mr-2" /> Loading profile...
       </div>
     );
-  }
 
-  // If user is null after loading finishes (shouldn't happen due to redirect),
-  // but good for safety. The useEffect should handle the redirect.
-  if (!user) {
-    return null;
-  }
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'Unknown Date';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   return (
-    // CORRECTED: Removed 'pb-40' to fix excessive space at the bottom
-    <div className="relative min-h-screen p-6 md:p-10 bg-[#F3F4F6] text-[#111827] overflow-y-auto font-sans">
-      {/* Subtle background blobs */}
-      <div className="absolute inset-0 -z-10 pointer-events-none">
-        <div className="absolute -top-24 -left-20 w-80 h-80 bg-[#3B82F6] rounded-full blur-3xl opacity-10" />
-        <div className="absolute -bottom-24 -right-20 w-96 h-96 bg-[#14B8A6] rounded-full blur-3xl opacity-10" />
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
+      <div className="w-full max-w-md bg-gray-800 rounded-3xl shadow-2xl p-8 border border-gray-700 text-white space-y-8 relative">
+        <h1 className="text-3xl font-bold text-center">Your Profile</h1>
 
-      <div className="relative max-w-4xl mx-auto py-4">
-        <div className="flex items-center gap-3 mb-2">
-          <Cog6ToothIcon className="h-8 w-8 text-[#3B82F6]" />
-          <h1 className="text-3xl md:text-4xl font-bold">Your Profile</h1>
-        </div>
-        <p className="text-[#4B5563] mb-8">
-          Manage your account details and subscription.
-        </p>
-
-        {/* Account Details */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white border border-[#E5E7EB] rounded-2xl shadow-[0_8px_30px_rgba(2,6,23,0.06)] p-6 md:p-8 mb-8"
-        >
-          <h2 className="text-xl md:text-2xl font-semibold mb-6">Account Details</h2>
-
-          {message && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className={`flex items-center gap-2 p-4 rounded-xl mb-5 text-sm font-medium 
-                ${message.startsWith('✅')
-                  ? 'bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]'
-                  : 'bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]'
-                }`}
+        {/* Purchased Items Button */}
+        {userTiers.length > 0 && (
+          <div className="flex justify-center mt-2">
+            <button
+              onClick={() => setShowPurchased(true)}
+              className="bg-teal-600 hover:bg-teal-700 transition-all py-2 px-5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md"
             >
-              {message.startsWith('✅') ? (
-                <CheckCircleIcon className="h-5 w-5" />
-              ) : (
-                <XCircleIcon className="h-5 w-5" />
-              )}
-              <p>{message.substring(3).trim()}</p>
-            </motion.div>
-          )}
-
-          <form onSubmit={handleUpdateProfile} className="space-y-6">
-            <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-[#374151] mb-2">
-                Display Name
-              </label>
-              <input
-                id="displayName"
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full p-3.5 bg-white border border-[#E5E7EB] rounded-xl text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-4 focus:ring-[#3B82F6]/20 focus:border-[#3B82F6]"
-                placeholder="Your name"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#374151] mb-2">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={userData?.email || user?.email || ""}
-                readOnly
-                className="w-full p-3.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-[#6B7280] cursor-not-allowed"
-              />
-            </div>
-
-            <div className="pt-2">
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold
-                                bg-[#3B82F6] text-white shadow-sm hover:bg-[#336fce] focus:outline-none
-                                focus:ring-4 focus:ring-[#3B82F6]/25"
-              >
-                Save Changes
-              </motion.button>
-            </div>
-          </form>
-        </motion.div>
-
-        {/* Subscription */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white border border-[#E5E7EB] rounded-2xl shadow-[0_8px_30px_rgba(2,6,23,0.06)] p-6 md:p-8 mb-8"
-        >
-          <h2 className="text-xl md:text-2xl font-semibold mb-6 flex items-center">
-            <CreditCardIcon className="h-6 w-6 mr-2 text-[#14B8A6]" />
-            Subscription
-          </h2>
-
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <p className="text-[#6B7280]">Your current plan:</p>
-              <p className="text-2xl font-bold text-[#111827] capitalize">
-                {userData?.tier || 'Free'}
-              </p>
-            </div>
-
-            <motion.button
-              onClick={handleManageSubscription}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              disabled={isManagingSubscription || userData?.tier !== 'premium'}
-              className={`inline-flex items-center justify-center px-5 py-3 rounded-xl font-semibold
-                                focus:outline-none focus:ring-4
-                                ${isManagingSubscription || userData?.tier !== 'premium'
-                  ? 'bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed'
-                  : 'bg-[#14B8A6] text-white hover:bg-[#129a8e] focus:ring-[#14B8A6]/25'
-                }`}
-            >
-              {isManagingSubscription ? 'Redirecting...' : 'Manage Subscription'}
-            </motion.button>
+              <Package size={16} /> View Purchased Items
+            </button>
           </div>
-        </motion.div>
-        
-        {/* BEAUTIFUL LOGOUT BUTTON */}
-        <motion.button
-          onClick={handleLogout}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.3 }}
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
-          className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-semibold text-lg
-bg-white border-2 border-[#FECACA] text-[#B91C1C] 
-shadow-[0_4px_15px_rgba(239,68,68,0.1)] transition-all
-hover:bg-[#FEF2F2] hover:shadow-[0_4px_20px_rgba(239,68,68,0.2)]"
-        >
-          <ArrowLeftStartOnRectangleIcon className="h-6 w-6" />
-          Log Out
-        </motion.button>
+        )}
+
+        {/* User Info */}
+        <div className="space-y-4 pt-4">
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-300">
+              Full Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-300">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              disabled
+              className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-gray-400"
+            />
+          </div>
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full bg-teal-500 hover:bg-teal-600 transition-all py-3 rounded-lg font-semibold flex items-center justify-center shadow-md disabled:opacity-70"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="animate-spin mr-2" /> Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
+          </button>
+          {message && (
+            <p className="text-center text-sm text-gray-300">{message}</p>
+          )}
+        </div>
+
+        {/* Subscription Section */}
+        <div className="pt-6 border-t border-gray-700 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-2 font-medium text-gray-300">
+              <CreditCard size={18} /> Subscription
+            </span>
+            <button
+              onClick={handleManageSubscription}
+              className="bg-blue-600 hover:bg-blue-700 transition-all py-2 px-4 rounded-lg font-semibold text-sm flex items-center shadow-md"
+            >
+              Manage Subscription
+            </button>
+          </div>
+        </div>
+
+        {/* Logout */}
+        <div className="pt-6 border-t border-gray-700">
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-600 hover:bg-red-700 transition-all py-3 rounded-lg font-semibold flex items-center justify-center gap-2 shadow-md"
+          >
+            <LogOut size={18} /> Log Out
+          </button>
+        </div>
+
+        {/* Purchased Items Modal */}
+        {showPurchased && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-sm shadow-xl border border-gray-700 relative animate-in fade-in zoom-in duration-200">
+              <button
+                onClick={() => setShowPurchased(false)}
+                className="absolute top-3 right-3 text-gray-400 hover:text-white"
+              >
+                <X size={20} />
+              </button>
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Package size={18} /> Purchased Items
+              </h2>
+              {userTiers.length > 0 ? (
+                <ul className="space-y-3">
+                  {userTiers.map((item, i) => {
+                    const productName =
+                      typeof item === 'string' ? item : item.product;
+                    const type =
+                      typeof item === 'string'
+                        ? 'onetime'
+                        : item.type || 'onetime';
+                    const date =
+                      typeof item === 'string' ? null : item.date || null;
+
+                    const isSub = type === 'subscription';
+                    return (
+                      <li
+                        key={i}
+                        className="bg-gray-700/60 border border-gray-600 rounded-lg px-4 py-3 text-sm text-gray-200 flex items-center justify-between"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-semibold">
+                            {productName.charAt(0).toUpperCase() +
+                              productName.slice(1)}
+                          </span>
+                          <span className="text-xs text-gray-400 flex items-center gap-1">
+                            <Clock size={12} /> {formatDate(date)}
+                          </span>
+                        </div>
+                        <span
+                          className={`${
+                            isSub ? 'text-teal-400' : 'text-yellow-400'
+                          } text-xs font-medium`}
+                        >
+                          {isSub ? 'Subscription' : 'One-time'}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="text-gray-400 text-sm">
+                  No purchased items found.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

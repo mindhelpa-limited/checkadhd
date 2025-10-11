@@ -9,8 +9,9 @@ import useWindowSize from 'react-use-window-size';
 // --- ADDED: Next.js 'next/link' for the back button ---
 import Link from 'next/link';
 
-// --- FIREBASE IMPORTS ---
-import { db, auth } from '../lib/firebase'; // Assuming '../lib/firebase' is correct path
+// --- FIREBASE IMPORTS (Updated to include setDoc and assumed requestFCMToken) ---
+// NOTE: Make sure to implement and export 'requestFCMToken' from '../lib/firebase'
+import { db, auth, requestFCMToken } from '../lib/firebase';
 import {
   collection,
   query,
@@ -20,6 +21,7 @@ import {
   addDoc,
   updateDoc,
   doc,
+  setDoc, // <--- ADDED: Needed for saving the token
   serverTimestamp
 } from 'firebase/firestore';
 
@@ -164,6 +166,47 @@ export default function GoalTrackerFirebase() {
     return () => unsubscribe();
   }, []);
 
+  // NEW: SERVICE WORKER REGISTRATION <----------------------------------------------------------------------------
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/firebase-messaging-sw.js")
+        .then(() => console.log("✅ Service worker registered"))
+        .catch((err) => console.error("❌ Service worker registration failed:", err));
+    }
+  }, []);
+  // --------------------------------------------------------------------------------------------------------------
+
+  // NEW: FIREBASE FCM TOKEN SAVER <--------------------------------------------------------------------------------
+  useEffect(() => {
+    async function saveUserFCMToken() {
+      try {
+        // ✅ Your VAPID key from Firebase console (Cloud Messaging settings)
+        // NOTE: Replace this with your actual VAPID key if different
+        const vapidKey = "BMpsrHHZO-VjhhNK05LB8O4wdD95ZsyOTxdVVWusdAblHSOQZWBPGCB2u5BgKBwspowEFPAMxafU1NVUR2--CzM";
+
+        // Request permission and get the token
+        const token = await requestFCMToken(vapidKey);
+
+        if (token && user?.uid) {
+          // Save the token to a subcollection for the user
+          await setDoc(
+            doc(db, "users", user.uid, "fcmTokens", token),
+            { token, createdAt: serverTimestamp() }, // Using serverTimestamp for consistency
+            { merge: true }
+          );
+          console.log("✅ FCM token saved for user:", token);
+        }
+      } catch (err) {
+        console.error("❌ Error saving FCM token:", err);
+      }
+    }
+
+    // Run once user is logged in
+    if (user) saveUserFCMToken();
+  }, [user]); // Runs when the user object changes (i.e., on sign in/out)
+  // --------------------------------------------------------------------------------------------------------------
+
   // FIREBASE DATA SUBSCRIPTION (READ/LISTEN - Daily & Zito Daily)
   useEffect(() => {
     if (!user) {
@@ -207,7 +250,7 @@ export default function GoalTrackerFirebase() {
     };
   }, [user, startOfFilteredDay]);
 
-  // Reset filter date when switching to the main tabs (embedded here from renderGoalAccordions for better effect visibility)
+  // Reset filter date when switching to the main tabs 
   useEffect(() => {
     if (selectedTab === 'Daily Goal' || selectedTab === 'Weekly Goal') {
       setTrackerFilterDate(formatDate(new Date()));
@@ -713,3 +756,4 @@ export default function GoalTrackerFirebase() {
     </div>
   );
 }
+
