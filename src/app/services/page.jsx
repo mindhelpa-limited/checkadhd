@@ -73,14 +73,6 @@ const musicTiles = [
     dest: "/pricing-adhd-clinical-assessment",
     isAdhd: true,
   },
-  {
-    name: "Mindhelpa institute",
-    description:
-      "Explore our specialized programs and professional training for mental health practitioners.",
-    imageUrl: "/images/healing.png",
-    dest: "/pricing-mindhelpa-institute",
-    isAdhd: false,
-  },
 ];
 
 // ----------------- Reusable Components -----------------
@@ -129,8 +121,7 @@ export default function FeaturesPage() {
       serviceName === "ADHD Assessment" ||
       serviceName === "Mental Health Recovery Tools" ||
       serviceName === "Psychiatrist-Led Coaching" ||
-      serviceName === "ADHD CLINICAL ASSESSMENT" ||
-      serviceName === "Mindhelpa institute"
+      serviceName === "ADHD CLINICAL ASSESSMENT"
     ) {
       router.push(dest);
     } else {
@@ -171,7 +162,7 @@ export default function FeaturesPage() {
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
             Built for Every Mind
           </h1>
-          <p className="text-lg sm:text-xl text-gray-300">
+          <p className className="text-lg sm:text-xl text-gray-300">
             Discover mental health solutions that meet you where you are — and guide you forward with clarity.
           </p>
         </div>
@@ -222,10 +213,10 @@ export default function FeaturesPage() {
         <div className="max-w-7xl mx-auto text-center">
           <AnimatedSpiralCircle className="mx-auto" />
           <h2 className="mt-3 text-4xl font-serif font-bold text-white">
-            Specialized Assessments & Professional Training
+            Specialized Assessments
           </h2>
           <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-            Access our in-depth ADHD clinical assessment and explore professional programs from the Mindhelpa Institute.
+            Access our in-depth ADHD clinical assessment.
           </p>
         </div>
 
@@ -254,6 +245,26 @@ export default function FeaturesPage() {
               </div>
             </div>
           ))}
+          {/* Empty div with a different animated shape for the right side */}
+          <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#101b3d] shadow-xl flex items-center justify-center p-6 aspect-[16/9]">
+            <svg
+              viewBox="0 0 200 200"
+              className="w-full h-full text-blue-500/20 animate-spin-slow-reverse"
+            >
+              {/* This is a simple radiating lines pattern for a different feel */}
+              {[...Array(8)].map((_, i) => (
+                <line
+                  key={i}
+                  x1="100" y1="100"
+                  x2={100 + 80 * Math.cos(i * Math.PI / 4)}
+                  y2={100 + 80 * Math.sin(i * Math.PI / 4)}
+                  stroke="currentColor"
+                  strokeWidth="0.5"
+                />
+              ))}
+              <circle cx="100" cy="100" r="20" fill="none" stroke="currentColor" strokeWidth="1"/>
+            </svg>
+          </div>
         </div>
       </div>
 
@@ -327,9 +338,17 @@ export default function FeaturesPage() {
           animation: spin 80s linear infinite;
           transform-origin: center;
         }
+        .animate-spin-slow-reverse {
+          animation: spin-reverse 80s linear infinite;
+          transform-origin: center;
+        }
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        @keyframes spin-reverse {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
         }
         .animate-spiral-spin {
           animation: spiral-spin 4s linear infinite;
