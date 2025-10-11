@@ -207,7 +207,7 @@ function Hero() {
 
         {/* GAP REDUCTION: Added mt-0 to reduce space above H1 */}
         <h1 className="font-sans text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight mt-0">
-          Your health matters. <br className="hidden sm:block" />
+          Your mental health matters. <br className="hidden sm:block" />
           It’s time to take charge — <span className="text-blue-400">your way.</span>
         </h1>
 
