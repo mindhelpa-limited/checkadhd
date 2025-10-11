@@ -40,7 +40,7 @@ export default function ProfilePage() {
           // 🛠 Migrate old tier → tiers
           if (!data.tiers && data.tier) {
             const newTiers = [
-              { product: data.tier, type: 'onetime', date: new Date().toISOString(), price: '£50' },
+              { product: data.tier, type: 'onetime', date: new Date().toISOString(), price: 'GBP 50' },
             ];
             await updateDoc(userRef, { tiers: newTiers, updatedAt: new Date().toISOString() });
             setUserTiers(newTiers);
@@ -104,7 +104,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white flex justify-center p-4">
-      <div className="w-full max-w-md bg-gray-800 rounded-3xl shadow-xl border border-gray-700 overflow-hidden">
+      <div className="w-full max-w-md bg-gray-800 rounded-3xl shadow-xl border border-gray-700 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="p-6 text-center border-b border-gray-700">
           <h1 className="text-2xl font-bold">Your Profile</h1>
@@ -115,7 +115,7 @@ export default function ProfilePage() {
           {[
             { key: 'profile', label: 'Profile', icon: <UserCircle2 size={16} /> },
             { key: 'subscription', label: 'Subscription', icon: <CreditCard size={16} /> },
-            { key: 'purchases', label: 'Purchases', icon: <Package size={16} /> },
+            { key: 'purchases', label: 'History', icon: <Package size={16} /> },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -132,8 +132,8 @@ export default function ProfilePage() {
           ))}
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-6 min-h-[400px] overflow-y-auto">
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
           {/* --- PROFILE TAB --- */}
           {activeTab === 'profile' && (
@@ -173,7 +173,7 @@ export default function ProfilePage() {
           {/* --- SUBSCRIPTION TAB --- */}
           {activeTab === 'subscription' && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 text-center">
                 Manage or cancel your active subscriptions anytime.
               </p>
               <button
@@ -185,7 +185,7 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* --- PURCHASES TAB --- */}
+          {/* --- HISTORY TAB --- */}
           {activeTab === 'purchases' && (
             <div className="space-y-4">
               {userTiers.length > 0 ? (
@@ -197,7 +197,7 @@ export default function ProfilePage() {
                     >
                       <div>
                         <p className="font-semibold text-teal-400 capitalize">
-                          {item.product || 'Unknown Product'}
+                          {item.product || 'Unknown'}
                         </p>
                         <p className="text-xs text-gray-400 flex items-center gap-1 mt-1">
                           <Calendar size={12} /> {formatDate(item.date)} &nbsp;•&nbsp;
@@ -215,13 +215,15 @@ export default function ProfilePage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-400 text-sm text-center">No purchased items found.</p>
+                <p className="text-gray-400 text-sm text-center">
+                  No one-time or subscription records found.
+                </p>
               )}
             </div>
           )}
         </div>
 
-        {/* Logout */}
+        {/* Logout always visible */}
         <div className="p-6 border-t border-gray-700">
           <button
             onClick={handleLogout}
