@@ -442,11 +442,8 @@
 .pdfToolList li { margin-bottom: 2px; }
 .confidential { font-style: italic; margin-top: 4px; font-size: 11px; }
 
-/* For PDF page break */
-.pageBreak {
-    page-break-before: always;
-    break-before: page;
-}
+
+
 
 /* --- Small Screen Adjustments --- */
 @media (max-width: 640px) {
