@@ -17,7 +17,7 @@
   max-width: 1000px;
 }
 
-/* Global styles */
+/* Global styles for h-tags and p-tags within container */
 .adhdContainer :global(h1),
 .adhdContainer :global(h2),
 .adhdContainer :global(h3),
@@ -31,7 +31,7 @@
   line-height: 1.6;
 }
 
-/* Inputs */
+/* Form element styles */
 .adhdContainer :global(label) {
   display: block;
   margin-top: 1rem;
@@ -56,7 +56,6 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-/* Info box */
 .infoBox {
   margin-top: 1.5rem;
   padding: 1rem;
@@ -67,7 +66,7 @@
   color: #1e40af;
 }
 
-/* --- Quiz Styles --- */
+/* --- Assessment Quiz Styles --- */
 .progressBarContainer {
   height: 10px;
   background-color: #e5e7eb;
@@ -121,7 +120,6 @@
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
 }
 
-/* Nav Buttons */
 .navControls {
   display: flex;
   justify-content: space-between;
@@ -150,7 +148,6 @@
   color: #9ca3af;
 }
 
-/* Confetti / milestone */
 .milestoneNotification {
   position: fixed;
   top: 50%;
@@ -172,6 +169,7 @@
   from { opacity: 0; transform: translate(-50%, -60%); }
   to { opacity: 1; transform: translate(-50%, -50%); }
 }
+
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }
@@ -415,7 +413,8 @@
 
 /* --- Mobile / PDF Fix --- */
 @media (max-width: 1024px) {
-  html, body {
+  :global(html),
+  :global(body) {
     width: 794px !important;
     overflow-x: hidden;
     transform: scale(1);
@@ -423,24 +422,25 @@
   }
 }
 
-/* --- Small Screen Adjustments (Still keep nice for UI) --- */
+/* --- Small Screen Adjustments --- */
 @media (max-width: 640px) {
-  .adhdContainer {
-    padding: 1.5rem;
+  .adhdContainer { 
+    padding: 1.5rem; 
     border-radius: 0;
   }
-  .infoGrid { grid-template-columns: 1fr; }
   .resultsTitle { font-size: 1.25rem; }
+  .infoGrid { grid-template-columns: 1fr; }
   .navButton { padding: 0.75rem 1rem; }
 }
 
 /* --- PDF Print Optimization --- */
 @media print {
-  body {
+  :global(body) {
     -webkit-print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
-  html, body {
+  :global(html),
+  :global(body) {
     width: 794px !important;
     height: auto;
     margin: 0;
