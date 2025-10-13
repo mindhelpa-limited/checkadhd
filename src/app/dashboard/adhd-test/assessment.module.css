@@ -175,7 +175,7 @@
     to { opacity: 0; }
 }
 
-/* --- Dialog Styles --- */
+/* --- Dialog Styles (for resume dialog) --- */
 .dialogOverlay {
     position: fixed;
     top: 0;
@@ -218,9 +218,6 @@
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    width: 794px;
-    max-width: 794px;
-    margin: 0 auto;
 }
 
 .pdfHeader {
@@ -308,9 +305,22 @@
     text-align: left;
 }
 
-.likelihoodDisplay { margin: 15px 0; }
-.likelihoodPercentage { font-size: 52px; font-weight: 800; margin: 0; }
-.likelihoodLabel { font-size: 16px; color: #4b5563; margin: 4px 0; font-weight: 500; }
+.likelihoodDisplay {
+    margin: 15px 0;
+}
+
+.likelihoodPercentage {
+    font-size: 52px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.likelihoodLabel {
+    font-size: 16px;
+    color: #4b5563;
+    margin: 4px 0;
+    font-weight: 500;
+}
 
 .riskLevel {
     display: inline-block;
@@ -322,13 +332,26 @@
     margin: 8px 0;
 }
 
-.visualScale { margin: 25px 0 15px 0; padding: 8px; }
+.visualScale {
+    margin: 25px 0 15px 0;
+    padding: 8px;
+}
+
 .scaleContainer {
     height: 12px;
     background: linear-gradient(to right, #16a34a 0%, #f59e0b 50%, #dc2626 100%);
     border-radius: 6px;
     position: relative;
     margin: 8px 0;
+}
+
+.scaleLabels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 500;
 }
 
 .scaleIndicator {
@@ -342,24 +365,26 @@
     box-shadow: 0 0 0 3px;
 }
 
-.scaleLabels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-    font-size: 11px;
-    color: #6b7280;
-    font-weight: 500;
-}
-
 .section {
     margin-bottom: 20px;
     padding: 20px;
     border-radius: 8px;
 }
 
-.interpretationSection { background: #f8fafc; border-left: 4px solid #2563eb; }
-.recommendationsSection { background: #f0fdf4; border-left: 4px solid #16a34a; }
-.importantNotes { background: #fffbeb; border-left: 4px solid #f59e0b; }
+.interpretationSection {
+    background: #f8fafc;
+    border-left: 4px solid #2563eb;
+}
+
+.recommendationsSection {
+    background: #f0fdf4;
+    border-left: 4px solid #16a34a;
+}
+
+.importantNotes {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+}
 
 .sectionTitle {
     font-size: 18px;
@@ -395,7 +420,11 @@
     font-size: 12px;
 }
 
-.pdfFooterLogo { font-weight: 600; color: #2563eb; margin-bottom: 4px; }
+.pdfFooterLogo {
+    font-weight: 600;
+    color: #2563eb;
+    margin-bottom: 4px;
+}
 
 .pdfToolList {
     list-style-type: none;
@@ -419,17 +448,6 @@
     break-before: page;
 }
 
-/* --- Mobile / PDF Fix --- */
-@media (max-width: 1024px) {
-    .adhdContainer :global(html),
-    .adhdContainer :global(body) {
-        width: 794px !important;
-        overflow-x: hidden;
-        transform: scale(1);
-        transform-origin: top left;
-    }
-}
-
 /* --- Small Screen Adjustments --- */
 @media (max-width: 640px) {
     .adhdContainer { 
@@ -439,20 +457,4 @@
     .resultsTitle { font-size: 1.25rem; }
     .infoGrid { grid-template-columns: 1fr; }
     .navButton { padding: 0.75rem 1rem; }
-}
-
-/* --- PDF Print Optimization --- */
-@media print {
-    .adhdContainer :global(body) {
-        -webkit-print-color-adjust: exact !important;
-        color-adjust: exact !important;
-    }
-    .adhdContainer :global(html),
-    .adhdContainer :global(body) {
-        width: 794px !important;
-        height: auto;
-        margin: 0;
-        padding: 0;
-        overflow: visible !important;
-    }
 }
