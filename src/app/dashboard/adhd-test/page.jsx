@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import Report from "./Report";
-import { Download, CheckCircle, Loader2 } from "lucide-react";
+import { Download, CheckCircle, Loader2, Play, RotateCcw } from "lucide-react"; // Added new icons
 import { useRouter } from "next/navigation";
 
 // ====================================================================
@@ -93,6 +93,7 @@ const milestoneMessages = [
   "Excellent Progress!",
   "Fantastic Effort!",
 ];
+const ADHD_TEST_PROGRESS_KEY = "adhdTestProgress"; // Key for localStorage
 
 function riskFromPercent(scorePercentage) {
   if (scorePercentage >= 75)
@@ -107,12 +108,13 @@ function riskFromPercent(scorePercentage) {
 // ====================================================================
 export default function AdhdTestPage() {
   const router = useRouter();
-  const [step, setStep] = useState("disclaimer");
+  const [step, setStep] = useState("loading"); // Start in a loading state
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState(() => new Array(questions.length).fill(null));
   const [userInfo, setUserInfo] = useState({ name: "", sex: "", dob: "" });
   const [milestoneNotification, setMilestoneNotification] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
+  const [loadedProgress, setLoadedProgress] = useState(null); // To hold saved data
   const audioRef = useRef(null);
 
   // === 🧩 Fix: Disable horizontal swipe & set full dark background ===
@@ -135,16 +137,80 @@ export default function AdhdTestPage() {
     };
   }, []);
 
-  const layoutClass = step === "disclaimer" ? "flex items-center justify-center" : "block pb-24";
+  // === ✨ New: Check for saved progress on initial load ===
+  useEffect(() => {
+    try {
+      const savedProgress = localStorage.getItem(ADHD_TEST_PROGRESS_KEY);
+      if (savedProgress) {
+        const parsed = JSON.parse(savedProgress);
+        // Ensure data is valid before offering to resume
+        if (parsed && typeof parsed.current === 'number' && Array.isArray(parsed.answers)) {
+          setLoadedProgress(parsed);
+          setStep("resumePrompt");
+        } else {
+          // If data is invalid, clear it and start fresh
+          localStorage.removeItem(ADHD_TEST_PROGRESS_KEY);
+          setStep("disclaimer");
+        }
+      } else {
+        setStep("disclaimer");
+      }
+    } catch (error) {
+      console.error("Failed to load progress:", error);
+      localStorage.removeItem(ADHD_TEST_PROGRESS_KEY);
+      setStep("disclaimer");
+    }
+  }, []);
+
+  // === ✨ New: Save progress whenever it changes during the quiz ===
+  useEffect(() => {
+    if (step === "quiz") {
+      const progress = { current, answers, userInfo };
+      localStorage.setItem(ADHD_TEST_PROGRESS_KEY, JSON.stringify(progress));
+    }
+  }, [current, answers, userInfo, step]);
+
+
+  // === ✨ New: Clear progress when the test is completed ===
+  useEffect(() => {
+    if (step === "results") {
+      localStorage.removeItem(ADHD_TEST_PROGRESS_KEY);
+      confetti({ particleCount: 250, spread: 160, origin: { y: 0.3 }, zIndex: 10001 });
+    }
+  }, [step]);
+
+
+  const layoutClass = ["disclaimer", "resumePrompt"].includes(step) ? "flex items-center justify-center" : "block pb-24";
+
 
   const handleStart = () => {
     if (!userInfo.name || !userInfo.sex || !userInfo.dob) {
       alert("Please complete all fields.");
       return;
     }
+    // Clear any old progress when explicitly starting a new test
+    localStorage.removeItem(ADHD_TEST_PROGRESS_KEY);
     setAnswers(new Array(questions.length).fill(null));
     setCurrent(0);
     setStep("quiz");
+  };
+
+  // === ✨ New: Handlers for the resume prompt ===
+  const handleResume = () => {
+    if (loadedProgress) {
+      setAnswers(loadedProgress.answers);
+      setCurrent(loadedProgress.current);
+      setUserInfo(loadedProgress.userInfo);
+      setStep("quiz");
+    }
+  };
+
+  const handleStartOver = () => {
+    localStorage.removeItem(ADHD_TEST_PROGRESS_KEY);
+    setAnswers(new Array(questions.length).fill(null));
+    setCurrent(0);
+    setUserInfo({ name: "", sex: "", dob: "" });
+    setStep("disclaimer"); // Go to the disclaimer to start fresh
   };
 
   const handleAnswer = (answerIndex) => {
@@ -163,8 +229,7 @@ export default function AdhdTestPage() {
       if (current < questions.length - 1) {
         setCurrent(current + 1);
       } else {
-        setStep("results");
-        confetti({ particleCount: 250, spread: 160, origin: { y: 0.3 }, zIndex: 10001 });
+        setStep("results"); // The new useEffect will handle confetti and clearing storage
       }
     }, 300);
   };
@@ -219,6 +284,32 @@ export default function AdhdTestPage() {
 
       {/* === Main Content === */}
       <div className="relative z-10 w-full max-w-lg md:max-w-2xl mx-auto">
+        {/* === ✨ New: Resume Prompt Screen === */}
+        {step === "resumePrompt" && (
+          <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 md:p-10 rounded-3xl text-center shadow-2xl border border-[#2c2c2c] animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Welcome Back!</h2>
+            <div className="p-6 md:p-8 bg-gray-900/50 rounded-2xl border border-gray-700 mb-8">
+              <p className="text-gray-400 text-lg leading-relaxed">
+                We saved your progress from your last session. Would you like to pick up where you left off?
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={handleResume}
+                className="w-full flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold text-white rounded-2xl bg-blue-500 hover:bg-blue-600"
+              >
+                <Play /> Resume
+              </button>
+              <button
+                onClick={handleStartOver}
+                className="w-full flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold text-white rounded-2xl bg-gray-600 hover:bg-gray-700"
+              >
+                <RotateCcw /> Start Over
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* === Disclaimer === */}
         {step === "disclaimer" && (
           <div className="bg-[#1A1A1A]/70 backdrop-blur-md p-8 md:p-10 rounded-3xl text-center shadow-2xl border border-[#2c2c2c] animate-fade-in">
@@ -314,11 +405,10 @@ export default function AdhdTestPage() {
               {options.map((opt, idx) => (
                 <button
                   key={idx}
-                  className={`py-4 px-6 text-lg font-semibold rounded-2xl transition-all duration-200 ${
-                    answers[current] === idx
+                  className={`py-4 px-6 text-lg font-semibold rounded-2xl transition-all duration-200 ${answers[current] === idx
                       ? "bg-blue-500 text-white shadow-lg"
                       : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 hover:text-white"
-                  }`}
+                    }`}
                   onClick={() => handleAnswer(idx)}
                 >
                   {opt}
@@ -329,11 +419,10 @@ export default function AdhdTestPage() {
               <button
                 onClick={handleGoBack}
                 disabled={current === 0}
-                className={`px-6 py-3 font-semibold rounded-2xl transition-colors ${
-                  current === 0
+                className={`px-6 py-3 font-semibold rounded-2xl transition-colors ${current === 0
                     ? "bg-gray-800/50 text-gray-500 cursor-not-allowed"
                     : "bg-gray-600 hover:bg-gray-700 text-white"
-                }`}
+                  }`}
               >
                 Back
               </button>
@@ -349,11 +438,10 @@ export default function AdhdTestPage() {
               <button
                 onClick={handleDownloadPDF}
                 disabled={isDownloading !== false}
-                className={`w-full max-w-xs px-8 py-4 font-semibold text-white rounded-2xl transition-colors flex items-center justify-center space-x-2 ${
-                  isDownloading === "success"
+                className={`w-full max-w-xs px-8 py-4 font-semibold text-white rounded-2xl transition-colors flex items-center justify-center space-x-2 ${isDownloading === "success"
                     ? "bg-green-500 hover:bg-green-600"
                     : "bg-blue-500 hover:bg-blue-600"
-                }`}
+                  }`}
               >
                 {isDownloading === true && <Loader2 className="h-6 w-6 animate-spin" />}
                 {isDownloading === "success" && <CheckCircle className="h-6 w-6" />}
