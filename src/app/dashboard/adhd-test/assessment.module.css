@@ -445,13 +445,4 @@
 
 
 
-/* --- Small Screen Adjustments --- */
-@media (max-width: 640px) {
-    .adhdContainer { 
-        padding: 1.5rem; 
-        border-radius: 0;
-    }
-    .resultsTitle { font-size: 1.25rem; }
-    .infoGrid { grid-template-columns: 1fr; }
-    .navButton { padding: 0.75rem 1rem; }
-}
+
