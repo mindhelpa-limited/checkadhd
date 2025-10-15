@@ -8,6 +8,7 @@ import {
   fetchSignInMethodsForEmail,
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // 👁️ Added eye icons
 
 /* ---------- UI helpers ---------- */
 const FullScreenLoader = ({ message }) => (
@@ -54,6 +55,7 @@ function SignUpPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // 👁️ Added state
 
   // Track product they bought
   const [productTag, setProductTag] = useState("free");
@@ -135,7 +137,9 @@ function SignUpPage() {
           // ✅ If email already exists → redirect to login
           const methods = await fetchSignInMethodsForEmail(auth, data.email);
           if (methods.length > 0) {
-            router.push(`/login?email=${encodeURIComponent(data.email)}&product=${tag}`);
+            router.push(
+              `/login?email=${encodeURIComponent(data.email)}&product=${tag}`
+            );
             return;
           }
         }
@@ -210,13 +214,22 @@ function SignUpPage() {
             <label className="block text-sm font-medium text-gray-300">
               Password
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 w-full px-4 py-3 rounded-xl border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
 
           <button
