@@ -3,12 +3,9 @@
 // =================================================================================================
 // 1. IMPORTS
 // -------------------------------------------------------------------------------------------------
-// Standard React/Next.js
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from 'framer-motion';
-
-// Firebase
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import {
@@ -20,24 +17,16 @@ import {
   query,
   limit,
 } from "firebase/firestore";
-
-// UI Components (Heroicons)
 import {
   ChatBubbleBottomCenterTextIcon,
   ClockIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 
-
 // =================================================================================================
 // 2. HELPER FUNCTIONS
 // -------------------------------------------------------------------------------------------------
 
-/**
- * Determines the ADHD likelihood status based on the score percentage.
- * @param {number} score - The score out of 100.
- * @returns {string} The descriptive status text.
- */
 const getAdhdStatus = (score) => {
   const s = Number(score) || 0;
   if (s >= 70) return "High Likelihood";
@@ -45,14 +34,26 @@ const getAdhdStatus = (score) => {
   return "Low Likelihood";
 };
 
+// ✅ NEW: Retake restriction helper (7 days)
+const getRetakeInfo = (lastDate, now = new Date()) => {
+  if (!lastDate) return { allowed: true, timeLeftText: "" };
+  const ms7d = 7 * 24 * 60 * 60 * 1000;
+  const diff = lastDate.getTime() + ms7d - now.getTime();
+  if (diff <= 0) return { allowed: true, timeLeftText: "" };
+  const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+  const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+  const minutes = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+  const parts = [];
+  if (days) parts.push(`${days}d`);
+  if (hours) parts.push(`${hours}h`);
+  if (minutes || (!days && !hours)) parts.push(`${minutes}m`);
+  return { allowed: false, timeLeftText: parts.join(" ") };
+};
 
 // =================================================================================================
 // 3. SMALL/VISUAL UI COMPONENTS
 // -------------------------------------------------------------------------------------------------
 
-/**
- * Renders a circular progress ring to display the score.
- */
 const ScoreRing = ({ score }) => {
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
@@ -88,11 +89,7 @@ const ScoreRing = ({ score }) => {
   );
 };
 
-/**
- * Modal shown when retaking the test is not yet available (time limit).
- */
 const RetakeTestModal = ({ timeLeft, onClose, onTakeTest, playClickSound }) => (
-  // Darker backdrop
   <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -118,7 +115,7 @@ const RetakeTestModal = ({ timeLeft, onClose, onTakeTest, playClickSound }) => (
         <ClockIcon className="h-16 w-16 text-[#60A5FA] mx-auto mb-4" />
         <h3 className="text-2xl font-bold text-white mb-2">Retake Not Yet Available</h3>
         <p className="text-[#9CA3AF] mb-6">
-          You must wait 14 days between tests to ensure accurate results.
+          You must wait 7 days between tests to ensure accurate results.
         </p>
         <div className="rounded-xl mb-4 p-4 border" style={{ borderColor: '#374151', background: '#1F2937' }}>
           <p className="text-[#9CA3AF]">Time remaining until retake:</p>
@@ -127,7 +124,7 @@ const RetakeTestModal = ({ timeLeft, onClose, onTakeTest, playClickSound }) => (
           </strong>
         </div>
         <button
-          onClick={() => { playClickSound(); onClose(); }} // Fallback button only closes now
+          onClick={() => { playClickSound(); onClose(); }}
           className="w-full px-8 py-3 text-sm font-semibold text-white rounded-2xl transition-colors"
           style={{
             background: 'linear-gradient(135deg, #FB923C, #F87171)',
@@ -141,9 +138,6 @@ const RetakeTestModal = ({ timeLeft, onClose, onTakeTest, playClickSound }) => (
   </div>
 );
 
-/**
- * Full-screen overlay component for displaying loading status.
- */
 const FullScreenLoader = ({ message }) => (
   <div
     className="fixed inset-0 flex items-center justify-center z-50"
@@ -160,7 +154,6 @@ const FullScreenLoader = ({ message }) => (
     <p className="ml-4 text-[#9CA3AF]">{message}</p>
   </div>
 );
-
 
 // =================================================================================================
 // 4. MAIN COMPONENT (DashboardPage)
@@ -182,8 +175,6 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
 
   const audioRef = useRef(null);
-  
-  // --- Animation State and Ref (The requested additions) ---
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -194,7 +185,6 @@ export default function DashboardPage() {
     }
   };
 
-  // --- Effect: Auth and Data Fetching (Unchanged) ---
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
@@ -219,7 +209,6 @@ export default function DashboardPage() {
       setUserData({ tier: data.tier });
       setLoadingMessage("Loading your latest result...");
 
-      // Set up real-time listener for the latest result
       const colRef = collection(db, "users", currentUser.uid, "results");
       const q = query(colRef, orderBy("takenAt", "desc"), limit(1));
       const unsubLatest = onSnapshot(
@@ -234,7 +223,7 @@ export default function DashboardPage() {
             setLevelLabel("");
             setLastTestDate(null);
             setRetakeAvailable(true);
-            setLoading(false); // <--- IMPORTANT: Set loading to false here
+            setLoading(false);
             return;
           }
 
@@ -249,14 +238,16 @@ export default function DashboardPage() {
           setRiskLevelText(d?.riskLevelText ?? "");
           setLevelLabel(d?.level ?? "");
           setLastTestDate(takenAt || null);
-          setLoading(false); // <--- IMPORTANT: Set loading to false here
+          setLoading(false);
 
-          setRetakeAvailable(true);
+          // ✅ Enforce 7-day retake restriction
+          const { allowed, timeLeftText } = getRetakeInfo(takenAt || null);
+          setRetakeAvailable(allowed);
+          setTimeLeft(timeLeftText);
         },
         (err) => {
           console.error("Latest result subscription error:", err);
-          // Set loading to false even on error to prevent eternal blank page
-          setLoading(false); 
+          setLoading(false);
         }
       );
       return () => unsubLatest();
@@ -264,43 +255,29 @@ export default function DashboardPage() {
     return () => unsub();
   }, [router]);
 
-  // --- Animation Effect (The requested IntersectionObserver logic) ---
   useEffect(() => {
-    // We only want the animation to run once the initial data load is complete.
-    if (loading) return; 
-
+    if (loading) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          // Stop observing after it becomes visible
-          observer.unobserve(entry.target); 
+          observer.unobserve(entry.target);
         }
       },
-      {
-        root: null, // relative to the viewport
-        rootMargin: "0px",
-        threshold: 0.1, // Trigger when 10% of the element is visible
-      }
+      { root: null, rootMargin: "0px", threshold: 0.1 }
     );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
+    if (sectionRef.current) observer.observe(sectionRef.current);
     return () => {
-      // Clean up the observer when the component unmounts or loading changes
-      if (sectionRef.current) {
-        // It's safe to call unobserve, even if it was already unobserved inside the callback
-        observer.unobserve(sectionRef.current); 
-      }
+      if (sectionRef.current) observer.unobserve(sectionRef.current);
     };
-  }, [loading]); // Re-run this effect when 'loading' state changes from true to false
-
-  // --- Handlers ---
+  }, [loading]);
 
   const handleTestButtonClick = () => {
     playClickSound();
+    if (!retakeAvailable) {
+      setShowModal(true);
+      return;
+    }
     router.push("/dashboard/adhd-test");
   };
 
@@ -309,13 +286,9 @@ export default function DashboardPage() {
     router.push("/dashboard/adhd-history");
   };
 
-  // --- Loading State ---
-
   if (loading) {
     return <FullScreenLoader message={loadingMessage} />;
   }
-
-  // --- Render ---
 
   return (
     <main
@@ -332,7 +305,6 @@ export default function DashboardPage() {
     >
       <audio ref={audioRef} src="/sounds/click.mp3" preload="auto" />
 
-      {/* Subtle ambient glows */}
       <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
         <div
           className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full filter blur-3xl opacity-30 animate-blob"
@@ -344,21 +316,14 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Main content wrapper with On-Scroll Fade-In animation */}
-      {/* The 'ref' links to the IntersectionObserver, and the conditional Tailwind classes 
-        provide the fade-in (opacity-0 to opacity-100) and slide-up (translate-y-10 to translate-y-0) effect.
-      */}
       <div
         ref={sectionRef}
         className={`relative max-w-6xl mx-auto z-10 transform transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 
-          {/* Actions card (Slot 1, Order 1 on mobile, 2 on desktop) */}
           <motion.div
-            // Framer Motion is kept for an immediate effect on the card itself, 
-            // but the parent 'div' now handles the scroll-based animation for the entire section.
-            initial={{ opacity: 0, y: 20 }} 
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             whileHover={{
@@ -396,7 +361,6 @@ export default function DashboardPage() {
                 </motion.div>
               )}
 
-              {/* Last Test Date displayed before the button */}
               {hasTakenTest && lastTestDate && (
                 <div className="text-center mb-6 p-3 bg-white/10 rounded-lg border border-gray-700 w-full">
                   <p className="text-[#9CA3AF] text-sm">Last Test Taken:</p>
@@ -411,7 +375,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="relative z-10 space-y-4"> {/* Added space-y-4 for gap */}
+            <div className="relative z-10 space-y-4">
               <motion.button
                 onClick={handleTestButtonClick}
                 whileHover={{ scale: 1.03 }}
@@ -425,14 +389,13 @@ export default function DashboardPage() {
                 {hasTakenTest ? "Retake the Test" : "Take the ADHD Test"}
               </motion.button>
 
-              {/* NEW: View Result Button */}
               <motion.button
                 onClick={handleViewResultClick}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full px-8 py-4 text-lg font-semibold rounded-2xl shadow-lg transition-all duration-300 transform focus:outline-none focus:ring-4 focus:ring-opacity-40 text-white"
                 style={{
-                  background: '#60A5FA', // A solid color for differentiation
+                  background: '#60A5FA',
                   boxShadow: '0 5px 15px rgba(96, 165, 250, 0.4)'
                 }}
               >
@@ -442,10 +405,7 @@ export default function DashboardPage() {
             </div>
           </motion.div>
 
-          {/* Dashboard Info Card (Slot 2, Order 2 on mobile, 1 on desktop) */}
           <motion.div
-            // Framer Motion is kept for an immediate effect on the card itself, 
-            // but the parent 'div' now handles the scroll-based animation for the entire section.
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -472,8 +432,6 @@ export default function DashboardPage() {
 
             {userData && (
               <ul className="space-y-4 md:space-y-6">
-
-                {/* ADHD Status Item */}
                 <motion.li
                   whileHover={{ scale: 1.02, backgroundColor: '#111827' }}
                   className="flex items-center p-4 rounded-xl border transition-all duration-300"
@@ -490,7 +448,6 @@ export default function DashboardPage() {
                     )}
                   </div>
                 </motion.li>
-
               </ul>
             )}
           </motion.div>
@@ -507,20 +464,13 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* ========================================================================================= */}
-      {/* 5. STYLES */}
-      {/* ----------------------------------------------------------------------------------------- */}
-
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap');
-
-        /* Set the default text color for the entire body to white/light-gray */
         body {
           font-family: 'Inter', sans-serif;
           color: #D1D5DB;
           background: #030712;
         }
-
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.06); }
@@ -535,12 +485,10 @@ export default function DashboardPage() {
         }
         .animate-blob { animation: blob 18s infinite ease-in-out; }
         .animate-blob-delay { animation: blob-delay 18s infinite ease-in-out; }
-
         @keyframes spin-slow {
           from { transform: rotate(270deg); }
           to { transform: rotate(630deg); }
         }
-
         @keyframes shine {
           0%, 100% { color: #34D399; filter: drop-shadow(0 0 5px rgba(52,211,153,0.5)); }
           50% { color: #FCD34D; filter: drop-shadow(0 0 10px rgba(252,211,77,0.7)); }
