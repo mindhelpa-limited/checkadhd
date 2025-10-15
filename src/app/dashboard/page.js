@@ -228,9 +228,18 @@ export default function DashboardPage() {
           }
 
           const d = doc0.data();
-          const takenAt =
-            d?.takenAt?.toDate?.() ??
-            (d?.takenAt ? new Date(d.takenAt) : null);
+
+          // ✅ SAFE PARSE: Works for Firestore Timestamp, string, or number
+          let takenAt = null;
+          if (d?.takenAt) {
+            if (typeof d.takenAt.toDate === "function") {
+              takenAt = d.takenAt.toDate();
+            } else if (typeof d.takenAt === "string" || typeof d.takenAt === "number") {
+              takenAt = new Date(d.takenAt);
+            } else {
+              takenAt = null;
+            }
+          }
 
           setHasTakenTest(true);
           setLatestId(doc0.id);
@@ -401,7 +410,6 @@ export default function DashboardPage() {
               >
                 View Result
               </motion.button>
-
             </div>
           </motion.div>
 
@@ -427,8 +435,6 @@ export default function DashboardPage() {
           >
             <div className="absolute inset-0 opacity-15 group-hover:opacity-30 transition-opacity duration-300"
               style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.15), rgba(167,139,250,0.15))' }} />
-
-            <div className="mb-6"></div>
 
             {userData && (
               <ul className="space-y-4 md:space-y-6">
