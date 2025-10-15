@@ -190,7 +190,7 @@ export default function AdhdTestPage() {
 
       const data = docSnap.data();
       if (data?.tier !== "premium") {
-        router.replace("/pricing-a");
+        router.replace("/pricing-adhd-assessment");
         return;
       }
 
