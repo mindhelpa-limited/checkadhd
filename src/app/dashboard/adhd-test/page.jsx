@@ -6,6 +6,19 @@ import Report from "./Report";
 import { Download, CheckCircle, Loader2, Play, RotateCcw } from "lucide-react"; // Added new icons
 import { useRouter } from "next/navigation";
 
+// 🔐 NEW: Firebase auth + firestore (logic only, no UI changes)
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  limit,
+} from "firebase/firestore";
+
 // ====================================================================
 // QUESTIONS
 // ====================================================================
@@ -103,6 +116,22 @@ function riskFromPercent(scorePercentage) {
   return { level: "Low likelihood of ADHD traits", riskLevelText: "Low Risk" };
 }
 
+// 🔐 NEW: 7-day retake helper (pure logic, no UI changes)
+const getRetakeInfo = (lastDate, now = new Date()) => {
+  if (!lastDate) return { allowed: true, timeLeftText: "" };
+  const ms7d = 7 * 24 * 60 * 60 * 1000;
+  const diff = lastDate.getTime() + ms7d - now.getTime();
+  if (diff <= 0) return { allowed: true, timeLeftText: "" };
+  const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+  const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+  const minutes = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+  const parts = [];
+  if (days) parts.push(`${days}d`);
+  if (hours) parts.push(`${hours}h`);
+  if (minutes || (!days && !hours)) parts.push(`${minutes}m`);
+  return { allowed: false, timeLeftText: parts.join(" ") };
+};
+
 // ====================================================================
 // MAIN COMPONENT
 // ====================================================================
@@ -116,6 +145,12 @@ export default function AdhdTestPage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [loadedProgress, setLoadedProgress] = useState(null); // To hold saved data
   const audioRef = useRef(null);
+
+  // 🔐 NEW: Access/retake state (logic only)
+  const [accessReady, setAccessReady] = useState(false);
+  const [retakeAvailable, setRetakeAvailable] = useState(true);
+  const [timeLeft, setTimeLeft] = useState("");
+  const [lastTestDate, setLastTestDate] = useState(null);
 
   // === 🧩 Fix: Disable horizontal swipe & set full dark background ===
   useEffect(() => {
@@ -137,18 +172,86 @@ export default function AdhdTestPage() {
     };
   }, []);
 
-  // === ✨ New: Check for saved progress on initial load ===
+  // 🔐 NEW: Gate access + fetch latest result + compute 7-day retake
   useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        router.replace("/login");
+        return;
+      }
+
+      // Require user doc
+      const userDocRef = doc(db, "users", currentUser.uid);
+      const docSnap = await getDoc(userDocRef);
+      if (!docSnap.exists()) {
+        router.replace("/pricing-adhd-assessment");
+        return;
+      }
+
+      const data = docSnap.data();
+      if (data?.tier !== "premium") {
+        router.replace("/pricing-a");
+        return;
+      }
+
+      // Listen for latest result
+      const colRef = collection(db, "users", currentUser.uid, "results");
+      const q = query(colRef, orderBy("takenAt", "desc"), limit(1));
+      const unsubLatest = onSnapshot(
+        q,
+        (snap) => {
+          const doc0 = snap.docs[0];
+          if (!doc0) {
+            setLastTestDate(null);
+            setRetakeAvailable(true);
+            setTimeLeft("");
+            setAccessReady(true);
+            return;
+          }
+          const d = doc0.data();
+          const takenAt =
+            d?.takenAt?.toDate?.() ??
+            (d?.takenAt ? new Date(d.takenAt) : null);
+
+          setLastTestDate(takenAt || null);
+          const { allowed, timeLeftText } = getRetakeInfo(takenAt || null);
+          setRetakeAvailable(allowed);
+          setTimeLeft(timeLeftText);
+
+          // If not allowed, block this page immediately (no design changes)
+          if (!allowed) {
+            alert(`You can retake the assessment in ${timeLeftText}.`);
+            router.replace("/dashboard");
+            return;
+          }
+
+          setAccessReady(true);
+        },
+        (err) => {
+          console.error("Latest result subscription error:", err);
+          setAccessReady(true); // Fail open to avoid infinite loading, but UI is still gated by handlers
+        }
+      );
+
+      // Cleanup
+      return () => unsubLatest();
+    });
+
+    return () => unsub();
+  }, [router]);
+
+  // === ✨ New: Check for saved progress on initial load — now waits for accessReady
+  useEffect(() => {
+    if (!accessReady) return;
+
     try {
       const savedProgress = localStorage.getItem(ADHD_TEST_PROGRESS_KEY);
       if (savedProgress) {
         const parsed = JSON.parse(savedProgress);
-        // Ensure data is valid before offering to resume
         if (parsed && typeof parsed.current === 'number' && Array.isArray(parsed.answers)) {
           setLoadedProgress(parsed);
           setStep("resumePrompt");
         } else {
-          // If data is invalid, clear it and start fresh
           localStorage.removeItem(ADHD_TEST_PROGRESS_KEY);
           setStep("disclaimer");
         }
@@ -160,7 +263,7 @@ export default function AdhdTestPage() {
       localStorage.removeItem(ADHD_TEST_PROGRESS_KEY);
       setStep("disclaimer");
     }
-  }, []);
+  }, [accessReady]);
 
   // === ✨ New: Save progress whenever it changes during the quiz ===
   useEffect(() => {
@@ -170,7 +273,6 @@ export default function AdhdTestPage() {
     }
   }, [current, answers, userInfo, step]);
 
-
   // === ✨ New: Clear progress when the test is completed ===
   useEffect(() => {
     if (step === "results") {
@@ -179,16 +281,19 @@ export default function AdhdTestPage() {
     }
   }, [step]);
 
-
   const layoutClass = ["disclaimer", "resumePrompt"].includes(step) ? "flex items-center justify-center" : "block pb-24";
 
-
+  // 🚦 NEW: Start is blocked if 7-day window not elapsed
   const handleStart = () => {
     if (!userInfo.name || !userInfo.sex || !userInfo.dob) {
       alert("Please complete all fields.");
       return;
     }
-    // Clear any old progress when explicitly starting a new test
+    if (!retakeAvailable) {
+      alert(`You can retake the assessment in ${timeLeft}.`);
+      router.replace("/dashboard");
+      return;
+    }
     localStorage.removeItem(ADHD_TEST_PROGRESS_KEY);
     setAnswers(new Array(questions.length).fill(null));
     setCurrent(0);
@@ -197,6 +302,11 @@ export default function AdhdTestPage() {
 
   // === ✨ New: Handlers for the resume prompt ===
   const handleResume = () => {
+    if (!retakeAvailable) {
+      alert(`You can retake the assessment in ${timeLeft}.`);
+      router.replace("/dashboard");
+      return;
+    }
     if (loadedProgress) {
       setAnswers(loadedProgress.answers);
       setCurrent(loadedProgress.current);
