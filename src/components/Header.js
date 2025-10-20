@@ -134,7 +134,7 @@ export default function Header() {
 
             <MobileMenuItem href="/resources" onClick={() => setMenuOpen(false)}>Resources</MobileMenuItem>
             
-            {/* UPDATED MOBILE MENU ITEM: Claim Gifts (after Resources) */}
+            {/* UPDATED MOBILE MENU ITEM: Claim Gifts (afterr Resources) */}
             {/*
             <MobileMenuItem 
                 href="/free-gifts" 
