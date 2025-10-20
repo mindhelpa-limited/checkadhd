@@ -17,7 +17,7 @@ import {
     GraduationCap,
     HeartHandshake,
     Users,
-    Gift // Import the Gift icon
+    // Gift // Import the Gift icon
 } from "lucide-react";
 
 // Updated MobileMenuItem to accept an optional 'icon' prop for the RIGHT side and pulse effect
@@ -135,6 +135,7 @@ export default function Header() {
             <MobileMenuItem href="/resources" onClick={() => setMenuOpen(false)}>Resources</MobileMenuItem>
             
             {/* UPDATED MOBILE MENU ITEM: Claim Gifts (after Resources) */}
+            {/*
             <MobileMenuItem 
                 href="/free-gifts" 
                 onClick={() => setMenuOpen(false)}
@@ -143,6 +144,7 @@ export default function Header() {
             >
                 Claim Gifts
             </MobileMenuItem>
+            */}
         </>
     );
 
@@ -212,12 +214,14 @@ export default function Header() {
                     <Link href="/resources" className="hover:text-blue-400 transition-all duration-200">Resources</Link>
                     
                     {/* UPDATED DESKTOP MENU ITEM: Claim Gifts (after Resources) */}
+                    {/*
                     <Link 
                         href="/free-gifts" 
                         className="hover:text-blue-400 transition-all duration-200" // Standard hover effect
                     >
                         Claim Gifts
                     </Link>
+                    */}
 
                     {/* User Login/Logout Logic */}
                     {user ? (
