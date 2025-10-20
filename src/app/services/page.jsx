@@ -47,11 +47,11 @@ const services = [
     isAdhd: true,
   },
   {
-    name: "Mental Health Recovery Tools",
+    name: "ADHD Clinical Assessment",
     description:
-      "Daily trackers and science-based exercises for resilience, focus, and calm.",
+      "Get definitive clarity with a comprehensive, psychiatrist-led diagnostic evaluation, built on robust DSM-5 standards and ICD-11 criteria.",
     imageUrl: "/images/trailmuncher.png",
-    dest: "/pricing-mental-health-recovery-tools",
+    dest: "/pricing-adhd-clinical-assessment",
     isAdhd: false,
   },
   {
@@ -112,7 +112,7 @@ export default function FeaturesPage() {
   const handleExploreClick = (serviceName, dest) => {
     if (
       serviceName === "ADHD Assessment" ||
-      serviceName === "Mental Health Recovery Tools" ||
+      serviceName === "ADHD Clinical Assessment" ||
       serviceName === "Psychiatrist-Led Coaching"
     ) {
       router.push(dest);

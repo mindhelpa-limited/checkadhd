@@ -222,7 +222,7 @@ export default function DashboardLayout({ children }) {
 
           <div className="px-6 py-6">
             <h2 className="text-[20px] leading-tight font-semibold tracking-tight">
-              <span className="text-[#1D4ED8]">ADHD</span> Check
+              <span className="text-[#1D4ED8]">Mindhelpa</span> Limited
             </h2>
             <p className="text-sm text-[#6B7280] mt-1">Hi, {getFirstName()}</p>
 

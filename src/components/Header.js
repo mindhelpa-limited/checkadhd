@@ -113,6 +113,7 @@ export default function Header() {
                     >
                         ADHD Clinical Assessment
                     </MobileMenuItem>
+                    {/*
                     <MobileMenuItem
                         href="/pricing-mental-health-recovery-tools"
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
@@ -120,6 +121,7 @@ export default function Header() {
                     >
                         Mental Health Recovery
                     </MobileMenuItem>
+                    */}
                     <MobileMenuItem
                         href="/book-a-coach"
                         onClick={() => {setMenuOpen(false); setPricingDropdownOpen(false);}}
@@ -187,6 +189,7 @@ export default function Header() {
                                 >
                                     ADHD Clinical Assessment
                                 </DropdownMenuItem>
+                                {/*
                                 <DropdownMenuItem
                                     href="/pricing-mental-health-recovery-tools"
                                     onClick={() => setPricingDropdownOpen(false)}
@@ -194,6 +197,7 @@ export default function Header() {
                                 >
                                     Mental Health Recovery
                                 </DropdownMenuItem>
+                                */}
                                 <DropdownMenuItem
                                     href="/book-a-coach"
                                     onClick={() => setPricingDropdownOpen(false)}

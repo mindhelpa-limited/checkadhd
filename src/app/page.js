@@ -21,7 +21,7 @@ import {
 /* 2. INTERNAL IMPORTS */
 // =========================================================================
 
-import Footer from "../components/home/Footer"; 
+import Footer from "../components/home/Footer";
 
 // =========================================================================
 /* 3. DATA CONSTANTS */
@@ -30,6 +30,8 @@ import Footer from "../components/home/Footer";
 /**
  * Services Data
  * Defines the main offerings with navigation details.
+ * MODIFIED: Replaced "Mental Health Recovery Tools" with "ADHD CLINICAL ASSESSMENT"
+ * to maintain exactly three service cards.
  */
 const services = [
   {
@@ -37,30 +39,31 @@ const services = [
     description:
       "A complete ADHD test built on DSM-5 standards to help you understand your mind better.",
     imageUrl: "/images/blockstack.png",
-    dest: "/pricing-adhd-assessment", 
+    dest: "/pricing-adhd-assessment",
     isAdhd: true,
   },
   {
-    name: "Mental Health Recovery Tools",
+    name: "ADHD CLINICAL ASSESSMENT",
     description:
-      "Daily trackers and science-based exercises for resilience, focus, and calm.",
-    imageUrl: "/images/trailmuncher.png",
-    dest: "/pricing-mental-health-recovery-tools", 
-    isAdhd: false,
+      "DSM-5 aligned, comprehensive clinical assessment for a clear ADHD diagnosis.",
+    imageUrl: "/images/music.png", // Using the image from the old musicTiles
+    dest: "/pricing-adhd-clinical-assessment",
+    isAdhd: true,
   },
   {
     name: "Psychiatrist-Led Coaching",
     description:
       "Work directly with licensed professionals for personalized guidance and strategies.",
     imageUrl: "/images/neuralbounds.png",
-    dest: "/book-a-coach", 
+    dest: "/book-a-coach",
     isAdhd: false,
   },
 ];
 
 /**
  * Music/Sound Tiles Data (Used for Specialized Assessments)
- * Defines the sound-related features.
+ * RETAINED: The array is kept, but the card using it in the render logic is removed.
+ * It's kept here in case the user wants to re-add the section later.
  */
 const musicTiles = [
   {
@@ -116,21 +119,21 @@ const AssessmentAnimation = ({ className }) => (
       <circle cx="250" cy="250" r="180" stroke="currentColor" strokeWidth="1" opacity="0.6" />
       {/* Inner Circle */}
       <circle cx="250" cy="250" r="120" stroke="currentColor" strokeWidth="1.5" opacity="0.8" />
-      
+
       {/* The abstract, overlapping, hand-drawn-like lines (similar to the image) */}
-      <path 
-        d="M 100 250 C 50 150, 450 150, 400 250 C 450 350, 50 350, 100 250" 
-        stroke="currentColor" 
-        strokeWidth="1.2" 
-        opacity="0.8" 
-        className="animate-pulse-slow" 
+      <path
+        d="M 100 250 C 50 150, 450 150, 400 250 C 450 350, 50 350, 100 250"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        opacity="0.8"
+        className="animate-pulse-slow"
       />
-      
-      <path 
-        d="M 250 50 A 150 150 0 1 0 250 450 A 100 100 0 1 1 250 50" 
-        stroke="currentColor" 
-        strokeWidth="0.8" 
-        opacity="0.6" 
+
+      <path
+        d="M 250 50 A 150 150 0 1 0 250 450 A 100 100 0 1 1 250 50"
+        stroke="currentColor"
+        strokeWidth="0.8"
+        opacity="0.6"
         className="animate-path-dash"
       />
 
@@ -162,7 +165,7 @@ function ComingSoonModal({ open, onClose }) {
         {/* Spinner */}
         <div className="flex justify-center mb-6">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          
+
         </div>
 
         <h3 className="text-2xl font-semibold text-white">Coming Soon</h3>
@@ -170,7 +173,7 @@ function ComingSoonModal({ open, onClose }) {
           This feature is under development. Stay tuned!
         </p>
       </div>
-      
+
     </div>
   );
 }
@@ -180,7 +183,7 @@ function ComingSoonModal({ open, onClose }) {
 // =========================================================================
 
 function Hero() {
-  const startJourneyRoute = "/services"; 
+  const startJourneyRoute = "/services";
 
   const handleNavigation = (route) => {
     window.location.href = route;
@@ -199,7 +202,7 @@ function Hero() {
       </div>
 
       <div className={`relative z-20 max-w-4xl text-center space-y-8 py-16 sm:py-20 px-4 sm:px-0 animate-fade-in-up`}>
-        
+
         {/* GAP REDUCTION: Added mb-2 to reduce space below tagline */}
         <p className="font-sans text-blue-300 uppercase text-sm tracking-widest font-semibold mb-2">
           FORTIFY YOUR MIND
@@ -224,13 +227,8 @@ function Hero() {
             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
             <span className="absolute -inset-px rounded-full group-hover:ring-2 group-hover:ring-blue-400 transition-all duration-300"></span>
           </button>
-
-          <button
-            onClick={() => handleNavigation("/pricing-mental-health-recovery-tools")} 
-            className="text-blue-300 hover:text-blue-200 border border-blue-400/30 hover:bg-blue-400/10 text-lg font-medium py-4 px-10 rounded-full transition-all duration-300"
-          >
-            Explore Recovery Tools
-          </button>
+          
+          {/* REMOVED: The "Explore Recovery Tools" button */}
         </div>
       </div>
 
@@ -264,9 +262,8 @@ export default function FeaturesPage() {
   const handleExploreClick = (serviceName, dest) => {
     if (
       serviceName === "ADHD Assessment" ||
-      serviceName === "Mental Health Recovery Tools" ||
-      serviceName === "Psychiatrist-Led Coaching" ||
-      serviceName === "ADHD CLINICAL ASSESSMENT" 
+      serviceName === "ADHD CLINICAL ASSESSMENT" || // Retained both in case logic is needed
+      serviceName === "Psychiatrist-Led Coaching"
     ) {
       router.push(dest);
     } else {
@@ -277,7 +274,7 @@ export default function FeaturesPage() {
   // Define the base URL and the version parameter for cache-busting
   const baseUrl = "https://www.mindhelpa.com";
   // Increment this 'v' value every time the image changes and Meta is stubborn
-  const cacheVersion = "v=4"; 
+  const cacheVersion = "v=4";
 
   const imageUrlWithVersion = `${baseUrl}/images/how-it-works.jpg?${cacheVersion}`;
 
@@ -299,7 +296,7 @@ export default function FeaturesPage() {
           content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
         />
         <meta property="og:image" content={imageUrlWithVersion} />
-        <meta property="og:url" content={baseUrl + "/"} /> 
+        <meta property="og:url" content={baseUrl + "/"} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Mindhelpa" />
 
@@ -312,9 +309,9 @@ export default function FeaturesPage() {
         />
         <meta name="twitter:image" content={imageUrlWithVersion} />
       </Head>
-      
+
       {/* RENDER THE HERO COMPONENT */}
-      <Hero /> 
+      <Hero />
 
       {/* --- */}
 
@@ -331,6 +328,7 @@ export default function FeaturesPage() {
           </p>
         </div>
 
+        {/* Renders exactly 3 cards from the modified 'services' array */}
         <div className="mt-12 max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {services.map((s, i) => (
             <div
@@ -364,96 +362,9 @@ export default function FeaturesPage() {
 
       {/* --- */}
 
-      {/* MUSIC/SOUNDS SECTION (Specialized Assessments) */}
-      <div className="bg-[#0a122a] py-16 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <AnimatedSpiralCircle className="mx-auto" />
+      {/* REMOVED: The entire MUSIC/SOUNDS SECTION (Specialized Assessments) */}
 
-          <h2 className="mt-3 text-4xl font-serif font-bold text-white">
-            Specialized Assessments
-          </h2>
-          <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-            Access our in-depth ADHD clinical assessment for a clear diagnosis.
-          </p>
-        </div>
-
-        {/* Two-column layout for the card and the new animation */}
-        <div className="mt-12 max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-          
-          {/* Assessment Card (Left Side) */}
-          <div className="md:col-span-1 max-w-md mx-auto w-full">
-            {musicTiles.map((m, idx) => (
-              <div
-                key={m.name}
-                className="group rounded-2xl overflow-hidden border border-white/10 bg-[#101b3d] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-              >
-                <div className="relative w-full aspect-[16/9] bg-[#0a122a] overflow-hidden">
-                  <Image
-                    src={m.imageUrl}
-                    alt={m.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    priority={idx === 0}
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-white">{m.name}</h3>
-                  <p className="mt-2 text-gray-400">{m.description}</p>
-                  <button
-                    onClick={() => handleExploreClick(m.name, m.dest)}
-                    className="mt-4 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 transition-colors"
-                  >
-                    Explore
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* New Animation (Right Side) */}
-          <div className="hidden md:flex md:col-span-1 max-w-md mx-auto w-full h-80 justify-center items-center">
-              <AssessmentAnimation className="w-full h-full text-blue-400" />
-          </div>
-
-        </div>
-      </div>
-
-      {/* --- */}
-
-      {/* DAILY PLAN SECTION */}
-      <div className="bg-gray-50 py-20 text-gray-900">
-        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-16 items-center">
-          <div>
-            <p className="text-blue-600 font-bold uppercase tracking-widest">
-              The Core Experience
-            </p>
-            <h2 className="mt-4 text-4xl font-serif font-bold">
-              Your Daily Recovery Plan
-            </h2>
-            <p className="mt-6 text-lg text-gray-700">
-              A five-part daily plan that blends meditation, mindful habits,
-              cognitive care, and real mental health recovery science.
-            </p>
-            <button
-              onClick={() => router.push("/how-it-works")}
-              className="mt-6 inline-flex items-center font-semibold text-blue-600 hover:underline"
-            >
-              See how it works <ArrowRight className="ml-2 w-4 h-4" />
-            </button>
-          </div>
-          <div className="text-center">
-            <Image
-              src="/images/feature-two.png"
-              alt="Yoga calm"
-              className="rounded-2xl shadow-xl mx-auto w-full max-w-lg"
-              width={700}
-              height={500}
-            />
-          </div>
-        </div>
-          
-      </div>
+      {/* REMOVED: The entire DAILY PLAN SECTION */}
 
       {/* --- */}
       {/* CALL TO ACTION (CTA) SECTION */}
@@ -500,7 +411,7 @@ export default function FeaturesPage() {
         }
         .animate-float { animation: float 10s ease-in-out infinite; }
         .animate-float-slow { animation: float-slow 12s ease-in-out infinite; }
-        
+
         /* The spin animation for the Assessment Animation circle */
         @keyframes spin-assessment-circle {
             from { transform: rotate(0deg); }
@@ -536,7 +447,7 @@ export default function FeaturesPage() {
         }
         /* The spin animation used in the ComingSoonModal */
         .animate-spin-slow {
-          animation: spin 2s linear infinite; 
+          animation: spin 2s linear infinite;
           transform-origin: center;
         }
         @keyframes spin {
@@ -567,10 +478,10 @@ export default function FeaturesPage() {
             50% { stroke-dashoffset: 0; }
             100% { stroke-dashoffset: -1000; }
         }
-        .animate-path-dash { 
+        .animate-path-dash {
             stroke-dasharray: 200; /* Define dash pattern */
             stroke-dashoffset: 200; /* Start offset */
-            animation: path-dash 20s linear infinite; 
+            animation: path-dash 20s linear infinite;
         }
         @keyframes pulse-slow {
             0%, 100% { opacity: 0.8; }

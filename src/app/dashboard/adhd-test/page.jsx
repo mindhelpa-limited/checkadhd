@@ -720,10 +720,10 @@ export default function AdhdTestPage() {
                                 )}
                             </button>
                             <a
-                                href="/dashboard/adhd-history"
+                                href="/dashboard/adhd-private"
                                 className="mt-4 w-full max-w-xs px-8 py-4 font-semibold text-white text-center rounded-2xl bg-gray-600 hover:bg-gray-700"
                             >
-                                View All Results
+                                Take A one-on-one test 👨🏻‍⚕️
                             </a>
                         </div>
                     </div>

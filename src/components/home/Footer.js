@@ -1,17 +1,27 @@
 "use client";
+
+// 1. Next.js/React Imports (Core)
 import Link from "next/link";
 import Image from "next/image";
-// 1. Import icons from react-icons/fa (Font Awesome)
+// 2. Third-Party Library Imports (Icons)
+// Import icons from react-icons/fa (Font Awesome)
 import { FaInstagram, FaFacebookF, FaYoutube } from 'react-icons/fa';
 // X (formerly Twitter) icon is found under react-icons/fa6
-import { FaXTwitter } from 'react-icons/fa6'; 
+import { FaXTwitter } from 'react-icons/fa6';
 
-// Component for a reusable social media link
+// 3. Helper Component Definitions
+
+/**
+ * Component for a reusable social media link.
+ * @param {string} href - The URL to link to.
+ * @param {React.ReactNode} children - The icon element.
+ * @param {string} platform - The name of the social media platform for accessibility.
+ */
 const SocialIcon = ({ href, children, platform }) => (
-  <Link 
-    href={href} 
-    target="_blank" 
-    rel="noopener noreferrer" 
+  <Link
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
     className="hover:text-blue-400 transition-colors p-1" // Added padding for better click area
     aria-label={`${platform} link`}
   >
@@ -19,7 +29,9 @@ const SocialIcon = ({ href, children, platform }) => (
   </Link>
 );
 
+// ---
 
+// 4. Main Component Definition
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -59,8 +71,8 @@ export default function Footer() {
           <ul className="space-y-3 text-white/80">
             <li><Link href="/adhdcheck" className="hover:text-blue-400 transition-colors">ADHD self assessment</Link></li>
             <li><Link href="/pricing-adhd-clinical-assessment" className="hover:text-blue-400 transition-colors">ADHD Clinical assessment</Link></li>
-            <li><Link href="/pricing-mental-health-recovery-tools" className="hover:text-blue-400 transition-colors">Mental health recovery</Link></li>
-            <li><Link href="/pricing-mental-health-recovery-tools" className="hover:text-blue-400 transition-colors">Goal tracker tool</Link></li>
+            {/* <li><Link href="/pricing-mental-health-recovery-tools" className="hover:text-blue-400 transition-colors">Mental health recovery</Link></li> */}
+            {/* <li><Link href="/pricing-mental-health-recovery-tools" className="hover:text-blue-400 transition-colors">Goal tracker tool</Link></li> */}
             <li><Link href="/book-a-coach" className="hover:text-blue-400 transition-colors">Psychiatrist coaching</Link></li>
           </ul>
         </div>
@@ -86,6 +98,8 @@ export default function Footer() {
         {/* Updated copyright text to Mindhelpa Limited and used dynamic year */}
         © {currentYear} Mindhelpa Limited. All rights reserved.
       </div>
+      
+      {/* 5. Component-Specific Styles (for Next.js with styled-jsx, though Tailwind is used above) */}
       <style jsx>{`
         .footer-radial-bg {
           background-color: #0a122a;
