@@ -76,7 +76,8 @@ const FeatureListItem = ({ icon, text }) => (
 
 // ----------------- Page -----------------
 export default function ADHDClinicalAssessmentPricing() {
-  const [activeTab, setActiveTab] = useState("child");
+  // CHANGED: Set initial activeTab to "adult" instead of "child"
+  const [activeTab, setActiveTab] = useState("adult");
 
   const features = [
     { text: "Consultant Psychiatrist-Led Diagnosis", icon: <BrainCircuit size={20} /> },
@@ -129,17 +130,8 @@ export default function ADHDClinicalAssessmentPricing() {
       </div>
 
       {/* TABS */}
+      {/* CHANGED: Swapped the order of the two buttons */}
       <div className="flex justify-center -mt-6 mb-6 space-x-6">
-        <button
-          onClick={() => setActiveTab("child")}
-          className={`px-6 py-3 rounded-full text-lg font-semibold transition-all ${
-            activeTab === "child"
-              ? "bg-gradient-to-r from-[#006D66] to-[#AD90F2] text-white shadow-lg shadow-purple-500/40"
-              : "bg-gray-800 text-gray-300 hover:text-white"
-          }`}
-        >
-          Child & Adolescent
-        </button>
         <button
           onClick={() => setActiveTab("adult")}
           className={`px-6 py-3 rounded-full text-lg font-semibold transition-all ${
@@ -149,6 +141,16 @@ export default function ADHDClinicalAssessmentPricing() {
           }`}
         >
           Adult
+        </button>
+        <button
+          onClick={() => setActiveTab("child")}
+          className={`px-6 py-3 rounded-full text-lg font-semibold transition-all ${
+            activeTab === "child"
+              ? "bg-gradient-to-r from-[#006D66] to-[#AD90F2] text-white shadow-lg shadow-purple-500/40"
+              : "bg-gray-800 text-gray-300 hover:text-white"
+          }`}
+        >
+          Child & Adolescent
         </button>
       </div>
 
@@ -249,7 +251,7 @@ export default function ADHDClinicalAssessmentPricing() {
             </div>
           </div>
 
-          {/* Row 3 - "Self-Assessment" (Previously "Monthly Prescriptions") */}
+          {/* Row 3 - "Self-Assessment" */}
           <div className="grid grid-cols-2 divide-x divide-white bg-white text-gray-900 font-medium">
             <div className="py-4 px-4 text-center bg-white/5">Self-Assessment</div>
             <div className="py-4 px-4 text-center bg-white/5">Self-Assessment</div>
@@ -268,9 +270,7 @@ export default function ADHDClinicalAssessmentPricing() {
             </div>
           </div>
           
-          {/* Row 4 ("Medication Titration Appointments") was successfully removed in the previous step. */}
-
-          {/* Row 5 (now effectively Row 4) */}
+          {/* Row 4 */}
           <div className="grid grid-cols-2 divide-x divide-white bg-white text-gray-900 font-medium">
             <div className="py-4 px-4 text-center bg-white/5">Refer to Shared Care</div>
             <div className="py-4 px-4 text-center bg-white/5">Refer to Shared Care</div>

@@ -1,7 +1,10 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+// --- Components and Utilities ---
 import Footer from "../../components/home/Footer";
+// --- Icons ---
 import {
   Check,
   BrainCircuit,
@@ -14,6 +17,13 @@ import {
   Tornado,
 } from "lucide-react";
 
+// ====================================================================
+// --- Utility Components ---
+// ====================================================================
+
+/**
+ * A reusable list item for displaying a feature with an icon, title, and description.
+ */
 const FeatureListItem = ({ icon, title, description }) => (
   <div className="flex items-start">
     <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-blue-600 text-white">
@@ -26,6 +36,9 @@ const FeatureListItem = ({ icon, title, description }) => (
   </div>
 );
 
+/**
+ * A decorative animated SVG grid for the background.
+ */
 const AnimatedGrid = () => (
   <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
     <svg
@@ -33,6 +46,7 @@ const AnimatedGrid = () => (
       className="w-[100vw] max-w-4xl h-auto text-cyan-500/10 animate-spin-slow-medium"
       style={{ transformOrigin: "center" }}
     >
+      {/* Horizontal Lines */}
       {[...Array(11)].map((_, i) => (
         <line
           key={`h-${i}`}
@@ -44,6 +58,7 @@ const AnimatedGrid = () => (
           strokeWidth="0.2"
         />
       ))}
+      {/* Vertical Lines */}
       {[...Array(11)].map((_, i) => (
         <line
           key={`v-${i}`}
@@ -55,6 +70,7 @@ const AnimatedGrid = () => (
           strokeWidth="0.2"
         />
       ))}
+      {/* Central Circle */}
       <circle
         cx="100"
         cy="100"
@@ -68,17 +84,32 @@ const AnimatedGrid = () => (
   </div>
 );
 
+// ====================================================================
+// --- Main Component ---
+// ====================================================================
+
+/**
+ * The main Pricing Page component.
+ */
 export default function PricingPage() {
   const router = useRouter();
+  
+  // --- State Hooks ---
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [discountApplied, setDiscountApplied] = useState(false);
 
+  // --- Price Logic ---
   const basePrice = 50;
-  const discountedPrice = 0;
+  const discountedPrice = 0; // Price when coupon is applied
   const displayPrice = discountApplied ? discountedPrice : basePrice;
 
+  // --- Event Handlers ---
+
+  /**
+   * Handles the checkout process by calling the API to create a Stripe session.
+   */
   const handleCheckout = async () => {
     setLoading(true);
     setError("");
@@ -99,7 +130,8 @@ export default function PricingPage() {
       }
 
       const { url } = await response.json();
-      window.location.href = url;
+      // Redirect the user to the Stripe checkout page
+      window.location.href = url; 
     } catch (err) {
       console.error(err);
       setError(err.message || "Could not connect to payment provider.");
@@ -107,8 +139,13 @@ export default function PricingPage() {
     }
   };
 
+  /**
+   * Updates the coupon code and checks for a specific discount code.
+   * @param {string} value The current value of the input field.
+   */
   const handleCouponChange = (value) => {
     setCouponCode(value);
+    // Hardcoded check for a specific free access coupon
     if (value.trim().toUpperCase() === "DRKELVIN100") {
       setDiscountApplied(true);
     } else {
@@ -116,19 +153,36 @@ export default function PricingPage() {
     }
   };
 
+  // --- Features Data ---
   const features = [
-    { icon: <Check size={24} />, title: "Comprehensive ADHD Assessment", description: "Unlock the complete 75-question, evidence-based ADHD test." },
-    { icon: <BrainCircuit size={24} />, title: "Personalized Recovery Dashboard", description: "Track insights and recommended next steps tailored to you." },
-    { icon: <BookOpen size={24} />, title: "ADHD Educational Resources", description: "Access interactive readings and coping strategies." },
-    { icon: <FileText size={24} />, title: "Downloadable PDF Report", description: "Get a professional PDF summary of your test results." },
-    { icon: <BarChart3 size={24} />, title: "Progress Tracking", description: "Visual charts to measure your growth and improvements." },
-    { icon: <Flame size={24} />, title: "Motivation Streaks", description: "Stay consistent with streaks and daily motivation tools." },
-    { icon: <Star size={24} />, title: "Priority Access to Updates", description: "Get first access to all new ADHD tools and features." },
-    { icon: <Infinity size={24} />, title: "Unlimited Access", description: "Revisit your test results and tools anytime without limits." },
+    { 
+      icon: <Check size={24} />, 
+      title: "Comprehensive ADHD Assessment", 
+      description: "Unlock the complete 75-question, evidence-based ADHD test." 
+    },
+    { 
+      icon: <FileText size={24} />, 
+      title: "Downloadable PDF Report", 
+      description: "Get a professional PDF summary of your test results." 
+    },
+    { 
+      icon: <Star size={24} />, 
+      title: "Priority Access to Updates", 
+      description: "Get first access to all new ADHD tools and features." 
+    },
+    { 
+      icon: <Infinity size={24} />, 
+      title: "Unlimited Access", 
+      description: "Revisit your test results and tools anytime without limits." 
+    },
+    // The commented-out features from the original code are omitted here for brevity
   ];
 
+  // --- Rendered JSX ---
   return (
     <div className="bg-[#0a122a] text-white min-h-screen overflow-hidden">
+      
+      {/* Hero Section with Animated Background */}
       <div className="relative py-24 sm:py-32 overflow-hidden">
         <AnimatedGrid />
         <div className="relative z-20 max-w-4xl mx-auto px-6 lg:px-8 text-center animate-hero-title-fade">
@@ -145,8 +199,11 @@ export default function PricingPage() {
         </div>
       </div>
 
+      {/* Pricing and Features Section */}
       <div className="pb-24 sm:pb-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+          
+          {/* Pricing Card (Order 2 on mobile, 1 on desktop) */}
           <div className="bg-[#101b3d] p-8 rounded-2xl shadow-2xl border border-blue-400/20 order-2 lg:order-1">
             <h2 className="font-sans text-3xl font-semibold text-white">Premium Access</h2>
             <p className="mt-4 text-6xl font-extrabold text-white flex items-baseline">
@@ -177,6 +234,7 @@ export default function PricingPage() {
             {error && <p className="font-sans text-red-400 text-center mt-4">{error}</p>}
           </div>
 
+          {/* Features List (Order 1 on mobile, 2 on desktop) */}
           <div className="order-1 lg:order-2">
             <h3 className="font-serif text-3xl font-bold text-white mb-8 border-b border-gray-700 pb-4">Your Premium Access Includes:</h3>
             <div className="space-y-10">
@@ -188,8 +246,10 @@ export default function PricingPage() {
         </div>
       </div>
 
+      {/* Footer Component */}
       <Footer />
 
+      {/* Global CSS (for animations) */}
       <style jsx global>{`
         .animate-hero-title-fade {
           animation: hero-title-fade 1.5s ease-out forwards;
