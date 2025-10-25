@@ -24,7 +24,7 @@ export default function Head() {
       <meta name="twitter:title" content="ADHD Self-Assessment" />
       <meta
         name="twitter:description"
-        content="Take MindHelpa’s ADHD Self-Assessment to understand your focus, attention, and behavior patterns in minutes. Get your instant report today."
+        content="Take the MindHelpa’s ADHD Self-Assessment to understand your focus, attention, and behavior patterns in minutes. Get your instant report today."
       />
       <meta
         name="twitter:image"
