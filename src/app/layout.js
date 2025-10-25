@@ -8,7 +8,7 @@ export const dynamic = "force-static";
 export const metadata = {
   title: "Mindhelpa",
   icons: {
-    icon: "/logo.png", // 👈 uses your own logo in /public/logo.png
+    icon: "/logo3.png", // 👈 uses your own logo in /public/logo.png
   },
 };
 
