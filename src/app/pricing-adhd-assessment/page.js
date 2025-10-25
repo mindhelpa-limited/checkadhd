@@ -2,28 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-// --- Components and Utilities ---
+import Head from "next/head"; // ✅ Added for internal SEO
 import Footer from "../../components/home/Footer";
-// --- Icons ---
 import {
   Check,
-  BrainCircuit,
-  BookOpen,
   FileText,
-  BarChart3,
-  Flame,
   Star,
   Infinity,
   Tornado,
 } from "lucide-react";
 
-// ====================================================================
-// --- Utility Components ---
-// ====================================================================
-
-/**
- * A reusable list item for displaying a feature with an icon, title, and description.
- */
 const FeatureListItem = ({ icon, title, description }) => (
   <div className="flex items-start">
     <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-blue-600 text-white">
@@ -36,9 +24,6 @@ const FeatureListItem = ({ icon, title, description }) => (
   </div>
 );
 
-/**
- * A decorative animated SVG grid for the background.
- */
 const AnimatedGrid = () => (
   <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
     <svg
@@ -46,7 +31,6 @@ const AnimatedGrid = () => (
       className="w-[100vw] max-w-4xl h-auto text-cyan-500/10 animate-spin-slow-medium"
       style={{ transformOrigin: "center" }}
     >
-      {/* Horizontal Lines */}
       {[...Array(11)].map((_, i) => (
         <line
           key={`h-${i}`}
@@ -58,7 +42,6 @@ const AnimatedGrid = () => (
           strokeWidth="0.2"
         />
       ))}
-      {/* Vertical Lines */}
       {[...Array(11)].map((_, i) => (
         <line
           key={`v-${i}`}
@@ -70,7 +53,6 @@ const AnimatedGrid = () => (
           strokeWidth="0.2"
         />
       ))}
-      {/* Central Circle */}
       <circle
         cx="100"
         cy="100"
@@ -84,32 +66,17 @@ const AnimatedGrid = () => (
   </div>
 );
 
-// ====================================================================
-// --- Main Component ---
-// ====================================================================
-
-/**
- * The main Pricing Page component.
- */
 export default function PricingPage() {
   const router = useRouter();
-  
-  // --- State Hooks ---
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [discountApplied, setDiscountApplied] = useState(false);
 
-  // --- Price Logic ---
   const basePrice = 50;
-  const discountedPrice = 0; // Price when coupon is applied
+  const discountedPrice = 0;
   const displayPrice = discountApplied ? discountedPrice : basePrice;
 
-  // --- Event Handlers ---
-
-  /**
-   * Handles the checkout process by calling the API to create a Stripe session.
-   */
   const handleCheckout = async () => {
     setLoading(true);
     setError("");
@@ -130,8 +97,7 @@ export default function PricingPage() {
       }
 
       const { url } = await response.json();
-      // Redirect the user to the Stripe checkout page
-      window.location.href = url; 
+      window.location.href = url;
     } catch (err) {
       console.error(err);
       setError(err.message || "Could not connect to payment provider.");
@@ -139,13 +105,8 @@ export default function PricingPage() {
     }
   };
 
-  /**
-   * Updates the coupon code and checks for a specific discount code.
-   * @param {string} value The current value of the input field.
-   */
   const handleCouponChange = (value) => {
     setCouponCode(value);
-    // Hardcoded check for a specific free access coupon
     if (value.trim().toUpperCase() === "DRKELVIN100") {
       setDiscountApplied(true);
     } else {
@@ -153,36 +114,71 @@ export default function PricingPage() {
     }
   };
 
-  // --- Features Data ---
   const features = [
-    { 
-      icon: <Check size={24} />, 
-      title: "Comprehensive ADHD Assessment", 
-      description: "Unlock the complete 75-question, evidence-based ADHD test." 
+    {
+      icon: <Check size={24} />,
+      title: "Comprehensive ADHD Assessment",
+      description:
+        "Unlock the complete 75-question, evidence-based ADHD test.",
     },
-    { 
-      icon: <FileText size={24} />, 
-      title: "Downloadable PDF Report", 
-      description: "Get a professional PDF summary of your test results." 
+    {
+      icon: <FileText size={24} />,
+      title: "Downloadable PDF Report",
+      description: "Get a professional PDF summary of your test results.",
     },
-    { 
-      icon: <Star size={24} />, 
-      title: "Priority Access to Updates", 
-      description: "Get first access to all new ADHD tools and features." 
+    {
+      icon: <Star size={24} />,
+      title: "Priority Access to Updates",
+      description: "Get first access to all new ADHD tools and features.",
     },
-    { 
-      icon: <Infinity size={24} />, 
-      title: "Unlimited Access", 
-      description: "Revisit your test results and tools anytime without limits." 
+    {
+      icon: <Infinity size={24} />,
+      title: "Unlimited Access",
+      description:
+        "Revisit your test results and tools anytime without limits.",
     },
-    // The commented-out features from the original code are omitted here for brevity
   ];
 
-  // --- Rendered JSX ---
   return (
     <div className="bg-[#0a122a] text-white min-h-screen overflow-hidden">
-      
-      {/* Hero Section with Animated Background */}
+      {/* ✅ SEO & Link Preview */}
+      <Head>
+        <title>ADHD Self-Assessment | MindHelpa</title>
+        <meta
+          name="description"
+          content="Take MindHelpa’s ADHD Self-Assessment to understand your focus, attention, and behavior patterns in minutes. Get your instant, evidence-based report today."
+        />
+        <meta property="og:title" content="ADHD Self-Assessment" />
+        <meta
+          property="og:description"
+          content="Understand your focus, attention, and behavior patterns in minutes. Get your instant report from MindHelpa."
+        />
+        <meta
+          property="og:image"
+          content="https://www.mindhelpa.com/your-image-path/adhd-banner.jpg"
+        />
+        <meta
+          property="og:url"
+          content="https://www.mindhelpa.com/adhd-self-assessment"
+        />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="ADHD Self-Assessment" />
+        <meta
+          name="twitter:description"
+          content="Take MindHelpa’s ADHD Self-Assessment to understand your focus, attention, and behavior patterns in minutes. Get your instant report today."
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.mindhelpa.com/your-image-path/adhd-banner.jpg"
+        />
+        <link
+          rel="canonical"
+          href="https://www.mindhelpa.com/adhd-self-assessment"
+        />
+      </Head>
+
+      {/* Hero Section */}
       <div className="relative py-24 sm:py-32 overflow-hidden">
         <AnimatedGrid />
         <div className="relative z-20 max-w-4xl mx-auto px-6 lg:px-8 text-center animate-hero-title-fade">
@@ -191,29 +187,40 @@ export default function PricingPage() {
             SIMPLE, ONE-TIME PAYMENT
           </p>
           <h1 className="font-serif mt-2 text-4xl font-bold tracking-tight text-white sm:text-6xl leading-tight">
-            Unlock Your Premium ADHD Recovery Plan
+            ADHD Self-Assessment
           </h1>
           <p className="font-sans mt-6 text-xl leading-8 text-gray-300">
-            Get lifetime premium access for a single payment. No subscriptions, just clarity and tools you need.
+            Scientifically designed test to help you understand your focus,
+            attention, and behavior patterns — get your instant report today.
           </p>
         </div>
       </div>
 
-      {/* Pricing and Features Section */}
+      {/* Pricing and Features */}
       <div className="pb-24 sm:pb-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-          
-          {/* Pricing Card (Order 2 on mobile, 1 on desktop) */}
+          {/* Pricing */}
           <div className="bg-[#101b3d] p-8 rounded-2xl shadow-2xl border border-blue-400/20 order-2 lg:order-1">
-            <h2 className="font-sans text-3xl font-semibold text-white">Premium Access</h2>
+            <h2 className="font-sans text-3xl font-semibold text-white">
+              Premium Access
+            </h2>
             <p className="mt-4 text-6xl font-extrabold text-white flex items-baseline">
               £{displayPrice}
-              {displayPrice < basePrice && <span className="text-xl line-through ml-4 text-red-400">£{basePrice}</span>}
-              <span className="font-sans text-xl font-medium text-gray-400 ml-2"> one-time</span>
+              {displayPrice < basePrice && (
+                <span className="text-xl line-through ml-4 text-red-400">
+                  £{basePrice}
+                </span>
+              )}
+              <span className="font-sans text-xl font-medium text-gray-400 ml-2">
+                {" "}
+                one-time
+              </span>
             </p>
-
-            {discountApplied && <p className="text-green-400 mt-2 text-lg font-medium">🎉 Coupon applied! You get free access.</p>}
-
+            {discountApplied && (
+              <p className="text-green-400 mt-2 text-lg font-medium">
+                🎉 Coupon applied! You get free access.
+              </p>
+            )}
             <div className="mt-8">
               <input
                 type="text"
@@ -223,20 +230,25 @@ export default function PricingPage() {
                 className="font-sans w-full p-4 border-2 border-gray-600 rounded-xl text-white bg-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/50 focus:border-blue-500"
               />
             </div>
-
             <button
               onClick={handleCheckout}
               disabled={loading}
               className="font-sans mt-6 w-full bg-blue-600 text-white font-bold py-4 rounded-xl text-xl hover:bg-blue-700 transition-colors"
             >
-              {loading ? "Redirecting..." : `Unlock Premium Now — £${displayPrice}`}
+              {loading
+                ? "Redirecting..."
+                : `Unlock Premium Now — £${displayPrice}`}
             </button>
-            {error && <p className="font-sans text-red-400 text-center mt-4">{error}</p>}
+            {error && (
+              <p className="font-sans text-red-400 text-center mt-4">{error}</p>
+            )}
           </div>
 
-          {/* Features List (Order 1 on mobile, 2 on desktop) */}
+          {/* Features */}
           <div className="order-1 lg:order-2">
-            <h3 className="font-serif text-3xl font-bold text-white mb-8 border-b border-gray-700 pb-4">Your Premium Access Includes:</h3>
+            <h3 className="font-serif text-3xl font-bold text-white mb-8 border-b border-gray-700 pb-4">
+              Your Premium Access Includes:
+            </h3>
             <div className="space-y-10">
               {features.map((feature, index) => (
                 <FeatureListItem key={index} {...feature} />
@@ -246,10 +258,8 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Footer Component */}
       <Footer />
 
-      {/* Global CSS (for animations) */}
       <style jsx global>{`
         .animate-hero-title-fade {
           animation: hero-title-fade 1.5s ease-out forwards;

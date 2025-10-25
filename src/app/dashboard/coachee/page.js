@@ -31,11 +31,11 @@ const BookingPage = () => {
     }, []); 
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center p-4 sm:p-8 font-sans">
+        <div className="bg-gray-50 flex flex-col items-center p-4 sm:p-8 font-sans">
             
             {/* Header Card */}
-            <div className="w-full max-w-4xl bg-white p-6 sm:p-8 rounded-xl shadow-lg mb-6 text-center">
-                <h1 className="text-4xl font-extrabold text-indigo-700 mb-2">
+            <div className="w-full max-w-4xl bg-white p-6 sm:p-6 rounded-xl shadow-lg mb-6 text-center">
+                <h1 className="text-3xl font-extrabold text-indigo-700 mb-2">
                     Book Your Appointment
                 </h1>
                 <p className="text-gray-600 text-lg">
@@ -60,7 +60,8 @@ const BookingPage = () => {
             </div>
             
             {/* Footer / Instructions */}
-            <div className="w-full max-w-4xl mt-6 p-4 text-center text-sm text-gray-500">
+            {/* ADDED: hidden md:block to hide on mobile and show on medium screens and up */}
+            <div className="w-full max-w-4xl mt-6 p-4 text-center text-sm text-gray-500 hidden md:block">
                 All bookings are automatically confirmed and added to your calendar. You will receive an email confirmation shortly after.
             </div>
             
