@@ -1,5 +1,10 @@
+/* app/globals.css */
+
+/* ✅ Keep all @imports at the top for Next.js compatibility */
+@import url('https://fonts.googleapis.com/css2?family=Cooper+Hewitt:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* ------------------ Theme Vars (yours) ------------------ */
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -8,7 +13,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: 'Cooper Hewitt', sans-serif; /* Updated font variable (optional but good practice) */
   --font-mono: var(--font-geist-mono);
 }
 
@@ -19,8 +24,9 @@
   }
 }
 
+/* ------------------ Base (using Cooper Hewitt throughout) ------------------ */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Cooper Hewitt', sans-serif;
   background: #f5f8ff;
   margin: 0;
   padding: 0;
@@ -29,13 +35,13 @@ body {
   font-weight: 300;
 }
 
-/* Headings styles based on the Tabulio design */
+/* Headings (same Cooper Hewitt font, just heavier weight) */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
+  font-family: 'Cooper Hewitt', sans-serif;
+  font-weight: 600;
 }
 
-/* ✅ FORM STYLES ONLY — no heading overrides */
+/* ✅ FORM STYLES ONLY — no heading overrides (yours) */
 label {
   font-weight: bold;
   display: block;
@@ -51,15 +57,120 @@ select {
   margin-bottom: 15px;
   box-sizing: border-box;
 }
-@keyframes slow-spin {
-  from {
-    transform: rotate(0deg);
+
+/* =========================================================
+    WOW EFFECTS + UTILITIES (additions)
+    ========================================================= */
+
+/* Animated gradient-mesh background (radial movement) */
+.bg-mesh {
+  background-image:
+    radial-gradient(60% 80% at 15% 10%, rgba(0,109,102,0.28), transparent 60%),
+    radial-gradient(50% 60% at 85% 15%, rgba(230,138,31,0.22), transparent 60%),
+    radial-gradient(60% 80% at 50% 90%, rgba(255,255,255,0.08), transparent 60%);
+  background-repeat: no-repeat;
+  background-size: 140% 140%, 140% 140%, 140% 140%;
+  animation: meshMove 24s ease-in-out infinite alternate;
+}
+@keyframes meshMove {
+  0%   { background-position: 0% 0%,   100% 0%, 50% 100%; }
+  50%  { background-position: 10% 5%,   90% 15%, 50% 90%; }
+  100% { background-position: 5% 10%,   95% 10%, 50% 80%; }
+}
+
+/* Subtle grain for premium finish */
+.grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.8'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* Edge fade helper (optional) */
+.mask-fade {
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
+          mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
+}
+
+/* Gooey filter hook (SVG filter is defined in BackgroundFX.jsx) */
+.goo { filter: url('#goo'); }
+
+/* ---------- Motion keyframes & helpers (no Tailwind config needed) ---------- */
+@keyframes pulse-light {
+  0%,100% { opacity: 0; }
+  50%      { opacity: .25; }
+}
+@keyframes blob {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  33%  { transform: translate(15px, -20px) scale(1.05); }
+  66%  { transform: translate(-10px, 10px) scale(0.97); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(12px); }
+}
+@keyframes orbit {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
   }
-  to {
-    transform: rotate(360deg);
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.animate-slow-spin {
-  animation: slow-spin 4s linear infinite; 
+@keyframes fadeInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
+
+@keyframes fadeInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeInUp 1s ease-out both;
+}
+
+.animate-fade-left {
+  animation: fadeInLeft 1s ease-out both;
+}
+
+.animate-fade-right {
+  animation: fadeInRight 1s ease-out both;
+}
+
+
+
+/* Use these classes directly in JSX */
+.animate-pulse-light { animation: pulse-light 2s ease-in-out infinite; }
+.animate-blob        { animation: blob 12s ease-in-out infinite; }
+.animate-float-slow  { animation: float 6s ease-in-out infinite; }
+.animate-orbit-slow  { animation: orbit 18s linear infinite; }
+
+/* Soft glow shadows used in buttons/CTAs */
+.shadow-glowAmber { box-shadow: 0 0 25px rgba(230,138,31,0.6); }
+.shadow-glowTeal  { box-shadow: 0 0 25px rgba(0,109,102,0.6); }
