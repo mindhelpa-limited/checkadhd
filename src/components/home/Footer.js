@@ -69,11 +69,11 @@ export default function Footer() {
         <div>
           <h3 className="text-md font-semibold mb-4 text-white">Services</h3> 
           <ul className="space-y-3 text-white/80">
-            <li><Link href="/adhdcheck" className="hover:text-blue-400 transition-colors">ADHD self assessment</Link></li>
-            <li><Link href="/pricing-adhd-clinical-assessment" className="hover:text-blue-400 transition-colors">ADHD Clinical assessment</Link></li>
+            <li><Link href="/adhdcheck" className="hover:text-blue-400 transition-colors">ADHD Self-Assessment</Link></li>
+            <li><Link href="/pricing-adhd-clinical-assessment" className="hover:text-blue-400 transition-colors">ADHD Clinical Assessment</Link></li>
             {/* <li><Link href="/pricing-mental-health-recovery-tools" className="hover:text-blue-400 transition-colors">Mental health recovery</Link></li> */}
             {/* <li><Link href="/pricing-mental-health-recovery-tools" className="hover:text-blue-400 transition-colors">Goal tracker tool</Link></li> */}
-            <li><Link href="/book-a-coach" className="hover:text-blue-400 transition-colors">Psychiatrist coaching</Link></li>
+            <li><Link href="/book-a-coach" className="hover:text-blue-400 transition-colors">Psychiatrist-Led Coaching</Link></li>
           </ul>
         </div>
 
