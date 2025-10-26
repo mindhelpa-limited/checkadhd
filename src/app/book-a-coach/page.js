@@ -82,7 +82,6 @@ const SMALL_GROUP_PRICING = [
   { tier: 'Monthly', sessions: '4 weekly sessions', persons: '1-5 persons', price: '£2,000', product: 'coaching_smallgroup_monthly' },
   { tier: 'Quarterly', sessions: '12 weekly sessions', persons: '1-5 persons', price: '£5,800', savings: 'Save £200', product: 'coaching_smallgroup_quarterly', recommended: true },
   { tier: '6-Months', sessions: '24 weekly sessions', persons: '1-5 persons', price: '£10,300', savings: 'Save £1,700', product: 'coaching_smallgroup_6month' },
-  { tier: 'Yearly', sessions: '48 weekly sessions', persons: '1-5 persons', price: '£20,000', savings: 'Save £4,000', product: 'coaching_smallgroup_yearly' },
 ];
 
 // LARGE GROUP (5–10 people)
