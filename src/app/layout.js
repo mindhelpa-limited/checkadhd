@@ -1,14 +1,14 @@
 import "./globals.css";
 import { headers } from "next/headers";
-import ClientLayout from "./ClientLayout";
+import Header from "../components/Header"; // 👈 correct relative path
 
 export const dynamic = "force-static";
 
-// ✅ Add this — tells Next.js to use your own logo instead of Vercel’s
+// ✅ Custom logo and metadata
 export const metadata = {
   title: "Mindhelpa",
   icons: {
-    icon: "/logo3.png", // 👈 uses your own logo in /public/logo.png
+    icon: "/logo3.png", // 👈 your logo from /public/logo3.png
   },
 };
 
@@ -16,7 +16,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <ClientLayout>{children}</ClientLayout>
+        <Header /> {/* 👈 Header now shows on all pages */}
+        {children}
       </body>
     </html>
   );
