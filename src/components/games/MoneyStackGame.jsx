@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Music, XCircle, ChevronLeft, ChevronRight, ChevronDown, RotateCcw } from 'lucide-react';
-import * as Tone from 'tone';
 
 const COLS = 15;
 const ROWS = 20;
@@ -13,21 +12,20 @@ const CONTROL_GAP = 8;
 const FLOOR_CLEAR = CONTROL_SIZE / 2 + CONTROL_GAP + 8;
 
 const SHAPES = [
-  [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
-  [[0,0,1,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]],
-  [[0,1,0,0],[0,1,1,1],[0,0,0,0],[0,0,0,0]],
-  [[0,1,0,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]],
-  [[0,1,1,0],[1,1,0,0],[0,0,0,0],[0,0,0,0]],
-  [[1,1,0,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]],
-  [[1,1,0,0],[1,1,0,0],[0,0,0,0],[0,0,0,0]],
+  [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[0, 0, 1, 0], [1, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[0, 1, 0, 0], [0, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+  [[1, 1, 0, 0], [1, 1, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
 ];
 
 const Game = ({
   onNext,
-  duration = 7 * 60 * 1000,          // default to 7 minutes (ms) for your game stage
-  initialRemainingMs,                 // <<< NEW: resume point in ms (optional)
+  duration = 7 * 60 * 1000, // default 7 minutes (ms)
+  initialRemainingMs,
 }) => {
-  // ===== Disable page scrolling while mounted =====
   useEffect(() => {
     const { documentElement: html, body } = document;
     const prevHtmlOverflow = html.style.overflow;
@@ -58,83 +56,35 @@ const Game = ({
   const [score, setScore] = useState(0);
   const [gameSpeed] = useState(INITIAL_SPEED);
 
-  // ----- TIMER with resume -----
+  // ----- TIMER -----
   const startMs =
     typeof initialRemainingMs === 'number' && initialRemainingMs >= 0
       ? initialRemainingMs
       : duration;
-
-  // store seconds; initialize from startMs
   const [timeLeft, setTimeLeft] = useState(Math.ceil(startMs / 1000));
 
-  // if parent ever re-mounts with a different resume value (e.g., tab 2),
-  // update the timer start accordingly.
   useEffect(() => {
     setTimeLeft(Math.ceil(startMs / 1000));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialRemainingMs, duration]);
 
+  // Music-related UI only (no sound)
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const [isAudioLoaded, setIsAudioLoaded] = useState(false);
-
-  const placementSoundPlayer = useRef(null);
-  const backgroundMusicPlayer = useRef(null);
-
-  useEffect(() => {
-    const init = async () => {
-      await Tone.start();
-      // Updated to use your 'crush.mp3' file
-      placementSoundPlayer.current = new Tone.Player('/sounds/crush.mp3').toDestination();
-      // Updated to use your 'pre-session.mp3' file
-      backgroundMusicPlayer.current = new Tone.Player('/sounds/pre-session.mp3', () => {
-        backgroundMusicPlayer.current.loop = true;
-        backgroundMusicPlayer.current.volume.value = -10;
-        setIsAudioLoaded(true);
-      }).toDestination();
-    };
-    init();
-    return () => {
-      placementSoundPlayer.current?.dispose();
-      backgroundMusicPlayer.current?.dispose();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isAudioLoaded) {
-      backgroundMusicPlayer.current.start();
-      setIsMusicPlaying(true);
-    }
-  }, [isAudioLoaded]);
-
-  const playPlacementSound = async () => {
-    await Tone.start();
-    if (placementSoundPlayer.current?.loaded) placementSoundPlayer.current.start();
-  };
-
-  const toggleBackgroundMusic = async () => {
-    await Tone.start();
-    if (!backgroundMusicPlayer.current?.loaded) return;
-    if (isMusicPlaying) {
-      backgroundMusicPlayer.current.stop();
-      setIsMusicPlaying(false);
-    } else {
-      backgroundMusicPlayer.current.start();
-      setIsMusicPlaying(true);
-    }
-  };
 
   // Timer tick
   useEffect(() => {
     if (timeLeft <= 0) {
-      if (isMusicPlaying && backgroundMusicPlayer.current?.loaded) backgroundMusicPlayer.current.stop();
       onNext({ score, board });
       return;
     }
     const t = setInterval(() => setTimeLeft((s) => s - 1), 1000);
     return () => clearInterval(t);
-  }, [timeLeft, isMusicPlaying, onNext, score, board]);
+  }, [timeLeft, onNext, score, board]);
 
-  // Piece helpers
+  const toggleBackgroundMusic = () => {
+    // purely toggle icon state (visual only)
+    setIsMusicPlaying((prev) => !prev);
+  };
+
   const generateNewPiece = useCallback(() => {
     const idx = Math.floor(Math.random() * SHAPES.length);
     const shape = SHAPES[idx];
@@ -158,7 +108,6 @@ const Game = ({
 
   const placePiece = useCallback(() => {
     if (!currentPiece) return;
-    playPlacementSound();
 
     setBoard((prev) => {
       const nb = prev.map((row) => [...row]);
@@ -218,7 +167,6 @@ const Game = ({
     [currentPiece, board, isValidMove, moveDown]
   );
 
-  // Auto-fall
   useEffect(() => {
     if (timeLeft > 0) {
       const i = setInterval(moveDown, gameSpeed);
@@ -226,7 +174,6 @@ const Game = ({
     }
   }, [moveDown, gameSpeed, timeLeft]);
 
-  // Spawn + keyboard
   useEffect(() => {
     if (!currentPiece) {
       setCurrentPiece(generateNewPiece());
@@ -248,7 +195,6 @@ const Game = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // ===== RENDERING =====
   const renderBoard = () => {
     const combined = board.map((row) => [...row]);
     if (currentPiece) {
@@ -355,18 +301,15 @@ const Game = ({
             touchAction: 'none',
           }}
         >
-          {/* Grid begins at top; keep room at bottom for controls */}
           <div className="w-full flex flex-col items-center" style={{ paddingBottom: FLOOR_CLEAR + 16 }}>
             {renderBoard()}
           </div>
 
-          {/* Floor boundary */}
           <div
             className="absolute left-0 right-0"
             style={{ bottom: FLOOR_CLEAR, height: 0, borderTop: '2px solid #10B981' }}
           />
 
-          {/* Opaque mask under the circular control */}
           <div
             className="absolute left-0 right-0 bg-gray-950/90 pointer-events-none"
             style={{ height: FLOOR_CLEAR, bottom: 0 }}
