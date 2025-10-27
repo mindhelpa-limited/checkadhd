@@ -1,13 +1,17 @@
 /* =========================================================
-   ✅ SAFARI-OPTIMIZED GLOBALS.CSS
-   Preserves your design and fixes Safari rendering quirks
+   ✅ SAFARI + CHROME OPTIMIZED GLOBALS.CSS
+   Mirrors Chrome behavior on macOS & iOS Safari
    ========================================================= */
 
-/* ---- Imports (must stay first) ---- */
+/* ---------------------------------------------------------
+   1️⃣ Imports — must always stay first
+   --------------------------------------------------------- */
 @import url('https://fonts.googleapis.com/css2?family=Cooper+Hewitt:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* ---- Theme Variables ---- */
+/* ---------------------------------------------------------
+   2️⃣ Theme Variables (Base Colors + Fonts)
+   --------------------------------------------------------- */
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -20,7 +24,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* ---- Dark Mode ---- */
+/* ✅ WebKit prefers color variables defined early */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -28,9 +32,9 @@
   }
 }
 
-/* =========================================================
-   BASE TYPOGRAPHY
-   ========================================================= */
+/* ---------------------------------------------------------
+   3️⃣ Base Typography & Body Reset
+   --------------------------------------------------------- */
 body {
   font-family: 'Cooper Hewitt', sans-serif;
   background: #f5f8ff;
@@ -40,22 +44,28 @@ body {
   color: #1f2937;
   font-weight: 300;
 
-  /* Safari text smoothing & hardware acceleration */
+  /* 🔧 Safari text + transform rendering */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
+
+  /* 🧭 Smooth scroll on Safari */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* ✅ Heading consistency across browsers */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Cooper Hewitt', sans-serif;
   font-weight: 600;
   -webkit-font-smoothing: antialiased;
+  margin: 0;
 }
 
-/* =========================================================
-   FORM ELEMENTS
-   ========================================================= */
+/* ---------------------------------------------------------
+   4️⃣ Form Elements — Safari friendly styling
+   --------------------------------------------------------- */
 label {
   font-weight: bold;
   display: block;
@@ -70,15 +80,18 @@ select {
   border-radius: 6px;
   margin-bottom: 15px;
   box-sizing: border-box;
+
+  /* ✅ Prevent Safari rounded native styles */
   -webkit-appearance: none;
   appearance: none;
+
+  /* 🧠 Prevent zoom on iOS when focusing small inputs */
+  font-size: 16px;
 }
 
-/* =========================================================
-   VISUAL EFFECTS + UTILITIES
-   ========================================================= */
-
-/* --- Animated Mesh Background --- */
+/* ---------------------------------------------------------
+   5️⃣ Animated Mesh Background — Safari GPU smooth
+   --------------------------------------------------------- */
 .bg-mesh {
   background-image:
     radial-gradient(60% 80% at 15% 10%, rgba(0,109,102,0.28), transparent 60%),
@@ -86,9 +99,13 @@ select {
     radial-gradient(60% 80% at 50% 90%, rgba(255,255,255,0.08), transparent 60%);
   background-repeat: no-repeat;
   background-size: 140% 140%, 140% 140%, 140% 140%;
+
+  /* ✅ WebKit animation performance boost */
   animation: meshMove 24s ease-in-out infinite alternate;
   -webkit-animation: meshMove 24s ease-in-out infinite alternate;
   will-change: background-position;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 @keyframes meshMove {
@@ -97,7 +114,9 @@ select {
   100% { background-position: 5% 10%, 95% 10%, 50% 80%; }
 }
 
-/* --- Subtle Grain --- */
+/* ---------------------------------------------------------
+   6️⃣ Grain Overlay — Safari GPU friendly
+   --------------------------------------------------------- */
 .grain {
   position: absolute;
   inset: 0;
@@ -105,23 +124,35 @@ select {
   opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.8'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
+
+  /* ✅ Prevent Safari flicker on transforms */
   -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
-/* --- Edge Mask Fade (Safari-safe) --- */
+/* ---------------------------------------------------------
+   7️⃣ Mask Fade (WebKit-safe radial mask)
+   --------------------------------------------------------- */
 .mask-fade {
   -webkit-mask-image: -webkit-radial-gradient(ellipse at center, #000 60%, transparent 100%);
   mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  -webkit-mask-size: cover;
 }
 
-/* --- Gooey Filter (Safari-compatible fallback) --- */
-.goo { filter: url('#goo'); -webkit-filter: url('#goo'); }
+/* ---------------------------------------------------------
+   8️⃣ Gooey Filter (WebKit fallback)
+   --------------------------------------------------------- */
+.goo {
+  filter: url('#goo');
+  -webkit-filter: url('#goo');
+  will-change: filter;
+}
 
-/* =========================================================
-   MOTION KEYFRAMES
-   ========================================================= */
+/* ---------------------------------------------------------
+   9️⃣ Motion Keyframes (Safari-optimized)
+   --------------------------------------------------------- */
 @keyframes pulse-light {
   0%,100% { opacity: 0; }
   50% { opacity: .25; }
@@ -144,7 +175,7 @@ select {
   100% { transform: rotate(360deg); }
 }
 
-/* ---- Fade In Animations (Safari Hardware Accelerated) ---- */
+/* ✅ Safari GPU-accelerated fade-ins */
 @keyframes fadeInUp {
   0% { opacity: 0; transform: translate3d(0, 40px, 0); }
   100% { opacity: 1; transform: translate3d(0, 0, 0); }
@@ -160,7 +191,9 @@ select {
   100% { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
-/* ---- Animation Utility Classes ---- */
+/* ---------------------------------------------------------
+   🔟 Animation Utility Classes (Chrome + Safari)
+   --------------------------------------------------------- */
 .animate-fade-up    { animation: fadeInUp 1s ease-out both; -webkit-animation: fadeInUp 1s ease-out both; }
 .animate-fade-left  { animation: fadeInLeft 1s ease-out both; -webkit-animation: fadeInLeft 1s ease-out both; }
 .animate-fade-right { animation: fadeInRight 1s ease-out both; -webkit-animation: fadeInRight 1s ease-out both; }
@@ -170,14 +203,17 @@ select {
 .animate-float-slow  { animation: float 6s ease-in-out infinite; -webkit-animation: float 6s ease-in-out infinite; }
 .animate-orbit-slow  { animation: orbit 18s linear infinite; -webkit-animation: orbit 18s linear infinite; }
 
-/* =========================================================
-   GLOW & SHADOW HELPERS
-   ========================================================= */
-.shadow-glowAmber { box-shadow: 0 0 25px rgba(230,138,31,0.6); }
-.shadow-glowTeal  { box-shadow: 0 0 25px rgba(0,109,102,0.6); }
+/* ---------------------------------------------------------
+   11️⃣ Glow & Shadow Helpers (Safari shadow fix)
+   --------------------------------------------------------- */
+.shadow-glowAmber { box-shadow: 0 0 25px rgba(230,138,31,0.6); -webkit-box-shadow: 0 0 25px rgba(230,138,31,0.6); }
+.shadow-glowTeal  { box-shadow: 0 0 25px rgba(0,109,102,0.6); -webkit-box-shadow: 0 0 25px rgba(0,109,102,0.6); }
 
-/* --- Ensure smooth transform animations on Safari --- */
+/* ---------------------------------------------------------
+   12️⃣ Universal Transform Stability
+   --------------------------------------------------------- */
 * {
+  /* ✅ Forces Safari to use GPU layer compositing (like Chrome) */
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
   -webkit-tap-highlight-color: transparent;
