@@ -149,11 +149,11 @@ export default function Header() {
     );
 
     return (
-        <header className="bg-[#101b3d] backdrop-blur-md text-white w-full relative md:fixed md:top-0 md:left-0 md:right-0 z-50 shadow-lg">
+        <header className="bg-[#101b3d] backdrop-blur-md text-white w-full static z-50 shadow-lg transform translate-z-0">
             <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                {/* Logo */}
+                {/* Logo - ALT text removed */}
                 <Link href="/" className="flex items-center">
-                    <img src="/logo.png" alt="ADHD Check Logo" className="h-14" />
+                    <img src="/logo.png" className="h-14" />
                 </Link>
 
                 {/* Desktop Menu */}
