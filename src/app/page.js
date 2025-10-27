@@ -22,6 +22,7 @@ import {
 // =========================================================================
 
 import Footer from "../components/home/Footer";
+import Header from "../components/Header"; // 💡 IMPORTED THE HEADER
 
 // =========================================================================
 /* 3. DATA CONSTANTS */
@@ -171,6 +172,11 @@ export default function FeaturesPage() {
           content="Screening, evaluation, and recovery made simple. With psychiatrist-led coaching and tools designed to help you crush your goals."
         />
       </Head>
+
+      <Header /> 
+
+      {/* 💡 FIXED: This div ensures content is not hidden by the fixed desktop header */}
+      <div className="hidden md:block h-[90px]" /> 
 
       <Hero />
 

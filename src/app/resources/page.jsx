@@ -1,13 +1,15 @@
 "use client"; 
 import { BookOpen, AppWindow, Users, ArrowRight } from "lucide-react"; 
+import Header from "../../components/Header"; // 💡 IMPORTED THE HEADER
 import Footer from "../../components/home/Footer";
+
 // --- Resource Card Component --- 
 const ResourceCard = ({ imageUrl, category, title, description, link }) => ( 
   <a href={link} target="_blank" rel="noopener noreferrer" className="block group"> 
     <div className="relative overflow-hidden rounded-xl shadow-lg h-64"> 
-      <img  
-        src={imageUrl}  
-        alt={title}  
+      <img  
+        src={imageUrl}  
+        alt={title}  
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
       /> 
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div> 
@@ -74,12 +76,17 @@ export default function ResourcesPage() {
 
   return ( 
     <div className="bg-gray-50"> 
+      <Header />
+
+      {/* 💡 ADDED SPACING DIV FOR FIXED HEADER */}
+      <div className="hidden md:block h-[90px]" /> 
+      
       {/* --- Hero Section --- */} 
       <div className="relative h-[60vh] flex items-center justify-center text-center text-white"> 
         <div className="absolute inset-0 z-0"> 
-          <img  
-            src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?q=80&w=2940&auto=format&fit=crop"  
-            alt="Empowering individual looking out over a calm landscape"  
+          <img  
+            src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?q=80&w=2940&auto=format&fit=crop"  
+            alt="Empowering individual looking out over a calm landscape"  
             className="w-full h-full object-cover" 
           /> 
           <div className="absolute inset-0 bg-black/50"></div> 
@@ -116,13 +123,13 @@ export default function ResourcesPage() {
             Subscribe to our newsletter for the latest articles, tips, and success stories delivered right to your inbox. 
           </p> 
           <form className="mt-8 flex flex-col md:flex-row justify-center max-w-lg mx-auto gap-4"> 
-            <input  
-              type="email"  
-              placeholder="Enter your email address"  
+            <input  
+              type="email"  
+              placeholder="Enter your email address"  
               className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
             /> 
-            <button  
-              type="submit"  
+            <button  
+              type="submit"  
               className="bg-blue-600 text-white font-bold py-4 px-8 rounded-lg shadow-lg hover:bg-blue-700 transition-colors" 
             > 
               Subscribe 

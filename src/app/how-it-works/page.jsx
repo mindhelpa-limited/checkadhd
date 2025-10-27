@@ -1,5 +1,6 @@
 "use client";
 import Footer from "../../components/home/Footer";
+import Header from "../../components/Header"; // 💡 IMPORTED THE HEADER
 import { CreditCard, UserPlus, CheckSquare, Plus, ArrowRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image"; // Added Image import
@@ -82,6 +83,12 @@ const FaqItem = ({ question, answer }) => {
 export default function HowItWorksPage() {
   return (
     <div className="bg-[#0a122a] text-white overflow-hidden">
+      
+      <Header />
+      
+      {/* 💡 FIXED: This div ensures content is not hidden by the fixed desktop header */}
+      <div className="hidden md:block h-[90px]" /> 
+      
       {/* --- Hero Section with Image --- */}
       <div className="relative bg-[#0a122a] py-24 sm:py-32">
         <div className="absolute inset-0 -z-10 animate-float-container">

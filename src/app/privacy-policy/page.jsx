@@ -1,6 +1,8 @@
 "use client";
 import { ShieldCheck, Database, Fingerprint, User, Mail } from "lucide-react";
+import Header from "../../components/Header"; // 💡 IMPORTED THE HEADER
 import Footer from "../../components/home/Footer";
+
 // --- Policy Section Component ---
 const PolicySection = ({ icon, title, children }) => (
     <div className="flex items-start mt-12">
@@ -20,6 +22,12 @@ const PolicySection = ({ icon, title, children }) => (
 export default function PrivacyPolicyPage() {
   return (
     <div className="bg-white text-gray-800">
+        
+      <Header />
+      
+      {/* 💡 ADDED SPACING DIV FOR FIXED HEADER */}
+      <div className="hidden md:block h-[90px]" /> 
+
       {/* --- Hero Section --- */}
       <div className="bg-gray-50 py-24 sm:py-32">
         <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">

@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { CheckCircle, Users, User, ChevronDown, Loader2, Star, ShieldCheck, Zap, Target } from 'lucide-react'; 
 
 // LOCAL IMPORTS
+import Header from "../../components/Header"; // 💡 IMPORTED THE HEADER
 import Footer from "../../components/home/Footer";
 import { auth } from "@/lib/firebase";
 
@@ -261,9 +262,16 @@ export default function CoachingPricingPage() {
   };
 
   return (
-    <div className="min-h-screen pt-12 md:pt-20 pb-20 text-white font-sans bg-gradient-to-b from-[#06113b] to-black">
+    <div className="min-h-screen pb-20 text-white font-sans bg-gradient-to-b from-[#06113b] to-black">
+      
+      <Header />
+      
+      {/* 💡 ADDED SPACING DIV FOR FIXED HEADER */}
+      <div className="hidden md:block h-[90px]" /> 
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="text-center mb-10 md:mb-16">
+        {/* Adjusted vertical padding since the spacing div handles the top gap */}
+        <header className="text-center pt-12 md:pt-20 mb-10 md:mb-16">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-blue-300 to-blue-600 bg-clip-text text-transparent leading-tight">
             Psychiatrist-Led<br className="md:hidden"/> Coaching
           </h1>

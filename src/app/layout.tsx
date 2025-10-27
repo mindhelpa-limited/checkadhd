@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Regain Your Calm",
+  title: "Fortify Your Mind",
   description: "Mindhelpa Limited",
 };
 

@@ -1,9 +1,9 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Head from "next/head"; // ✅ Added for internal SEO
 import Footer from "../../components/home/Footer";
+import Header from "../../components/Header"; // 💡 IMPORTED THE HEADER
 import {
   Check,
   FileText,
@@ -141,6 +141,12 @@ export default function PricingPage() {
 
   return (
     <div className="bg-[#0a122a] text-white min-h-screen overflow-hidden">
+      
+      <Header />
+
+      {/* 💡 ADDED SPACING DIV FOR FIXED HEADER */}
+      <div className="hidden md:block h-[90px]" /> 
+      
       {/* ✅ SEO & Link Preview */}
       <Head>
         <title>ADHD Self-Assessment | MindHelpa</title>
@@ -179,7 +185,8 @@ export default function PricingPage() {
       </Head>
 
       {/* Hero Section */}
-      <div className="relative py-24 sm:py-32 overflow-hidden">
+      {/* The py-24/py-32 padding below will start the content after the header and spacing div */}
+      <div className="relative py-24 sm:py-32 overflow-hidden"> 
         <AnimatedGrid />
         <div className="relative z-20 max-w-4xl mx-auto px-6 lg:px-8 text-center animate-hero-title-fade">
           <p className="font-serif text-base font-semibold leading-7 text-blue-400 uppercase tracking-widest flex justify-center items-center">

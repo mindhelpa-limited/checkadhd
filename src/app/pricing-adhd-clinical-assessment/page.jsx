@@ -9,26 +9,8 @@ import {
   ShieldCheck,
   XCircle,
 } from "lucide-react";
-
-// The original code failed because it tried to import a component from an external path.
-// For a single-file React component, we define the Footer component inline.
-const Footer = () => (
-  <footer className="bg-[#0f1936] border-t border-purple-400/10 py-12">
-    <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-      <p className="text-sm text-gray-400">
-        &copy; {new Date().getFullYear()} MindHelpa. All rights reserved.
-      </p>
-      <div className="mt-4 flex justify-center space-x-6">
-        <a href="#" className="text-gray-400 hover:text-cyan-400 transition">
-          Privacy Policy
-        </a>
-        <a href="#" className="text-gray-400 hover:text-cyan-400 transition">
-          Terms of Service
-        </a>
-      </div>
-    </div>
-  </footer>
-);
+import Header from "../../components/Header"; // 💡 IMPORTED THE HEADER
+import Footer from "../../components/home/Footer"; // 💡 IMPORTED THE FOOTER
 
 // ----------------- Animated Hero -----------------
 const AnimatedBrainCircuit = () => (
@@ -108,6 +90,12 @@ export default function ADHDClinicalAssessmentPricing() {
 
   return (
     <div className="bg-[#0a122a] text-white min-h-screen overflow-hidden">
+      
+      <Header />
+      
+      {/* 💡 ADDED SPACING DIV FOR FIXED HEADER */}
+      <div className="hidden md:block h-[90px]" /> 
+      
       {/* HERO */}
       <div className="relative py-24 sm:py-32 overflow-hidden">
         <AnimatedBrainCircuit />

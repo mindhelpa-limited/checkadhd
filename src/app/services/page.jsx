@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 
 import Footer from "../../components/home/Footer";
+// 💡 IMPORTED THE HEADER
+import Header from "../../components/Header"; 
 
 // ----------------- New Animated Icon Component -----------------
 const AnimatedSpiralCircle = ({ className }) => (
@@ -123,6 +125,13 @@ export default function FeaturesPage() {
 
   return (
     <div className="bg-[#0a122a] text-white overflow-hidden">
+      
+      {/* 💡 RENDERED HEADER HERE */}
+      <Header /> 
+
+      {/* 💡 ADDED SPACING DIV FOR FIXED HEADER */}
+      <div className="hidden md:block h-[90px]" /> 
+      
       {/* HERO SECTION */}
       {/* Reduced min-h-[60vh] to min-h-[55vh] */}
       <div className="relative min-h-[55vh] flex items-center justify-center text-center px-4 sm:px-8">
