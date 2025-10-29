@@ -190,16 +190,18 @@ export default function DashboardLayout({ children }) {
         </div>
       </aside>
 
-      {/* ===== Main Content ===== */}
+      {/* ===== Main Content (Adjusted Padding Here) ===== */}
       <div className="flex-1 flex flex-col">
         <main className="flex-1 p-0 md:p-0 overflow-y-auto">
           <div className="w-full h-full">
-            <div className="p-0 md:p-0">{children}</div>
+            {/* 💡 CHANGE: Added 'pb-[80px]' for mobile to clear the fixed bottom navigation, and reset it on medium screens. */}
+            <div className="p-0 pb-[80px] md:p-0 md:pb-0">{children}</div>
           </div>
         </main>
       </div>
 
-      {/* ===== Bottom Dock (Mobile) ===== */}
+      {/* ===== Bottom Dock (Mobile - Already Fixed) ===== */}
+      {/* The classes 'fixed bottom-0 left-0 right-0 z-40' make this sticky on scroll */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 w-full bg-white/80 backdrop-blur-2xl border-t border-[#E5E7EB] shadow-[0_0px_30px_rgba(2,6,23,0.1)] flex justify-around py-3">
         {tabs.map((tab) => {
           const active = pathname === tab.href;
