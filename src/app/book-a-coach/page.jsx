@@ -95,24 +95,20 @@ const LARGE_GROUP_PRICING = [
 ];
 
 // ===============================================
-// III. TOGGLE & PRICING CARD COMPONENTS (Child Components)
+// III. TOGGLE & PRICING CARD COMPONENTS
 // ===============================================
 
 const GroupToggle = ({ active, setActive }) => (
   <div className="flex bg-gray-700/50 p-1 rounded-full w-full max-w-sm mx-auto shadow-2xl backdrop-blur-sm relative border border-gray-600/50">
     <button
       onClick={() => setActive('individual')}
-      className={`flex-1 py-2 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 relative z-10 ${
-        active === 'individual' ? 'text-white' : 'text-gray-300'
-      }`}
+      className={`flex-1 py-2 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 relative z-10 ${active === 'individual' ? 'text-white' : 'text-gray-300'}`}
     >
       <User size={16} className="inline mr-1 md:mr-2" /> Individual
     </button>
     <button
       onClick={() => setActive('group')}
-      className={`flex-1 py-2 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 relative z-10 ${
-        active === 'group' ? 'text-white' : 'text-gray-300'
-      }`}
+      className={`flex-1 py-2 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 relative z-10 ${active === 'group' ? 'text-white' : 'text-gray-300'}`}
     >
       <Users size={16} className="inline mr-1 md:mr-2" /> Group
     </button>
@@ -208,7 +204,35 @@ const PricingCard = ({ tier, sessions, price, persons, savings, product, handleC
 };
 
 // ===============================================
-// IV. MAIN COMPONENT
+// IV. NEW FREE SESSION COMPONENT (REQUESTED BY USER)
+// ===============================================
+
+const FreeSessionBanner = () => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+      className="bg-green-600/20 border border-green-500/50 p-4 md:p-6 rounded-xl text-center max-w-2xl mx-auto shadow-2xl backdrop-blur-sm mt-8 mb-10"
+    >
+      <div className="flex items-center justify-center space-x-3">
+        <CheckCircle size={24} className="text-green-400 shrink-0" />
+        <p className="text-base md:text-lg font-bold text-green-200">
+          Start for Free!
+        </p>
+      </div>
+      <p className="text-sm md:text-base text-gray-300 mt-2">
+        <strong className="text-white">Your first session is complimentary.</strong> Billing for the full plan begins <strong className="text-white">only after your initial session is complete.</strong>
+      </p>
+      <p className="text-xs text-green-300 mt-1">
+        Enroll today to secure your plan—you won't be charged until the first session is delivered.
+      </p>
+    </motion.div>
+  );
+};
+
+// ===============================================
+// V. MAIN COMPONENT
 // ===============================================
 
 export default function CoachingPricingPage() {
@@ -216,7 +240,6 @@ export default function CoachingPricingPage() {
   const [activeTab, setActiveTab] = useState('individual');
   const [loadingPlan, setLoadingPlan] = useState(null);
   const [error, setError] = useState("");
-  const [couponCode, setCouponCode] = useState("");
 
   const isIndividualTab = activeTab === 'individual';
   const pricingData = isIndividualTab ? INDIVIDUAL_PRICING : SMALL_GROUP_PRICING;
@@ -241,9 +264,10 @@ export default function CoachingPricingPage() {
           "Content-Type": "application/json",
           ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
         },
+        // ✅ Automatically apply DRKELVIN100 coupon
         body: JSON.stringify({
           product: productKey,
-          couponCode: couponCode.trim().toUpperCase(),
+          couponCode: "DRKELVIN100",
           successRedirect,
         }),
       });
@@ -264,35 +288,23 @@ export default function CoachingPricingPage() {
 
   return (
     <div className="min-h-screen pb-20 text-white font-sans bg-gradient-to-b from-[#06113b] to-black">
-      
       <Header />
-      
-      {/* 💡 Spacing div for fixed header - Only applies to medium screens and up */}
       <div className="hidden md:block h-[90px]" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 💡 ADDED PADDING TOP FOR MOBILE ONLY (pt-64) to clear the fixed header. Defaults to pt-20 on md screens and up. */}
         <header className="text-center pt-24 md:pt-20 mb-10 md:mb-16">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-blue-300 to-blue-600 bg-clip-text text-transparent leading-tight">
-            Psychiatrist-Led<br className="md:hidden"/> Coaching
+            Psychiatrist-Led<br className="md:hidden" /> Coaching
           </h1>
-          <div className="max-w-4xl mx-auto">
-            {COACHING_CONTENT.body}
-          </div>
+          <div className="max-w-4xl mx-auto">{COACHING_CONTENT.body}</div>
           {error && <p className="text-red-400 mt-4 font-medium">{error}</p>}
+          
+          {/* 💡 INSERTED THE NEW FREE SESSION BANNER HERE */}
+          <FreeSessionBanner />
+          
         </header>
 
         <GroupToggle active={activeTab} setActive={setActiveTab} />
-
-        <div className="max-w-md mx-auto mt-8">
-          <input
-            type="text"
-            placeholder="Enter coupon code"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value)}
-            className="w-full p-4 border-2 border-gray-600 rounded-xl text-white bg-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-          />
-        </div>
 
         <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mt-12">
           {pricingData.map((plan) => (
@@ -307,7 +319,9 @@ export default function CoachingPricingPage() {
 
         {showLargeGroup && (
           <div className="lg:col-span-4 mt-16">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 text-blue-300">Large Groups (5-10 persons)</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 text-blue-300">
+              Large Groups (5-10 persons)
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
               {LARGE_GROUP_PRICING.map((plan) => (
                 <PricingCard
