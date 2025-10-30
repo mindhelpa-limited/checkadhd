@@ -16,7 +16,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 // =====================================================
-// 1. Authentication Hook (shared by both layouts)
+// 1. Shared Auth Hook
 // =====================================================
 const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -43,7 +43,7 @@ const useAuth = () => {
 };
 
 // =====================================================
-// 2. Shared Tools Button (Mobile Floating Tab)
+// 2. Tools Button (Mobile Floating)
 // =====================================================
 const MobileToolsTab = ({ href, active }) => (
   <Link
@@ -60,7 +60,7 @@ const MobileToolsTab = ({ href, active }) => (
 );
 
 // =====================================================
-// 3. Main Layout Component (Responsive Switch)
+// 3. Main Layout Component (Responsive)
 // =====================================================
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
@@ -97,19 +97,21 @@ export default function DashboardLayout({ children }) {
   };
 
   // =====================================================
-  // 4. Desktop Version
+  // Desktop Layout
   // =====================================================
   const DesktopView = (
     <div className="min-h-screen flex bg-[#F3F4F6] font-sans text-[#111827]">
-      {/* Sidebar */}
-      <aside className="w-72 bg-white/70 backdrop-blur-xl border-r border-[#E5E7EB] shadow-[0_20px_80px_rgba(2,6,23,0.08)] flex flex-col fixed left-0 top-0 bottom-0 z-30">
+      <aside className="w-72 bg-white/70 backdrop-blur-xl border-r border-[#E5E7EB]
+                        shadow-[0_20px_80px_rgba(2,6,23,0.08)] flex flex-col fixed
+                        left-0 top-0 bottom-0 z-30">
         <div className="h-1.5 bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#14B8A6]" />
         <div className="px-6 py-6">
           <h2 className="text-[20px] font-semibold">
             <span className="text-[#1D4ED8]">Mindhelpa</span> Limited
           </h2>
           <p className="text-sm text-[#6B7280] mt-1">Hi, {getFirstName()}</p>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs bg-[#EFF6FF] text-[#1E3A8A] ring-1 ring-[#DBEAFE]">
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs
+                          bg-[#EFF6FF] text-[#1E3A8A] ring-1 ring-[#DBEAFE]">
             Healing is Possible
           </div>
         </div>
@@ -142,7 +144,9 @@ export default function DashboardLayout({ children }) {
         <div className="px-4 pb-6">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold bg-white/80 hover:bg-[#FEF2F2] text-[#B91C1C] border border-[#E5E7EB] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold
+                       bg-white/80 hover:bg-[#FEF2F2] text-[#B91C1C] border border-[#E5E7EB]
+                       shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all"
           >
             <LogOut size={18} />
             Logout
@@ -150,7 +154,6 @@ export default function DashboardLayout({ children }) {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 ml-72 flex flex-col">
         <div className="flex-1 overflow-y-auto">{children}</div>
       </main>
@@ -158,18 +161,23 @@ export default function DashboardLayout({ children }) {
   );
 
   // =====================================================
-  // 5. Mobile Version (with sticky footer)
+  // Mobile Layout (Sticky Footer)
   // =====================================================
   const MobileView = (
-    <div className="h-screen flex flex-col bg-[#F3F4F6] font-sans text-[#111827]">
+    <div className="min-h-[100svh] flex flex-col bg-[#F3F4F6] font-sans text-[#111827]">
       <div className="flex-1 overflow-y-auto pb-[90px]">{children}</div>
 
-      {/* Sticky Footer */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-[9999]
-                   bg-white/95 backdrop-blur-xl border-t border-gray-200
-                   shadow-[0_-2px_25px_rgba(0,0,0,0.1)]
-                   flex justify-around items-center py-2 safe-bottom"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          WebkitTransform: "translateZ(0)",
+          transform: "translateZ(0)",
+        }}
+        className="md:hidden z-[9999] bg-white/95 backdrop-blur-xl border-t border-gray-200
+                   shadow-[0_-2px_25px_rgba(0,0,0,0.1)] flex justify-around items-center py-2 safe-bottom"
       >
         {tabs.map((tab) => {
           const active = pathname === tab.href;
@@ -195,7 +203,7 @@ export default function DashboardLayout({ children }) {
   );
 
   // =====================================================
-  // 6. Conditional Render (One Layout)
+  // Conditional Render
   // =====================================================
   return isMobile ? MobileView : DesktopView;
 }
