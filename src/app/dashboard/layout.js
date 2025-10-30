@@ -16,6 +16,31 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 // =====================================================
+// Inline CSS Injection (so you don't need globals.css)
+// =====================================================
+if (typeof window !== "undefined") {
+  const style = document.createElement("style");
+  style.innerHTML = `
+    html, body, #__next {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      -webkit-overflow-scrolling: touch;
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  `;
+  if (!document.head.querySelector("style[data-sticky-footer]")) {
+    style.setAttribute("data-sticky-footer", "true");
+    document.head.appendChild(style);
+  }
+}
+
+// =====================================================
 // 1. Shared Auth Hook
 // =====================================================
 const useAuth = () => {
@@ -116,7 +141,6 @@ export default function DashboardLayout({ children }) {
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="px-3 pb-4 space-y-1.5 flex-1 overflow-y-auto">
           {tabs.map((tab) => {
             const active = pathname === tab.href;
@@ -140,7 +164,6 @@ export default function DashboardLayout({ children }) {
           })}
         </nav>
 
-        {/* Logout */}
         <div className="px-4 pb-6">
           <button
             onClick={handleLogout}
@@ -164,8 +187,8 @@ export default function DashboardLayout({ children }) {
   // Mobile Layout (Sticky Footer)
   // =====================================================
   const MobileView = (
-    <div className="min-h-[100svh] flex flex-col bg-[#F3F4F6] font-sans text-[#111827]">
-      <div className="flex-1 overflow-y-auto pb-[90px]">{children}</div>
+    <div className="min-h-[100svh] flex flex-col bg-[#F3F4F6] font-sans text-[#111827] relative">
+      <div className="flex-1 overflow-y-auto pb-[90px] z-0">{children}</div>
 
       <nav
         style={{
@@ -202,8 +225,5 @@ export default function DashboardLayout({ children }) {
     </div>
   );
 
-  // =====================================================
-  // Conditional Render
-  // =====================================================
   return isMobile ? MobileView : DesktopView;
 }
