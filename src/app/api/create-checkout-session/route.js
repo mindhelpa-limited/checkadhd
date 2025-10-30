@@ -45,8 +45,8 @@ export async function POST(request) {
     const {
       email = "",
       successRedirect = "/signup",
-      product = "premium", // 👈 default to premium
-      couponCode = "",     // 👈 optional coupon
+      product = "premium",
+      couponCode = "",
     } = body;
 
     const productConfig = PRODUCT_LOOKUPS[product];
@@ -91,7 +91,6 @@ export async function POST(request) {
           });
           customerId = customer.id;
 
-          // ✅ Save Stripe customer ID + plan info in Firestore
           await userRef.set(
             {
               stripeCustomerId: customerId,
@@ -101,7 +100,6 @@ export async function POST(request) {
             { merge: true }
           );
         } else {
-          // ✅ Update last subscription info even if customer already exists
           await userRef.set(
             {
               activeSubscription: product,
@@ -140,6 +138,11 @@ export async function POST(request) {
 
     if (customerId) sessionOptions.customer = customerId;
     else if (email) sessionOptions.customer_email = email;
+
+    // ✅ Add 7-day free trial for subscriptions only
+    if (productConfig.mode === "subscription") {
+      sessionOptions.subscription_data = { trial_period_days: 7 };
+    }
 
     const session = await stripe.checkout.sessions.create(sessionOptions);
     return NextResponse.json({ url: session.url });
