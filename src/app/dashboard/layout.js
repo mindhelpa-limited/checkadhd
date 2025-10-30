@@ -80,72 +80,18 @@ export default function DashboardLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row font-sans text-[#111827] bg-[#F3F4F6]">
-      {/* ===== Desktop Sidebar ===== */}
-      <aside className="hidden md:flex w-72 bg-white/70 backdrop-blur-xl border-r border-[#E5E7EB] shadow-[0_20px_80px_rgba(2,6,23,0.08)] flex-col">
-        <div className="h-1.5 bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#14B8A6]" />
-        <div className="px-6 py-6">
-          <h2 className="text-[20px] font-semibold">
-            <span className="text-[#1D4ED8]">Mindhelpa</span> Limited
-          </h2>
-          <p className="text-sm text-[#6B7280] mt-1">Hi, {getFirstName()}</p>
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs bg-[#EFF6FF] text-[#1E3A8A] ring-1 ring-[#DBEAFE]">
-            Healing is Possible
-          </div>
-        </div>
+    <div className="h-screen flex flex-col bg-[#F3F4F6] font-sans text-[#111827]">
+      {/* ===== Scrollable Main Content ===== */}
+      <div className="flex-1 overflow-y-auto pb-[90px] md:pb-0">
+        {children}
+      </div>
 
-        <nav className="px-3 pb-4 space-y-1.5 flex-1">
-          {tabs.map((tab) => {
-            const active = pathname === tab.href;
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                className={`group relative flex items-center gap-3 rounded-xl px-3 py-3 transition-all
-                  ${active
-                    ? "bg-white shadow-[0_10px_40px_rgba(2,6,23,0.08)] text-[#0F172A] border border-[#E5E7EB]"
-                    : "text-[#475569] hover:text-[#0F172A] hover:bg-white/60 hover:shadow-[0_6px_24px_rgba(2,6,23,0.06)]"
-                  }`}
-              >
-                <tab.icon
-                  size={20}
-                  className={active ? "text-[#2563EB]" : "text-[#64748B] group-hover:text-[#2563EB]"}
-                />
-                <span className="text-sm font-medium">{tab.name}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="px-4 pb-6">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold bg-white/80 hover:bg-[#FEF2F2] text-[#B91C1C] border border-[#E5E7EB] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* ===== Main Content (Scrollable) ===== */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto pb-[90px] md:pb-0">
-          {children}
-        </div>
-      </main>
-
-      {/* ===== Mobile Sticky Footer ===== */}
+      {/* ===== Sticky Footer (Always Visible) ===== */}
       <nav
         className="md:hidden fixed bottom-0 left-0 right-0 z-[9999]
-                   w-full bg-white/90 backdrop-blur-2xl
-                   border-t border-[#E5E7EB]
-                   shadow-[0_-2px_20px_rgba(0,0,0,0.08)]
+                   bg-white/95 backdrop-blur-xl border-t border-gray-200
+                   shadow-[0_-2px_25px_rgba(0,0,0,0.1)]
                    flex justify-around items-center py-2 safe-bottom"
-        style={{
-          WebkitTransform: "translateZ(0)",
-          position: "fixed",
-        }}
       >
         {tabs.map((tab) => {
           const active = pathname === tab.href;
@@ -156,9 +102,9 @@ export default function DashboardLayout({ children }) {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-col items-center text-[11px] px-3 py-1.5 rounded-xl transition-all
+              className={`flex flex-col items-center justify-center text-[11px] px-3 py-1.5 rounded-xl transition-all
                 ${active
-                  ? "text-[#2563EB] bg-[#EFF6FF] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
+                  ? "text-[#2563EB] bg-[#EFF6FF]"
                   : "text-[#6B7280] hover:text-[#2563EB]"}`}
             >
               <tab.icon size={18} className="mb-0.5" />
