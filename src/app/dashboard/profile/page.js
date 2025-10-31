@@ -1,32 +1,75 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { auth, db } from '@/lib/firebase';
-import { signOut, updateProfile } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useEffect, useState } from "react";
+import { auth, db } from "@/lib/firebase";
+import { signOut, updateProfile, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import {
   Loader2,
   LogOut,
   CreditCard,
   UserCircle2,
-} from 'lucide-react';
+  LogIn,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
+// === Login Modal Component ===
+function LoginModal({ onLogin }) {
+  return (
+    <div className="fixed inset-0 bg-white/90 flex items-center justify-center z-50">
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          className="bg-white text-gray-800 rounded-2xl shadow-2xl p-8 w-[90%] max-w-md text-center border border-gray-200"
+        >
+          <div className="flex justify-center mb-4">
+            <LogIn size={60} className="text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-extrabold text-gray-900 mb-2">
+            Please Log In
+          </h2>
+          <p className="text-gray-600 mb-6">
+            You need to log in to access your MindHelpa profile and
+            subscription details.
+          </p>
+
+          <motion.button
+            onClick={onLogin}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-full py-3 font-bold rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg hover:from-blue-700 hover:to-blue-900 flex items-center justify-center gap-2"
+          >
+            <LogIn size={20} /> Log In
+          </motion.button>
+
+          <p className="text-xs text-gray-400 mt-4">
+            Secure access to your account is required.
+          </p>
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// === MAIN PROFILE PAGE ===
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   // ✅ Fetch user info
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        setName(currentUser.displayName || '');
-        setEmail(currentUser.email || '');
-        const userRef = doc(db, 'users', currentUser.uid);
+        setName(currentUser.displayName || "");
+        setEmail(currentUser.email || "");
+        const userRef = doc(db, "users", currentUser.uid);
         const snap = await getDoc(userRef);
         if (snap.exists()) {
           const data = snap.data();
@@ -42,14 +85,14 @@ export default function ProfilePage() {
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
-    setMessage('');
+    setMessage("");
     try {
       await updateProfile(user, { displayName: name });
-      const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { name, email });
-      setMessage('✅ Profile updated successfully');
+      setMessage("✅ Profile updated successfully");
     } catch {
-      setMessage('❌ Error updating profile');
+      setMessage("❌ Error updating profile");
     } finally {
       setSaving(false);
     }
@@ -59,16 +102,16 @@ export default function ProfilePage() {
   const handleManageSubscription = async () => {
     try {
       const token = await user.getIdToken();
-      const res = await fetch('/api/create-portal-session', {
-        method: 'POST',
+      const res = await fetch("/api/create-portal-session", {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+      if (!res.ok) throw new Error(data.error || "Something went wrong");
       window.location.href = data.url;
     } catch (err) {
       alert(err.message);
@@ -78,20 +121,30 @@ export default function ProfilePage() {
   // ✅ Logout
   const handleLogout = async () => {
     await signOut(auth);
-    window.location.href = '/';
+    window.location.href = "/";
+  };
+
+  // ✅ Handle Login Redirect
+  const handleLogin = () => {
+    window.location.href = "/login";
   };
 
   if (loading)
     return (
-      <div className="h-screen flex items-center justify-center text-gray-400">
+      <div className="h-screen flex items-center justify-center text-gray-400 bg-white">
         <Loader2 className="animate-spin mr-2" /> Loading profile...
       </div>
     );
 
+  // ✅ Show login modal if user is not logged in
+  if (!user) {
+    return <LoginModal onLogin={handleLogin} />;
+  }
+
+  // ✅ Main Profile Content
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white flex justify-center py-10 px-5">
       <div className="w-full max-w-md bg-gray-800 rounded-3xl shadow-xl border border-gray-700 p-8 flex flex-col space-y-8">
-
         {/* Header */}
         <h1 className="text-3xl font-bold text-center mb-2">Your Profile</h1>
 
@@ -127,7 +180,7 @@ export default function ProfilePage() {
             className="w-full bg-teal-500 hover:bg-teal-600 transition-all py-3 rounded-lg font-semibold flex items-center justify-center shadow-md disabled:opacity-70"
           >
             {saving ? <Loader2 className="animate-spin mr-2" /> : null}
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? "Saving..." : "Save Changes"}
           </button>
 
           {message && (
