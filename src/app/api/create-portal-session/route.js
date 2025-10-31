@@ -52,7 +52,7 @@ export async function POST(req) {
     // 4️⃣ Create Stripe Billing Portal
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+      return_url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.mindhelpa.com/dashboard/profile",
     });
 
     return NextResponse.json({ url: portalSession.url });
