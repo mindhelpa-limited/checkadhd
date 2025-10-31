@@ -239,8 +239,8 @@ export default function ReportHistoryPage() {
 
       {/* MODAL */}
       {isModalOpen && selectedResult && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center p-3 sm:p-4">
-          <div className="bg-gray-800 w-full max-w-3xl rounded-2xl overflow-hidden flex flex-col relative translate-y-[-20px] sm:translate-y-0">
+        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-start sm:items-center p-0 sm:p-4">
+          <div className="bg-gray-800 w-full h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl overflow-hidden flex flex-col">
             <div className="flex justify-between items-center p-4 border-b border-gray-700 flex-shrink-0">
               <h3 className="font-bold text-xl">Report Preview</h3>
               <button
@@ -250,7 +250,7 @@ export default function ReportHistoryPage() {
                 <X size={20} />
               </button>
             </div>
-            <div className="p-4 sm:p-6 overflow-y-auto max-h-[60vh]" id="report-modal-content-wrapper">
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1" id="report-modal-content-wrapper">
               <div id="report-content-modal">
                 <Report
                   userInfo={selectedResult.userInfo}
@@ -258,7 +258,7 @@ export default function ReportHistoryPage() {
                 />
               </div>
             </div>
-            <div className="p-3 sm:p-4 border-t border-gray-700 sticky bottom-0 bg-gray-800">
+            <div className="p-3 sm:p-4 border-t border-gray-700 bg-gray-800 sticky bottom-0">
               <button
                 onClick={handleDownloadPDF}
                 disabled={isDownloading !== false}
