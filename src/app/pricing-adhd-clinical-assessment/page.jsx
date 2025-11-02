@@ -8,11 +8,16 @@ import {
   Lightbulb,
   ShieldCheck,
   XCircle,
+  Sparkles, 
+  Handshake, 
+  Zap, 
+  Package, 
+  MessageCircle, 
 } from "lucide-react";
-import Header from "../../components/Header"; // 💡 IMPORTED THE HEADER
-import Footer from "../../components/home/Footer"; // 💡 IMPORTED THE FOOTER
+import Header from "../../components/Header"; 
+import Footer from "../../components/home/Footer"; 
 
-// ----------------- Animated Hero -----------------
+// ----------------- Animated Hero (No Change) -----------------
 const AnimatedBrainCircuit = () => (
   <div className="absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
     <svg
@@ -46,7 +51,7 @@ const AnimatedBrainCircuit = () => (
   </div>
 );
 
-// ----------------- Feature Item -----------------
+// ----------------- Feature Item (No Change) -----------------
 const FeatureListItem = ({ icon, text }) => (
   <li className="flex items-start">
     <span className="flex-shrink-0 text-cyan-400 mt-1 mr-4">{icon}</span>
@@ -56,9 +61,80 @@ const FeatureListItem = ({ icon, text }) => (
   </li>
 );
 
-// ----------------- Page -----------------
+// ----------------- New Elegant Comparison List Component (UPDATED) -----------------
+const MindHelpaAdvantageList = () => {
+  const advantageFeatures = [
+    {
+      icon: <Package size={24} />,
+      title: "All-Inclusive Care Package",
+      description:
+        "A premium, All-Inclusive Plan with zero hidden fees, a definitive shield against the 'pay-per-step' models.",
+    },
+    {
+      icon: <Zap size={24} />,
+      title: "Hyper-Efficient Turnaround",
+      description:
+        "Receive your essential Summary Letter in just 3 Business Days—unparalleled speed that bypasses typical 'Weeks–Months' delays.", 
+    },
+    {
+      icon: <MessageCircle size={24} />, 
+      title: "Complimentary Follow-Up Sessions", 
+      description:
+        "Your journey doesn't end with the diagnosis. Benefit from Two Complimentary Follow-up Sessions to discuss next steps and support.",
+    },
+    {
+      icon: <CheckCircle size={24} />,
+      title: "Essential Pre-Assessment Tools",
+      description:
+        "Your necessary Self-Assessment is Included as standard, ensuring a thorough evaluation without an 'Extra Charge' fee.",
+    },
+    {
+      icon: <Handshake size={24} />,
+      title: "Seamless Shared Care Transition",
+      description:
+        "Full, proactive support for Referral to Shared Care is Included, guaranteeing a smooth, integrated handover for your ongoing needs.",
+    },
+  ];
+
+  return (
+    <div className="max-w-4xl mx-auto px-6 pb-24 text-center">
+      <h2 className="text-4xl font-serif font-bold text-white mb-6 flex items-center justify-center">
+        <Sparkles size={32} className="text-purple-400 mr-3" />
+        The MindHelpa Gold Standard Advantage
+      </h2>
+      <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+        We deliver speed, transparency, and comprehensive support. Choose definitive care built on your success.
+      </p>
+
+      <ul className="space-y-8 text-left max-w-xl mx-auto">
+        {advantageFeatures.map((f, i) => (
+          <li
+            key={i}
+            className="p-6 bg-[#101b3d] rounded-2xl border-l-4 border-cyan-400/80 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-cyan-500/30"
+          >
+            <div className="flex items-start">
+              <span className="flex-shrink-0 text-cyan-400 mt-1 mr-4">
+                {f.icon}
+              </span>
+              <div>
+                <h4 className="text-2xl font-semibold text-white mb-2">
+                  {f.title}
+                </h4>
+                <p
+                  className="text-gray-300 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: f.description }}
+                />
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+// ----------------- Page (Minor Change to Features) -----------------
 export default function ADHDClinicalAssessmentPricing() {
-  // CHANGED: Set initial activeTab to "adult" instead of "child"
   const [activeTab, setActiveTab] = useState("adult");
 
   const features = [
@@ -68,7 +144,8 @@ export default function ADHDClinicalAssessmentPricing() {
     { text: "Formal, Medically Recognized Detailed Clinical Report", icon: <ShieldCheck size={20} /> },
     { text: "Differential Diagnosis Screening & Rule-Outs", icon: <CheckCircle size={20} /> },
     { text: "Personalised Next Steps & Expert-Guided Recommendations", icon: <BrainCircuit size={20} /> },
-    { text: "Fast Access: Avoid NHS Waiting Times", icon: <Clock size={20} /> },
+    { text: "Rapid Turnaround: Summary Letter in 3 Business Days", icon: <Clock size={20} /> }, 
+    { text: "Two Complimentary Post-Assessment Follow-ups", icon: <MessageCircle size={20} /> }, 
   ];
 
   const plans = {
@@ -93,10 +170,8 @@ export default function ADHDClinicalAssessmentPricing() {
       
       <Header />
       
-      {/* 💡 ADDED SPACING DIV FOR FIXED HEADER */}
       <div className="hidden md:block h-[90px]" /> 
       
-      {/* HERO */}
       <div className="relative py-24 sm:py-32 overflow-hidden">
         <AnimatedBrainCircuit />
         <div className="relative z-20 max-w-4xl mx-auto px-6 lg:px-8 text-center animate-hero-title-fade">
@@ -111,14 +186,12 @@ export default function ADHDClinicalAssessmentPricing() {
             </span>
           </h1>
           <p className="font-sans mt-6 text-xl leading-8 text-gray-300">
-            Get definitive clarity with a <strong>psychiatrist-led diagnostic evaluation</strong>,
+            Get definitive clarity with a psychiatrist-led diagnostic evaluation,
             built on DSM-5 and ICD-11 standards.
           </p>
         </div>
       </div>
 
-      {/* TABS */}
-      {/* CHANGED: Swapped the order of the two buttons */}
       <div className="flex justify-center -mt-6 mb-6 space-x-6">
         <button
           onClick={() => setActiveTab("adult")}
@@ -142,7 +215,6 @@ export default function ADHDClinicalAssessmentPricing() {
         </button>
       </div>
 
-      {/* CARD */}
       <div className="max-w-7xl mx-auto px-4 pb-12">
         <div className="max-w-2xl mx-auto bg-[#101b3d] rounded-3xl shadow-2xl border border-purple-400/20 overflow-hidden transform transition duration-500 hover:scale-[1.01] hover:shadow-purple-500/30">
           <div className="p-10 text-center bg-purple-600/10 border-b border-purple-400/30">
@@ -184,104 +256,10 @@ export default function ADHDClinicalAssessmentPricing() {
         </div>
       </div>
 
-      {/* COMPARISON SECTION (Mentalwell Style) */}
-      <div className="max-w-5xl mx-auto px-6 pb-24 text-center">
-        <h2 className="text-4xl font-serif font-bold text-white mb-12">
-          Making the Right Choice
-        </h2>
-
-        <div className="overflow-hidden rounded-[30px] border border-purple-400/20 shadow-xl">
-          {/* Header */}
-          <div className="grid grid-cols-2 text-white text-lg font-semibold">
-            <div className="bg-gradient-to-r from-[#006D66] to-[#AD90F2] py-5 rounded-tl-[30px] text-center">
-              MindHelpa
-            </div>
-            <div className="bg-[#E5E6EE] text-gray-800 py-5 rounded-tr-[30px] text-center">
-              Competitors
-            </div>
-          </div>
-
-          {/* Row 1 */}
-          <div className="grid grid-cols-2 divide-x divide-white bg-white text-gray-900 font-medium">
-            <div className="py-4 px-4 text-center bg-white/5">All Inclusive Plans</div>
-            <div className="py-4 px-4 text-center bg-white/5">All Inclusive Plans</div>
-          </div>
-
-          <div className="grid grid-cols-2 divide-x divide-white text-lg">
-            <div className="bg-[#0a122a] py-6 flex flex-col items-center justify-center">
-              <div className="flex items-center gap-2 text-green-400 font-medium">
-                <CheckCircle size={22} /> Complete Care Package
-              </div>
-            </div>
-            <div className="bg-[#E5E6EE] py-6 flex flex-col items-center justify-center text-gray-700">
-              <div className="flex items-center gap-2 text-red-500 font-medium">
-                <XCircle size={22} /> Pay Extra on Each Step
-              </div>
-            </div>
-          </div>
-
-          {/* Row 2 */}
-          <div className="grid grid-cols-2 divide-x divide-white bg-white text-gray-900 font-medium">
-            <div className="py-4 px-4 text-center bg-white/5">Summary Letter Turnaround</div>
-            <div className="py-4 px-4 text-center bg-white/5">Summary Letter Turnaround</div>
-          </div>
-
-          <div className="grid grid-cols-2 divide-x divide-white text-lg">
-            <div className="bg-[#0a122a] py-6 flex flex-col items-center justify-center">
-              <div className="flex items-center gap-2 text-green-400 font-medium">
-                <Clock size={22} /> 5 Days
-              </div>
-            </div>
-            <div className="bg-[#E5E6EE] py-6 flex flex-col items-center justify-center text-gray-700">
-              <div className="flex items-center gap-2 text-red-500 font-medium">
-                <Clock size={22} /> Weeks–Months
-              </div>
-            </div>
-          </div>
-
-          {/* Row 3 - "Self-Assessment" */}
-          <div className="grid grid-cols-2 divide-x divide-white bg-white text-gray-900 font-medium">
-            <div className="py-4 px-4 text-center bg-white/5">Self-Assessment</div>
-            <div className="py-4 px-4 text-center bg-white/5">Self-Assessment</div>
-          </div>
-
-          <div className="grid grid-cols-2 divide-x divide-white text-lg">
-            <div className="bg-[#0a122a] py-6 flex flex-col items-center justify-center">
-              <div className="flex items-center gap-2 text-green-400 font-medium">
-                <CheckCircle size={22} /> Included
-              </div>
-            </div>
-            <div className="bg-[#E5E6EE] py-6 flex flex-col items-center justify-center text-gray-700">
-              <div className="flex items-center gap-2 text-red-500 font-medium">
-                <XCircle size={22} /> Extra Charge
-              </div>
-            </div>
-          </div>
-          
-          {/* Row 4 */}
-          <div className="grid grid-cols-2 divide-x divide-white bg-white text-gray-900 font-medium">
-            <div className="py-4 px-4 text-center bg-white/5">Refer to Shared Care</div>
-            <div className="py-4 px-4 text-center bg-white/5">Refer to Shared Care</div>
-          </div>
-
-          <div className="grid grid-cols-2 divide-x divide-white text-lg rounded-b-[30px] overflow-hidden">
-            <div className="bg-[#0a122a] py-6 flex flex-col items-center justify-center rounded-bl-[30px]">
-              <div className="flex items-center gap-2 text-green-400 font-medium">
-                <CheckCircle size={22} /> Included
-              </div>
-            </div>
-            <div className="bg-[#E5E6EE] py-6 flex flex-col items-center justify-center text-gray-700 rounded-br-[30px]">
-              <div className="flex items-center gap-2 text-red-500 font-medium">
-                <XCircle size={22} /> Not Optional / Extra Charge
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MindHelpaAdvantageList />
 
       <Footer />
 
-      {/* ANIMATIONS */}
       <style jsx global>{`
         .animate-hero-title-fade {
           animation: hero-title-fade 1.5s ease-out forwards;
