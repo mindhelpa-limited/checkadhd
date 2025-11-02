@@ -51,7 +51,7 @@ const AnimatedBrainCircuit = () => (
   </div>
 );
 
-// ----------------- Feature Item (No Change) -----------------
+// ----------------- Feature Item -----------------
 const FeatureListItem = ({ icon, text }) => (
   <li className="flex items-start">
     <span className="flex-shrink-0 text-cyan-400 mt-1 mr-4">{icon}</span>
@@ -61,7 +61,7 @@ const FeatureListItem = ({ icon, text }) => (
   </li>
 );
 
-// ----------------- New Elegant Comparison List Component (UPDATED) -----------------
+// ----------------- MindHelpa Advantage List -----------------
 const MindHelpaAdvantageList = () => {
   const advantageFeatures = [
     {
@@ -87,12 +87,6 @@ const MindHelpaAdvantageList = () => {
       title: "Essential Pre-Assessment Tools",
       description:
         "Your necessary Self-Assessment is Included as standard, ensuring a thorough evaluation without an 'Extra Charge' fee.",
-    },
-    {
-      icon: <Handshake size={24} />,
-      title: "Seamless Shared Care Transition",
-      description:
-        "Full, proactive support for Referral to Shared Care is Included, guaranteeing a smooth, integrated handover for your ongoing needs.",
     },
   ];
 
@@ -133,7 +127,7 @@ const MindHelpaAdvantageList = () => {
   );
 };
 
-// ----------------- Page (Minor Change to Features) -----------------
+// ----------------- Page -----------------
 export default function ADHDClinicalAssessmentPricing() {
   const [activeTab, setActiveTab] = useState("adult");
 
