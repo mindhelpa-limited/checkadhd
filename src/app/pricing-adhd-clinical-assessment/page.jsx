@@ -82,19 +82,13 @@ const MindHelpaAdvantageList = () => {
       description:
         "Your journey doesn't end with the diagnosis. Benefit from Two Complimentary Follow-up Sessions to discuss next steps and support.",
     },
-    {
-      icon: <CheckCircle size={24} />,
-      title: "Essential Pre-Assessment Tools",
-      description:
-        "Your necessary Self-Assessment is Included as standard, ensuring a thorough evaluation without an 'Extra Charge' fee.",
-    },
   ];
 
   return (
     <div className="max-w-4xl mx-auto px-6 pb-24 text-center">
       <h2 className="text-4xl font-serif font-bold text-white mb-6 flex items-center justify-center">
         <Sparkles size={32} className="text-purple-400 mr-3" />
-        The MindHelpa Gold Standard Advantage
+        The Mindhelpa Gold Standard Advantage
       </h2>
       <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
         We deliver speed, transparency, and comprehensive support. Choose definitive care built on your success.
